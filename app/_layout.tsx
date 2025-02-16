@@ -19,6 +19,7 @@ const  RootLayout = () => {
           <Stack.Screen name="(routes)/login/index" />
           <Stack.Screen name="(routes)/sign-up/index" />
           <Stack.Screen name="(routes)/login/forgot-password" />
+          <Stack.Screen name="(routes)/verifyAccount/index" />
       </Stack>
    
     )}

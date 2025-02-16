@@ -269,12 +269,8 @@ const styles = StyleSheet.create({
         textAlign: "center",
         marginBottom: 20,
     },
-    inputContainer: {
-        flexDirection: "column",
-        alignItems: "center",
-        width: "100%",
-        gap: 10, // Adjust spacing
-    },
+    
+    
     visibleIcon: {
         position: "absolute",
         right: 30,
@@ -303,14 +299,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: "Raleway_700Bold",
     },
-    errorContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 5,
-    },
+
     errorText: {
         color: "red",
-        fontSize: 14,
+        fontSize: 19,
         marginLeft: 5,
         marginHorizontal: 16,
     },

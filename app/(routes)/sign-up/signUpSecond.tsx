@@ -1,14 +1,13 @@
-import { View, Text } from 'react-native'
 import React from 'react'
-import SignUpScreen from "../../../screens/auth/signUp/signUp.screen";
+import SignUpSecondScreen from "../../../screens/auth/signUpSecond/signUpSecond.screen";
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
 
-const signUp = () => {
+const signUpSecond = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-       <SignUpScreen />
+       <SignUpSecondScreen />
    </GestureHandlerRootView>
   )
 }
 
-export default signUp
+export default signUpSecond

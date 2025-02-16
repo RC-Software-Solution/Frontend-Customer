@@ -97,7 +97,7 @@ export const commonStyles = StyleSheet.create({
       flexDirection: "row",
       alignItems: "center",
       marginHorizontal:16,	
+
+      },
      
-      }
-    
 });
