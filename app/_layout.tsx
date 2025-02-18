@@ -3,6 +3,7 @@ import React from 'react'
 import { useState } from 'react'
 import { useEffect } from 'react'
 import { Stack } from 'expo-router'
+import TabsLayout from './(tabs)/_layout'
 
 
 
@@ -12,7 +13,9 @@ const  RootLayout = () => {
   return (
    
     <>
-    {isLoggedIn ? (<View></View>) : (
+    {isLoggedIn ? (
+      <TabsLayout />
+    ) : (
       <Stack screenOptions={{headerShown: false}}>
           <Stack.Screen name="index" />
           <Stack.Screen name="(routes)/welcome-intro/index" />

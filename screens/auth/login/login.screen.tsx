@@ -59,7 +59,7 @@ export default function LoginScreen() {
             setRequired(true);
         } else {
             setRequired(false);
-            router.push("/(routes)/login/forgot-password")
+            router.push("/(tabs)/home")
         }
     };
 
@@ -143,7 +143,7 @@ export default function LoginScreen() {
 
                         <TouchableOpacity
                             style={styles.signUpButton}
-                            onPress={handleSignIn}
+                            onPress={() => router.push("/(tabs)/home")}
                         >
                             {buttonSpinner ? (
                                 <ActivityIndicator size="small" color="white" />
@@ -191,56 +191,7 @@ export default function LoginScreen() {
 }
 
 
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//     },
-//     signInImage: {
-//         width: "100%",
-//         height: 250,
-//         resizeMode: "cover",
-//     },
-//     formContainer: {
-//         backgroundColor: "white",
-//         flex: 1,
-//         padding: 20,
-//         marginTop: -40,  // Moves it upwards to overlap the image
-//         borderTopLeftRadius: 40,
-//         borderTopRightRadius: 40,
-//         shadowColor: "#000",
-//         shadowOpacity: 0.2,
-//         shadowRadius: 10,
-//         elevation: 5,  // Shadow effect for Android
-//     },
-//     title: {
-//         fontSize: 24,
-//         fontWeight: "bold",
-//         textAlign: "center",
-//         marginBottom: 20,
-//     },
-//     visibleIcon: {
-//         position: "absolute",
-//         right: 30,
-//         top: 15,
-//     },
-//     forgotSection: {
-//         marginHorizontal: 16,
-//         textAlign: "right",
-//         fontSize: 18,
-//         marginTop: -5
-//     },
-//     signUpButton: {
-//         padding: 20,
-//         borderRadius: 50,
-//         marginHorizontal: 16,
-//         marginTop: 50,
-//         backgroundColor: "#69bf70",
 
-
-//     }
-
-
-// });
 
 const styles = StyleSheet.create({
     container: {
