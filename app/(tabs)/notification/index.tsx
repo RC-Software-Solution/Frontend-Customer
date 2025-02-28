@@ -1,10 +1,13 @@
-import { View, Text } from 'react-native'
 import React from 'react'
+import Notification from '@/screens/notifications/notifications.screen'
+import {GestureHandlerRootView} from 'react-native-gesture-handler'
 
-export default function Notification() {
+const index = () => {
   return (
-    <View>
-      <Text>Notification</Text>
-    </View>
+     <GestureHandlerRootView style={{ flex: 1 }}>
+      <Notification/>
+    </GestureHandlerRootView>
   )
 }
+
+export default index

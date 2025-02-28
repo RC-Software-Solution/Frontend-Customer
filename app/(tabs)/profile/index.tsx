@@ -1,10 +1,13 @@
-import { View, Text } from 'react-native'
 import React from 'react'
+import Profile from '@/screens/profile/profile.screen'
+import {GestureHandlerRootView} from 'react-native-gesture-handler'
 
-export default function Profile() {
+const index = () => {
   return (
-    <View>
-      <Text>Profile</Text>
-    </View>
+     <GestureHandlerRootView style={{ flex: 1 }}>
+    <Profile />
+    </GestureHandlerRootView>
   )
 }
+
+export default index

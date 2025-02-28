@@ -59,7 +59,7 @@ export default function LoginScreen() {
             setRequired(true);
         } else {
             setRequired(false);
-            router.push("/(tabs)/home")
+            router.push("/(tabs)")
         }
     };
 
@@ -143,7 +143,7 @@ export default function LoginScreen() {
 
                         <TouchableOpacity
                             style={styles.signUpButton}
-                            onPress={() => router.push("/(tabs)/home")}
+                            onPress={() => router.push("/(tabs)")}
                         >
                             {buttonSpinner ? (
                                 <ActivityIndicator size="small" color="white" />

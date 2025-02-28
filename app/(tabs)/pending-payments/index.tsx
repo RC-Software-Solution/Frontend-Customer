@@ -1,10 +1,13 @@
-import { View, Text } from 'react-native'
 import React from 'react'
+import PendigPayments from '@/screens/pendingPayments/pendingPayments.screen' 
+import {GestureHandlerRootView} from 'react-native-gesture-handler'
 
-export default function PendingPayments() {
+const index = () => {
   return (
-    <View>
-      <Text>pendingPayments</Text>
-    </View>
+     <GestureHandlerRootView style={{ flex: 1 }}>
+  <PendigPayments />
+    </GestureHandlerRootView>
   )
 }
+
+export default index

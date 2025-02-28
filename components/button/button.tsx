@@ -4,7 +4,7 @@ import { commonStyles } from '@/styles/common/common.styles'
 import { responsiveWidth,responsiveHeight } from "react-native-responsive-dimensions";
 export default function Button({title,onPress}:{title:string, onPress:()=>void}) {    
   return (
-    <TouchableOpacity style={Styles.Button}
+    <TouchableOpacity  style={Styles.Button}
     onPress={()=>onPress()}>
         <Text style={Styles.buttonText}>
            {title}</Text>
