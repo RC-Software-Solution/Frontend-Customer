@@ -37,7 +37,7 @@ const RenderItem = ({ item, onPressCheckbox, isChecked }: { item: string, onPres
           Savory Chicken Curry, Dhal Curry, and Tempered Potato
         </Text>
         <Text style={{ fontSize: 14, fontWeight: "bold", marginTop: 5 }}>
-          Rs. 260.00
+          Rs. 240.00
         </Text>
       </View>
 

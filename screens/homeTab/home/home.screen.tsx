@@ -32,8 +32,8 @@ const HomeScreen = () => {
 
   const menuData: MenuDataType = {
     Breakfast: {
-      Veg: ["Veg Sandwich", "Oats", "Pancakes"],
-      NonVeg: ["Egg Omelette", "Chicken Sausage"],
+      Veg: ["Veg - Full Meal", "Veg - Half Meal"],
+      NonVeg: ["Chicken - Full Meal", "Chicken - Half Meal"],
     },
     Lunch: {
       Veg: ["Veg Biryani", "Paneer Curry", "Dal Tadka"],
@@ -70,6 +70,29 @@ const HomeScreen = () => {
       [meal]: isChecked,
     }));
   };
+ 
+useEffect(() => {
+  const timer = setInterval(() => {
+    setTimeRemaining(prevTime => {
+      if (prevTime <= 0) {
+        clearInterval(timer);
+        return 0;
+      }
+      return prevTime - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(timer); // Cleanup on unmount
+}, []);
+
+const formatTime = (seconds: number) => {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+};
+
+
 
   const renderContent = () => {
     const currentCategory = activeButton;
@@ -115,6 +138,13 @@ const HomeScreen = () => {
           <Text style={{ fontSize: 15, fontWeight: "bold", color: "#OAOAOF" }}>
             Available Orders: {availableOrders}
           </Text>
+        </View>
+
+        <View style={{ alignItems: "flex-end", marginTop: 8, marginHorizontal: 15 }}>
+        <Text style={{ fontSize: 15, fontWeight: "bold", color: "#OAOAOF" }}>
+  Remaining time: {formatTime(timeRemaining)}
+</Text>
+
         </View>
 
         <View style={{ alignItems: "flex-start", marginTop: 20, marginHorizontal: 15 }}>

@@ -1,6 +1,7 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
-
+import { useState } from 'react';
+import CancelModal from '@/components/popupmodel/popupModel';
 // Define TypeScript Interfaces
 interface OrderItem {
   name: string;
@@ -45,6 +46,9 @@ const orders: Order[] = [
 ];
 
 const OrderStatus: React.FC = () => {
+
+  const [modalVisible, setModalVisible] = useState(false);
+
   const renderItem = ({ item }: { item: Order }) => (
     <View style={styles.card}>
       {/* Container to align content and button in the same row */}
@@ -60,27 +64,27 @@ const OrderStatus: React.FC = () => {
         </View>
 
         {/* Edit Button Positioned to the Bottom Right */}
-        <TouchableOpacity style={styles.editButton}>
-          <Text style={{ color: '#fff',fontWeight: "bold", }}>Cancel</Text>
+        <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
+          <Text style={{ color: 'white',fontWeight: "bold", }}>Cancel</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <View>
+    <View style={styles.container}>
       <View style={{ alignItems: 'flex-start', marginTop: 70, marginHorizontal: 15 }}>
         <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
       </View>
       <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 }}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#0A0A0F' }}>My Orders</Text>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#69bf70' }}>My Orders</Text>
       </View>
       <View
         style={{
           flexDirection: 'row',
           justifyContent: 'center',
           marginTop: 30,
-          marginHorizontal: 15,
+         
           borderRadius: 20,
           marginBottom: 15,
         }}
@@ -92,17 +96,30 @@ const OrderStatus: React.FC = () => {
           showsVerticalScrollIndicator={false}
         />
       </View>
+      <CancelModal 
+        visible={modalVisible} 
+        onClose={() => setModalVisible(false)} 
+        onConfirm={() => {
+          setModalVisible(false);
+          // Handle cancellation logic
+        }} 
+        title="Cancel Order"
+        message="Are you sure you want to cancel this order?"
+        confirmText="Cancel"
+        cancelText="Keep"
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#fff' },
   card: {
     backgroundColor: '#fff',
     padding: 15,
     borderRadius: 20,
     marginBottom: 10,
-    marginHorizontal: 15,
+   marginHorizontal:15,
     elevation: 5,
     
     // iOS Shadow
@@ -142,14 +159,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     marginTop: 14,
-    color: '#0A0A0F',
+    color: '#69bf70',
     marginHorizontal: 10,
   },
 
   editButton: {
-    backgroundColor: '#69bf70',
+    backgroundColor: '#0A0A0F',
     padding: 8,
-    borderRadius: 20,
+    borderRadius: 12,
     position: 'absolute',
     bottom: -1, // Position the button at the bottom of the card
     right: 10, // Position the button at the right of the card

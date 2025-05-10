@@ -34,7 +34,7 @@ const CartScreen = () => {
         <Ionicons name="arrow-back" size={28} color="#000" />
       </TouchableOpacity>
 
-      <Text style={styles.header}>🛒 My Basket</Text>
+      <Text style={styles.header}>🛒 Food Basket</Text>
       <FlatList
         data={basket}
         keyExtractor={(item) => item.id}

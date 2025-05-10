@@ -1,20 +1,22 @@
 import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import React from 'react'
-
+import { useState } from 'react';
+import CancelModal from '@/components/popupmodel/popupModel';
 const Profile = () => {
+     const [modalVisible, setModalVisible] = useState(false);
     return (
         <View style={styles.container}>
             <View style={{ alignItems: 'flex-start', marginTop: 70, marginHorizontal: 15 }}>
                 <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
             </View>
             <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 }}>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#0A0A0F' }}>Profile</Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#69bf70' }}>Profile</Text>
             </View>
             <View style={styles.header}>
                 <View style={styles.profileImageContainer}>
                     <Image source={require('../../assets/propic.png')} style={styles.profileImage} />
                 </View>
-                <Text style={styles.name}>Buddhi Gayan
+                <Text style={styles.name}>Buddhi Weerasinghe
                 </Text>
 
             </View>
@@ -25,20 +27,32 @@ const Profile = () => {
             </View>
             <View style={styles.fieldContainer}>
                 <Text style={styles.label}>Email</Text>
-                <TextInput style={styles.input} value="buddhigayanmaleesha2000@gmail.com" editable={false} />
+                <TextInput style={styles.input} value="buddhi2000@gmail.com" editable={false} />
             </View>
             <View style={styles.fieldContainer}>
                 <Text style={styles.label}>Location</Text>
-                <TextInput style={styles.input} value="199/6, Moraluwaka, Gurudeniya, Kandy" editable={false} />
+                <TextInput style={styles.input} value="199/6, Katubedda, Moratuwa" editable={false} />
             </View>
             <View style={styles.fieldContainer}>
                 <Text style={styles.label}>Phone Number</Text>
                 <TextInput style={styles.input} value="+91 9876543210" editable={false} />
             </View>
 
-            <TouchableOpacity style={styles.deleteButton}>
+            <TouchableOpacity style={styles.deleteButton}onPress={() => setModalVisible(true)}>
                 <Text style={styles.deleteButtonText}>Delete Account</Text>
             </TouchableOpacity>
+            <CancelModal 
+        visible={modalVisible} 
+        onClose={() => setModalVisible(false)} 
+        onConfirm={() => {
+          setModalVisible(false);
+          // Handle cancellation logic
+        }} 
+        title="Delete Account"
+        message="Are you sure you want to delete the account?"
+        confirmText="Yes"
+        cancelText="No"
+      />
         </View>
     );
 };
