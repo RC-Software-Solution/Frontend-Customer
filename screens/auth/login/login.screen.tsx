@@ -10,6 +10,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { commonStyles } from '@/styles/common/common.styles'
 import { router } from 'expo-router'
 import ForgotPassword from '@/app/(routes)/login/forgot-password'
+import axios from 'axios';
+import api from '@/services/api'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 export default function LoginScreen() {
     const [isPasswordVisible, setPasswordVisible] = useState(false);
     const [buttonSpinner, setButtonSpinner] = useState(false);
@@ -54,14 +59,45 @@ export default function LoginScreen() {
 
 
     };
-    const handleSignIn = () => {
-        if (userInfo.email === "" || userInfo.password === "") {
-            setRequired(true);
-        } else {
-            setRequired(false);
-            router.push("/(tabs)")
-        }
-    };
+   const handleSignIn = async () => {
+  setButtonSpinner(true);
+
+  if (userInfo.email === "" || userInfo.password === "") {
+    setRequired(true);
+    setButtonSpinner(false);
+    return;
+  }
+
+  try {
+    const response = await api.post('/users/login', {
+      email: userInfo.email,
+      password: userInfo.password,
+      fcm_token: "", // optional
+    });
+
+    console.log("✅ Login successful:", response.data);
+
+    // 👉 Save user data (and token if provided)
+    await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+    
+    if (response.data.token) {
+      await AsyncStorage.setItem("token", response.data.token);
+    }
+
+    // 👉 Navigate to main app
+    router.push("/(tabs)");
+
+  } catch (error: any) {
+    console.log("❌ Login error:", error.response?.data || error.message);
+    setError({
+      ...Error,
+      passwordError: error.response?.data?.message || "Login failed",
+    });
+  } finally {
+    setButtonSpinner(false);
+  }
+};
+
 
     return (
         <GestureHandlerRootView style={styles.container}>
@@ -98,15 +134,15 @@ export default function LoginScreen() {
                     </View>
                     <View style={{ marginTop: 30 }}>
 
-                        <TextInput
-                            style={commonStyles.input}
-                            keyboardType='default'
-                            placeholder="Password"
-                            placeholderTextColor="#888"
-                            secureTextEntry={!isPasswordVisible}
-                            defaultValue=""
-                            onChangeText={handlePasswordValidation}
-                        />
+                      <TextInput
+  style={commonStyles.input}
+  placeholder="Password"
+  placeholderTextColor="#888"
+  secureTextEntry={!isPasswordVisible}
+  value={userInfo.password}
+  onChangeText={(text) => setUserInfo({ ...userInfo, password: text })}
+/>
+
                         <TouchableOpacity
                             style={styles.visibleIcon}
                             onPress={() => setPasswordVisible(!isPasswordVisible)}>
@@ -141,10 +177,10 @@ export default function LoginScreen() {
 
                     <View>
 
-                        <TouchableOpacity
-                            style={styles.signUpButton}
-                            onPress={() => router.push("/(tabs)")}
-                        >
+                       <TouchableOpacity
+  style={styles.signUpButton}
+  onPress={handleSignIn}
+>
                             {buttonSpinner ? (
                                 <ActivityIndicator size="small" color="white" />
                             ) : (

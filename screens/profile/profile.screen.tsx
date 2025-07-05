@@ -1,8 +1,25 @@
 import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import React from 'react'
-import { useState } from 'react';
 import CancelModal from '@/components/popupmodel/popupModel';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const Profile = () => {
+
+    const [user, setUser] = useState<any>(null); // or use a proper type
+
+useEffect(() => {
+  const loadUser = async () => {
+    const storedUser = await AsyncStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  };
+
+  loadUser();
+}, []);
+
+
      const [modalVisible, setModalVisible] = useState(false);
     return (
         <View style={styles.container}>
@@ -16,27 +33,29 @@ const Profile = () => {
                 <View style={styles.profileImageContainer}>
                     <Image source={require('../../assets/propic.png')} style={styles.profileImage} />
                 </View>
-                <Text style={styles.name}>Buddhi Weerasinghe
-                </Text>
+               <Text style={styles.name}>{user?.full_name || "Loading..."}</Text>
 
             </View>
 
-            <View style={styles.fieldContainer}>
-                <Text style={styles.label}>User ID</Text>
-                <TextInput style={styles.input} value="123456" editable={false} />
-            </View>
-            <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Email</Text>
-                <TextInput style={styles.input} value="buddhi2000@gmail.com" editable={false} />
-            </View>
-            <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Location</Text>
-                <TextInput style={styles.input} value="199/6, Katubedda, Moratuwa" editable={false} />
-            </View>
-            <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Phone Number</Text>
-                <TextInput style={styles.input} value="+91 9876543210" editable={false} />
-            </View>
+           <View style={styles.fieldContainer}>
+  <Text style={styles.label}>User ID</Text>
+  <TextInput style={styles.input} value={user?.id || ""} editable={false} />
+</View>
+
+<View style={styles.fieldContainer}>
+  <Text style={styles.label}>Email</Text>
+  <TextInput style={styles.input} value={user?.email || ""} editable={false} />
+</View>
+
+<View style={styles.fieldContainer}>
+  <Text style={styles.label}>Location</Text>
+  <TextInput style={styles.input} value={user?.address || ""} editable={false} />
+</View>
+
+<View style={styles.fieldContainer}>
+  <Text style={styles.label}>Phone Number</Text>
+  <TextInput style={styles.input} value={user?.phone || ""} editable={false} />
+</View>
 
             <TouchableOpacity style={styles.deleteButton}onPress={() => setModalVisible(true)}>
                 <Text style={styles.deleteButtonText}>Delete Account</Text>
