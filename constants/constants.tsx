@@ -1,3 +1,4 @@
+import { JSX } from 'react';
 import { Image } from 'react-native';
 export const onboardingSwiperData: onboardingSwiperDataType[] = [
     {
