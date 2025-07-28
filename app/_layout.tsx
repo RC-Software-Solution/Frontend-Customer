@@ -4,15 +4,14 @@ import { useState } from 'react'
 import { useEffect } from 'react'
 import { Stack } from 'expo-router'
 import TabsLayout from './(tabs)/_layout'
-
-
+import { Provider } from 'react-redux'
+import { store } from '@/store'
 
 const  RootLayout = () => {
   const [isLoggedIn,setisLoggedIn] = useState(false);
   
   return (
-   
-    <>
+    <Provider store={store}>
     {isLoggedIn ? (
       <><TabsLayout />
       <Stack.Screen name="(routes)/cart/index" /></>
@@ -28,8 +27,9 @@ const  RootLayout = () => {
       </Stack>
    
     )}
-    </> 
-  )
+  </Provider>
+   
+  );
 }
 
 export default  RootLayout
