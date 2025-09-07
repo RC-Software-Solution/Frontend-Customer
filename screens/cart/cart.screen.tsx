@@ -68,7 +68,6 @@ const CartScreen = () => {
         quantity: item.quantity,
         food_name: item.name,
         food_description: item.description || 'No description',
-        meal_time: item.meal_time,
         meal_type: normalizeMealType(item.meal_type), // Normalize to ensure correct type
         price: item.price,
       })),

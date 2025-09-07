@@ -1,4 +1,29 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Helper function to decode JWT and check expiration
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    
+    const decoded = JSON.parse(jsonPayload);
+    console.log('🔍 JWT Payload decoded:', JSON.stringify(decoded, null, 2));
+    
+    const now = Date.now() / 1000;
+    console.log('⏰ Current time:', now);
+    console.log('⏰ Token expires at:', decoded.exp);
+    console.log('⏰ Time until expiry (seconds):', decoded.exp - now);
+    
+    return decoded.exp < now;
+  } catch (error) {
+    console.error('❌ Error decoding token:', error);
+    return true; // Assume expired if can't decode
+  }
+};
 
 const api = axios.create({
   baseURL: 'http://192.168.43.178:4002/api', // Order service port
@@ -8,7 +33,87 @@ const api = axios.create({
   },
 });
 
+// Add request interceptor to include authentication token
+api.interceptors.request.use(
+  async (config) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      console.log('🔍 Token retrieved from AsyncStorage:', token ? `${token.substring(0, 20)}...` : 'null');
+      
+      if (token) {
+        // Check if token is expired
+        const expired = isTokenExpired(token);
+        console.log('⏰ Token expired?', expired);
+        
+        if (expired) {
+          console.log('❌ Token is expired, removing from storage');
+          await AsyncStorage.removeItem('token');
+          // You might want to redirect to login here
+          throw new Error('Token expired');
+        }
+        
+        config.headers.Authorization = `Bearer ${token}`;
+        console.log('🔒 Authorization header set:', `Bearer ${token.substring(0, 20)}...`);
+        console.log('📋 Full config headers:', JSON.stringify(config.headers, null, 2));
+      } else {
+        console.log('⚠️ No token found in AsyncStorage');
+      }
+    } catch (error) {
+      console.error('❌ Error retrieving token:', error);
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to log server responses
+api.interceptors.response.use(
+  (response) => {
+    console.log('✅ Order service response:', response.status, response.statusText);
+    return response;
+  },
+  (error) => {
+    console.error('❌ Order service error response:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers,
+    });
+    
+    // Log additional debugging for authentication errors
+    if (error.response?.status === 401) {
+      console.error('🔐 Authentication Error Details:');
+      console.error('- Error type: Invalid or expired token');
+      console.error('- This suggests the JWT token from auth service (port 4001) is not valid for order service (port 4002)');
+      console.error('- Possible causes:');
+      console.error('  1. Different JWT secrets between microservices');
+      console.error('  2. Different token validation logic');
+      console.error('  3. Order service not configured to accept tokens from auth service');
+      console.error('- Request was made to:', error.config?.url);
+      console.error('- Full request headers:', JSON.stringify(error.config?.headers, null, 2));
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 export default api;
+
+// Helper function to test token validity with order service
+export const testTokenValidity = async (): Promise<boolean> => {
+  try {
+    console.log('🧪 Testing token validity with order service...');
+    // Try a simple GET request that requires authentication
+    const response = await api.get('/orders'); // or any protected endpoint
+    console.log('✅ Token is valid for order service');
+    return true;
+  } catch (error: any) {
+    console.error('❌ Token test failed:', error.response?.data || error.message);
+    return false;
+  }
+};
 
 export const createOrder = async (orderData: {
   customer_id: string; // Changed to string for UUID
@@ -16,13 +121,21 @@ export const createOrder = async (orderData: {
     quantity: number;
     food_name: string;
     food_description: string; // Made required to match backend
-    meal_time: 'breakfast' | 'lunch' | 'dinner';
     meal_type: 'veg' | 'non-veg' | 'other';
     price: number;
   }[];
   total_price: number;
   meal_time: 'breakfast' | 'lunch' | 'dinner';
 }) => {
+  console.log('🛍️ Creating order with data:', JSON.stringify(orderData, null, 2));
+  
+  // Test token validity first
+  const tokenValid = await testTokenValidity();
+  if (!tokenValid) {
+    console.error('❌ Token validation failed before creating order');
+    throw new Error('Token is not valid for order service. This may be due to microservice JWT configuration differences.');
+  }
+  
   return api.post('/orders', orderData);
 };
 
@@ -32,7 +145,6 @@ export const editOrder = async (orderId: string, orderData: {
     quantity: number;
     food_name: string;
     food_description: string;
-    meal_time: 'breakfast' | 'lunch' | 'dinner';
     meal_type: 'veg' | 'non-veg' | 'other';
     price: number;
   }[];
