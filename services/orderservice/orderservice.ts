@@ -35,7 +35,6 @@ export const createOrder = async (orderData: {
     quantity: number;
     food_name: string;
     food_description: string; // Made required to match backend
-    meal_time: 'breakfast' | 'lunch' | 'dinner';
     meal_type: 'veg' | 'non-veg' | 'other';
     price: number;
   }[];
@@ -51,7 +50,6 @@ export const editOrder = async (orderId: string, orderData: {
     quantity: number;
     food_name: string;
     food_description: string;
-    meal_time: 'breakfast' | 'lunch' | 'dinner';
     meal_type: 'veg' | 'non-veg' | 'other';
     price: number;
   }[];
