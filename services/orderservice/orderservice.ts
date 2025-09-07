@@ -11,10 +11,16 @@ const isTokenExpired = (token: string): boolean => {
     }).join(''));
     
     const decoded = JSON.parse(jsonPayload);
+    console.log('🔍 JWT Payload decoded:', JSON.stringify(decoded, null, 2));
+    
     const now = Date.now() / 1000;
+    console.log('⏰ Current time:', now);
+    console.log('⏰ Token expires at:', decoded.exp);
+    console.log('⏰ Time until expiry (seconds):', decoded.exp - now);
+    
     return decoded.exp < now;
   } catch (error) {
-    console.error('Error decoding token:', error);
+    console.error('❌ Error decoding token:', error);
     return true; // Assume expired if can't decode
   }
 };
@@ -75,11 +81,39 @@ api.interceptors.response.use(
       data: error.response?.data,
       headers: error.response?.headers,
     });
+    
+    // Log additional debugging for authentication errors
+    if (error.response?.status === 401) {
+      console.error('🔐 Authentication Error Details:');
+      console.error('- Error type: Invalid or expired token');
+      console.error('- This suggests the JWT token from auth service (port 4001) is not valid for order service (port 4002)');
+      console.error('- Possible causes:');
+      console.error('  1. Different JWT secrets between microservices');
+      console.error('  2. Different token validation logic');
+      console.error('  3. Order service not configured to accept tokens from auth service');
+      console.error('- Request was made to:', error.config?.url);
+      console.error('- Full request headers:', JSON.stringify(error.config?.headers, null, 2));
+    }
+    
     return Promise.reject(error);
   }
 );
 
 export default api;
+
+// Helper function to test token validity with order service
+export const testTokenValidity = async (): Promise<boolean> => {
+  try {
+    console.log('🧪 Testing token validity with order service...');
+    // Try a simple GET request that requires authentication
+    const response = await api.get('/orders'); // or any protected endpoint
+    console.log('✅ Token is valid for order service');
+    return true;
+  } catch (error: any) {
+    console.error('❌ Token test failed:', error.response?.data || error.message);
+    return false;
+  }
+};
 
 export const createOrder = async (orderData: {
   customer_id: string; // Changed to string for UUID
@@ -93,6 +127,15 @@ export const createOrder = async (orderData: {
   total_price: number;
   meal_time: 'breakfast' | 'lunch' | 'dinner';
 }) => {
+  console.log('🛍️ Creating order with data:', JSON.stringify(orderData, null, 2));
+  
+  // Test token validity first
+  const tokenValid = await testTokenValidity();
+  if (!tokenValid) {
+    console.error('❌ Token validation failed before creating order');
+    throw new Error('Token is not valid for order service. This may be due to microservice JWT configuration differences.');
+  }
+  
   return api.post('/orders', orderData);
 };
 
