@@ -10,9 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { commonStyles } from '@/styles/common/common.styles'
 import { router } from 'expo-router'
 import ForgotPassword from '@/app/(routes)/login/forgot-password'
-import axios from 'axios';
-import api from '@/services/api'; 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { authService } from '@/services';
 
 
 export default function LoginScreen() {
@@ -59,7 +57,7 @@ export default function LoginScreen() {
 
 
     };
-   const handleSignIn = async () => {
+const handleSignIn = async () => {
   setButtonSpinner(true);
 
   if (userInfo.email === "" || userInfo.password === "") {
@@ -69,29 +67,22 @@ export default function LoginScreen() {
   }
 
   try {
-    const response = await api.post('/users/login', {
+    const response = await authService.login({
       email: userInfo.email,
       password: userInfo.password,
       fcm_token: "", // optional
     });
 
-    console.log("✅ Login successful:", response.data);
-
-    // 👉 Save user data (and token if provided)
-    await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
-    
-    if (response.data.token) {
-      await AsyncStorage.setItem("token", response.data.token);
-    }
+    console.log("✅ Login successful:", response);
 
     // 👉 Navigate to main app
     router.push("/(tabs)");
 
   } catch (error: any) {
-    console.log("❌ Login error:", error.response?.data || error.message);
+    console.log("❌ Login error:", error);
     setError({
       ...Error,
-      passwordError: error.response?.data?.message || "Login failed",
+      passwordError: error.message || "Login failed",
     });
   } finally {
     setButtonSpinner(false);

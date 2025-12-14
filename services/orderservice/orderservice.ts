@@ -1,33 +1,13 @@
-import axios from 'axios';
+// This file is deprecated. Use the new order service from @/services instead.
+// Import the new order service:
+// import { orderService } from '@/services';
 
-const api = axios.create({
-  baseURL: 'http://192.168.43.178:4002/api', // Order service port
-  timeout: 5000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// Legacy exports for backward compatibility
+export { orderService as default } from '@/services';
 
-export default api;
-
+// Legacy function exports for backward compatibility
 export const createOrder = async (orderData: {
-  customer_id: string; // Changed to string for UUID
-  items: {
-    quantity: number;
-    food_name: string;
-    food_description: string; // Made required to match backend
-    meal_time: 'breakfast' | 'lunch' | 'dinner';
-    meal_type: 'veg' | 'non-veg' | 'other';
-    price: number;
-  }[];
-  total_price: number;
-  meal_time: 'breakfast' | 'lunch' | 'dinner';
-}) => {
-  return api.post('/orders', orderData);
-};
-
-// Optional: Add edit and delete functions if needed
-export const editOrder = async (orderId: string, orderData: {
+  customer_id: string;
   items: {
     quantity: number;
     food_name: string;
@@ -39,9 +19,21 @@ export const editOrder = async (orderId: string, orderData: {
   total_price: number;
   meal_time: 'breakfast' | 'lunch' | 'dinner';
 }) => {
-  return api.put(`/orders/${orderId}`, orderData);
+  const { orderService } = await import('@/services');
+  return orderService.createOrder(orderData);
+};
+
+export const editOrder = async (orderId: string, orderData: {
+  items: {
+    food_item_id: number;
+    quantity: number;
+  }[];
+}) => {
+  const { orderService } = await import('@/services');
+  return orderService.updateOrder(orderId, orderData);
 };
 
 export const deleteOrder = async (orderId: string) => {
-  return api.delete(`/orders/${orderId}`);
+  const { orderService } = await import('@/services');
+  return orderService.deleteOrder(orderId);
 };

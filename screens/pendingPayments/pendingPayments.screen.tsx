@@ -1,25 +1,56 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
-
-interface PendingPayment {
-    id: string;
-    date: string;
-    price: string;
-}
-
-const pendingPayments: PendingPayment[] = [
-    { id: '5012', date: '2024/06/22', price: 'Rs. 560.00' },
-    { id: '5013', date: '2024/06/23', price: 'Rs. 720.00' },
-];
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, Image, ActivityIndicator, Alert } from 'react-native';
+import { orderService, useAuth } from '@/services';
+import { Order } from '@/services/types/api.types';
+import { useFocusEffect } from 'expo-router';
 
 const PendingPaymentsScreen = () => {
-    const renderItem = ({ item }: { item: PendingPayment }) => (
+    const { isAuthenticated, user } = useAuth();
+    const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const loadPendingPayments = async () => {
+        if (!isAuthenticated || !user) {
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            console.log('Loading pending payments for user:', user.id);
+            const orders = await orderService.getPendingPaymentOrders();
+            console.log('Received pending payment orders:', orders);
+            setPendingOrders(orders);
+        } catch (error) {
+            console.error('Failed to load pending payments:', error);
+            Alert.alert('Error', 'Failed to load pending payments. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadPendingPayments();
+    }, [isAuthenticated, user]);
+
+    // Refresh when screen comes into focus
+    useFocusEffect(
+        React.useCallback(() => {
+            loadPendingPayments();
+        }, [isAuthenticated, user])
+    );
+
+    const renderItem = ({ item }: { item: Order }) => (
         <View style={styles.card}>
             <Image source={require('../../assets/pendPay.png')} style={styles.icon} />
-            <View>
-                <Text style={styles.orderId}>Order ID - {item.id}</Text>
-                <Text style={styles.details}>Date: {item.date}</Text>
-                <Text style={styles.price}>Price: {item.price}</Text>
+            <View style={styles.orderDetails}>
+                <Text style={styles.orderId} numberOfLines={1} ellipsizeMode="tail">
+                    Order ID - {item.order_id}
+                </Text>
+                <Text style={styles.details}>
+                    Date: {new Date(item.created_at).toLocaleDateString('en-GB')}
+                </Text>
+                <Text style={styles.price}>Price: Rs. {item.total_price.toFixed(2)}</Text>
             </View>
         </View>
     );
@@ -37,15 +68,24 @@ const PendingPaymentsScreen = () => {
                     If you have two unpaid orders, you won't be able to place new ones. Clear payments to continue.
                     </Text>
                   </View>
-            {/* <Text style={styles.description}>
-                If you have two unpaid orders, you won't be able to place new ones. Clear payments to continue.
-            </Text> */}
-            <FlatList
-                data={pendingPayments}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.list}
-            />
+            {loading ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#69bf70" />
+                    <Text style={styles.loadingText}>Loading pending payments...</Text>
+                </View>
+            ) : pendingOrders.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>No pending payments</Text>
+                    <Text style={styles.emptySubText}>All your orders are paid</Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={pendingOrders}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.order_id}
+                    contentContainerStyle={styles.list}
+                />
+            )}
         </View>
     );
 };
@@ -72,10 +112,48 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         marginTop: 10,
     },
-    icon: { width: 90, height: 90, marginRight: 35, marginLeft: 15 },
-    orderId: { fontSize: 16, fontWeight: 'bold', color: '#69bf70' , paddingBottom:10},
+    icon: { width: 90, height: 90, marginRight: 15, marginLeft: 15 },
+    orderDetails: {
+        flex: 1,
+        marginRight: 10,
+    },
+    orderId: { 
+        fontSize: 16, 
+        fontWeight: 'bold', 
+        color: '#69bf70', 
+        paddingBottom: 10,
+        flexShrink: 1,
+    },
     details: { fontSize: 14, color: '#oaoaoa' },
-    price: { fontSize: 14, color: '#oaoaoa', fontWeight: 'bold' ,paddingTop:10},
+    price: { fontSize: 14, color: '#oaoaoa', fontWeight: 'bold', paddingTop: 10 },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 100,
+    },
+    loadingText: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#69bf70',
+        fontWeight: '500',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 100,
+    },
+    emptyText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#666',
+        marginBottom: 5,
+    },
+    emptySubText: {
+        fontSize: 14,
+        color: '#999',
+    },
 });
 
 export default PendingPaymentsScreen;

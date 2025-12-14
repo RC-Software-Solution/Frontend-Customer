@@ -5,6 +5,8 @@ type CartItem = {
   meal_time: 'breakfast' | 'lunch' | 'dinner';
   description: string;
   id: string;
+  // preserve the backend id to pass to order-service
+  food_item_id?: number;
   name: string;
   quantity: number;
   price: number;
