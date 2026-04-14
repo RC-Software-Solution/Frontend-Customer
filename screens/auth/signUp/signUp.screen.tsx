@@ -123,6 +123,22 @@ export default function signUpScreen() {
                             </Text>
                         )}
                     </TouchableOpacity>
+
+                    <TouchableOpacity>
+                                            <View style={styles.signUpRedirect}>
+                                                <Text style={{ fontSize: 16, fontFamily: "Raleway_600SemiBold" }}
+                                                 onPress={() => router.push("/(routes)/login")}>
+                                                   Already have an account?
+                                                    <Text
+                                                        style={{ fontFamily: "Raleway_700Bold", color: "#69bf70" }}
+                                                       
+                                                    >
+                                                        {" "}Sign In
+                                                    </Text>
+                                                </Text>
+                                            </View>
+                                        </TouchableOpacity>
+                    
                 </View>
             </ScrollView>
         </GestureHandlerRootView>
@@ -158,6 +174,13 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
     },
     buttonText: { color: "white", fontSize: 16, fontWeight: "bold" },
+     signUpRedirect: {
+        flexDirection: "row",
+        justifyContent: "center",
+        marginBottom: 20,
+        marginHorizontal: 16,
+        marginTop: 20,
+    }
 
 });
 

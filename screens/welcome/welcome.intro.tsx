@@ -46,11 +46,11 @@ export default function WelcomeIntroScreen() {
       data={onboardingSwiperData}
       onDone={() => {
         console.log("Done button pressehhhhd");
-        router.push("/login")
+        router.push("/sign-up")
       }}
       onSkip={() => {
         console.log("Done button pressellllld");
-        router.push("/login")
+        router.push("/sign-up")
       }}
       renderNextButton={() => (
         <View style={commonStyles.welcomeButtonContainer}>

@@ -5,7 +5,7 @@ import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { commonStyles } from '@/styles/common/common.styles';
 import { router, useLocalSearchParams } from 'expo-router';
-
+import { authService } from '@/services';
 export default function signUpSecondScreen() {
     const params = useLocalSearchParams(); // Retrieve user data from previous screen
 
@@ -36,11 +36,33 @@ export default function signUpSecondScreen() {
         return valid;
     };
 
-    const handleNext = () => {
-        if (validatePassword()) {
-            router.push('/(routes)/verifyAccount'); // Navigate to the next step
-        }
-    };
+  const handleNext = async () => {
+  if (!validatePassword()) return;
+  setButtonSpinner(true);
+
+  try {
+    const response = await authService.signup({
+      full_name: params.name as string,
+      email: params.email as string,
+      password: passwordInfo.password,
+      role: 'customer', // default role
+      address: params.location as string,
+      phone: params.phone as string,
+      fcm_token: '', // if you don't have FCM yet
+    });
+
+    console.log("✅ Signup successful:", response);
+    alert("Signup successful! Please log in.");
+    router.replace('/(routes)/login'); // or next screen
+
+  } catch (err: any) {
+    console.error("❌ Signup failed:", err);
+    alert(err.message || "Signup failed.");
+  } finally {
+    setButtonSpinner(false);
+  }
+};
+
 
     return (
         <GestureHandlerRootView style={styles.container}>

@@ -11,7 +11,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const tabPositionX = useSharedValue(0);
 
   useEffect(() => {
-    tabPositionX.value = withSpring(buttonWidth * state.index, { damping: 15, stiffness: 100 });
+    tabPositionX.value = withSpring(buttonWidth * state.index, { damping: 95, stiffness: 180 });
   }, [state.index, buttonWidth]);
 
   const onTabbarLayout = (e: LayoutChangeEvent) => {
@@ -48,7 +48,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         const isFocused = state.index === index;
 
         const onPress = () => {
-          tabPositionX.value = withSpring(buttonWidth * index, { damping: 15, stiffness: 100 });
+          tabPositionX.value = withSpring(buttonWidth * index, { damping: 95, stiffness: 180 });
           const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
           if (!isFocused && !event.defaultPrevented) {
             navigation.navigate(route.name, route.params);

@@ -1,39 +1,25 @@
+/**
+ * Profile Screen with useAuth Hook
+ * Alternative implementation using the useAuth hook for cleaner code
+ */
+
 import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import React from 'react'
 import CancelModal from '@/components/popupmodel/popupModel';
-import { useEffect, useState } from 'react';
-import { authService } from '@/services';
-import { User } from '@/services/types/api.types';
+import { useState } from 'react';
+import { useAuth, authService } from '@/services';
 import { router, useFocusEffect } from 'expo-router';
 
-const Profile = () => {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        loadCurrentUser();
-    }, []);
+const ProfileWithHook = () => {
+    const { user, loading, logout, refreshUser } = useAuth();
+    const [modalVisible, setModalVisible] = useState(false);
 
     // Refresh user data when screen comes into focus
     useFocusEffect(
         React.useCallback(() => {
-            loadCurrentUser();
-        }, [])
+            refreshUser();
+        }, [refreshUser])
     );
-
-    const loadCurrentUser = async () => {
-        try {
-            setLoading(true);
-            const currentUser = await authService.getCurrentUser();
-            setUser(currentUser);
-        } catch (error) {
-            console.error('Failed to load user:', error);
-            // If user is not authenticated, redirect to login
-            router.replace('/(routes)/login');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleDeleteAccount = async () => {
         try {
@@ -59,7 +45,7 @@ const Profile = () => {
 
     const handleLogout = async () => {
         try {
-            await authService.logout();
+            await logout();
             router.replace('/(routes)/login');
         } catch (error) {
             console.error('Failed to logout:', error);
@@ -67,8 +53,6 @@ const Profile = () => {
         }
     };
 
-
-     const [modalVisible, setModalVisible] = useState(false);
     return (
         <View style={styles.container}>
             <View style={{ alignItems: 'flex-start', marginTop: 70, marginHorizontal: 15 }}>
@@ -77,6 +61,7 @@ const Profile = () => {
             <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 }}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#69bf70' }}>Profile</Text>
             </View>
+            
             {loading ? (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#69bf70" />
@@ -124,6 +109,7 @@ const Profile = () => {
                     </TouchableOpacity>
                 </>
             )}
+            
             <CancelModal 
                 visible={modalVisible} 
                 onClose={() => setModalVisible(false)} 
@@ -141,11 +127,10 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#fff' },
     header: { alignItems: 'center', marginVertical: 30 },
     profileImage: {
-        width: 125, height: 125, borderRadius: 60, marginBottom: 10, top: -12, // Move it slightly upwards
+        width: 125, height: 125, borderRadius: 60, marginBottom: 10, top: -12,
         left: -5, position: "absolute",
     },
     name: { fontSize: 24, fontWeight: 'bold', color: '#4A4A4A', marginTop: 12 },
-    role: { fontSize: 16, color: '#777' },
     fieldContainer: { marginBottom: 16 },
     label: { fontSize: 14, color: '#oaoaoa', marginBottom: 7, marginHorizontal: 16, },
     input: {
@@ -157,33 +142,21 @@ const styles = StyleSheet.create({
         marginHorizontal: 16
     },
     profileImageContainer: {
-        width: 109,  // Slightly larger than the image
-        height: 109, // Keep it circular
+        width: 109,
+        height: 109,
         borderRadius: 55,
-        overflow: "visible",  // Keeps part of the image inside
+        overflow: "visible",
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
-
         backgroundColor: '#69bf70',
         elevation: 5,
-
-        // iOS Shadow
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.4,
         shadowRadius: 4,
         marginTop: 10,
     },
-
-    // profileImage: {
-    //     width: 120,  // Slightly bigger than container
-    //     height: 120,
-    //     borderRadius: 60, // Make it larger than the container
-    //     position: "absolute",
-    //     top: -5, // Move it slightly upwards
-    //     left: -5, // Move it slightly left
-    // },
     deleteButton: {
         backgroundColor: 'black',
         padding: 15,
@@ -192,14 +165,10 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginHorizontal: 16,
         elevation: 5,
-
-        // iOS Shadow
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 4,
-
-
         width: 200,
         alignSelf: 'flex-end',
     },
@@ -238,4 +207,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Profile
+export default ProfileWithHook;
