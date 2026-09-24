@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native'
-import { PlatformPressable } from '@react-navigation/elements'
+import { PlatformPressable } from 'expo-router/react-navigation'
 import React, { useEffect } from 'react'
 import { icon } from '@/constants/constants'
 import Animated, { interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'

@@ -61,9 +61,7 @@ export class BaseApiClient {
         } catch (error) {
           console.error(`❌ [${this.serviceName}] Error in request interceptor:`, error);
         }
-        
-        
-        
+
         return config;
       },
       (error) => {
