@@ -74,10 +74,10 @@ const Profile = () => {
      const [modalVisible, setModalVisible] = useState(false);
     return (
         <Screen scroll tabBar>
-            <View style={{ alignItems: 'flex-start', marginHorizontal: 15 }}>
+            <View style={{ alignItems: 'flex-start' }}>
                 <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
             </View>
-            <View style={{ alignItems: 'flex-start', marginHorizontal: 15 }}>
+            <View style={{ alignItems: 'flex-start' }}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#69bf70' }}>Profile</Text>
             </View>
             {loading ? (
