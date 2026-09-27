@@ -3,7 +3,6 @@ import React from 'react'
 import { useFonts, Raleway_700Bold } from "@expo-google-fonts/raleway"
 import { Nunito_400Regular, Nunito_700Bold } from "@expo-google-fonts/nunito"
 import { ActivityIndicator } from 'react-native'
-import { LinearGradient } from 'expo-linear-gradient'
 import styles from "../../styles/onboarding/onboarding"
 import { router } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

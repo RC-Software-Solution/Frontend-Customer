@@ -3,7 +3,6 @@ import { PlatformPressable } from 'expo-router/react-navigation'
 import React, { useEffect } from 'react'
 import { icon } from '@/constants/constants'
 import Animated, { interpolate, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
-import { AnimatedText } from 'react-native-reanimated/lib/typescript/component/Text'
 import { withSpring } from 'react-native-reanimated';
 
 const TabBarButton = ({

@@ -1,9 +1,7 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, Image, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState } from 'react';
-import { Entypo, FontAwesome,Ionicons } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { commonStyles } from '@/styles/common/common.styles';
 import { router, useLocalSearchParams } from 'expo-router';
 import { authService } from '@/services';
 import { getFcmToken } from "@/services/push/push.service";
@@ -132,5 +130,4 @@ const styles = StyleSheet.create({
         ...shadow.card,
     },
     title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
-    errorText: { color: "red", fontSize: 14, marginTop: -1 },
 });

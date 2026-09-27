@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Button } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { useState, createRef, useRef } from 'react'
 import { router } from 'expo-router';
@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
+    justifyContent: 'center',
     marginBottom: space.lg,
     alignSelf: 'stretch',
     gap: space.sm,
@@ -103,16 +104,6 @@ const styles = StyleSheet.create({
     fontSize: type.h2,
     color: color.ink,
   },
-  loginLink: {
-    flexDirection: "row",
-    marginTop: 30,
-  },
-  loginText: {
-    color: "#3876EE",
-    marginLeft: 5,
-    fontSize: 16,
-  },
-  backText: { fontSize: 16 },
   signUpRedirect: {
     flexDirection: "row",
     justifyContent: "center",

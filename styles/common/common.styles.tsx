@@ -1,12 +1,6 @@
 import { StyleSheet } from "react-native";
 import { color, radius, space, type } from "@/theme";
 export const commonStyles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-
-    },
     dotStyle: {
         backgroundColor: color.border,
         width: 8,
@@ -72,21 +66,5 @@ export const commonStyles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: space.xl,
     },
-    input: {
-      height: 55,
-      marginHorizontal:16,
-      backgroundColor: "#f5f5f5",
-      paddingLeft: 25,
-      fontSize: 16,
-      borderRadius: 10,
-      marginBottom: 15,
-
-  },
-    errorContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginHorizontal:16,
-
-      },
 
 });

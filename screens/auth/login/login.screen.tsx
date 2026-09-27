@@ -1,15 +1,10 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, Image, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
 import React from 'react'
-import { Entypo, FontAwesome, Fontisto, Ionicons, SimpleLineIcons } from '@expo/vector-icons'
-import { useFonts, Raleway_700Bold, Raleway_600SemiBold } from "@expo-google-fonts/raleway"
-import { Nunito_400Regular, Nunito_700Bold, Nunito_500Medium, Nunito_600SemiBold } from "@expo-google-fonts/nunito"
+import { FontAwesome } from '@expo/vector-icons'
 import { useState, } from 'react'
-import { LinearGradient } from 'expo-linear-gradient'
 import { ScrollView } from 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import { commonStyles } from '@/styles/common/common.styles'
 import { router } from 'expo-router'
-import ForgotPassword from '@/app/(routes)/login/forgot-password'
 import { authService } from '@/services';
 import { getFcmToken } from "@/services/push/push.service";
 import { Field } from '@/components/ui/Field';
@@ -209,20 +204,6 @@ const styles = StyleSheet.create({
         textAlign: "right",
         fontSize: 16,
         marginTop: 10,
-        marginHorizontal: 16,
-
-    },
-    buttonText: {
-        color: "white",
-        fontSize: 16,
-        fontFamily: "Raleway_700Bold",
-    },
-
-    errorText: {
-        color: "red",
-        fontSize: 19,
-        marginLeft: 5,
-        marginHorizontal: 16,
     },
     signUpRedirect: {
         flexDirection: "row",

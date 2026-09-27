@@ -1,10 +1,8 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, Image, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
 import React from 'react'
-import { Entypo, FontAwesome, Ionicons } from '@expo/vector-icons'
 import { useState, } from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import { commonStyles } from '@/styles/common/common.styles'
 import { router } from 'expo-router'
 import { Field } from '@/components/ui/Field'
 import { AppButton } from '@/components/ui/AppButton'
@@ -13,7 +11,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function signUpScreen() {
     const insets = useSafeAreaInsets();
-    const [isPasswordVisible, setPasswordVisible] = useState(false);
     const [buttonSpinner, setButtonSpinner] = useState(false);
     const [userInfo, setUserInfo] = useState({
         name: "",
@@ -154,8 +151,6 @@ const styles = StyleSheet.create({
         ...shadow.card,
     },
     title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
-    errorText: { color: "red", fontSize: 14, marginTop: -1, },
-    buttonText: { color: "white", fontSize: 16, fontWeight: "bold" },
      signUpRedirect: {
         flexDirection: "row",
         justifyContent: "center",

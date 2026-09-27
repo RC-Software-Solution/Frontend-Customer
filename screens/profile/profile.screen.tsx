@@ -1,4 +1,4 @@
-import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import React from 'react'
 import CancelModal from '@/components/popupmodel/popupModel';
 import { useEffect, useState } from 'react';
@@ -150,7 +150,6 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
     },
     name: { fontSize: 24, fontWeight: 'bold', color: '#4A4A4A', marginTop: 12 },
-    role: { fontSize: 16, color: '#777' },
     fieldContainer: { marginBottom: 16 },
     label: { fontSize: 14, color: color.muted, marginBottom: 7 },
     input: {
