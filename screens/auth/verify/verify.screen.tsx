@@ -1,8 +1,9 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Button } from 'react-native'
 import React from 'react'
 import { useState, createRef, useRef } from 'react'
-import CustomButton from "../../../components/button/button";
 import { router } from 'expo-router';
+import { AppButton } from '@/components/ui/AppButton';
+import { color, radius, space, type } from '@/theme';
 export default function VerifyScreen() {
 
   const [code, setcCode] = React.useState(new Array(4).fill(''));
@@ -44,8 +45,7 @@ export default function VerifyScreen() {
 
       </View>
       <View>
-        <CustomButton title="Submit"
-          onPress={handleSubmit} />
+        <AppButton title="Submit" onPress={handleSubmit} />
       </View>
 
      <TouchableOpacity>
@@ -69,7 +69,7 @@ export default function VerifyScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    height: "100%",
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
@@ -87,18 +87,21 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   inputContainer: {
-    flexDirection: "row",
-    marginBottom: 20,
+    flexDirection: 'row',
+    marginBottom: space.lg,
+    alignSelf: 'stretch',
+    gap: space.sm,
   },
   inputBox: {
-    width: 60,
-    height: 60,
+    flex: 1,
+    aspectRatio: 1,
+    maxWidth: 72,
     borderWidth: 1,
-    borderColor: "#ddd",
-    textAlign: "center",
-    marginRight: 10,
-    borderRadius: 10,
-    fontSize: 20,
+    borderColor: color.border,
+    textAlign: 'center',
+    borderRadius: radius.md,
+    fontSize: type.h2,
+    color: color.ink,
   },
   loginLink: {
     flexDirection: "row",
