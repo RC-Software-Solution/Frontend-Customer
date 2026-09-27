@@ -1,87 +1,76 @@
 import { StyleSheet } from "react-native";
-import { responsiveWidth,responsiveHeight } from "react-native-responsive-dimensions";
-import { heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { color, radius, space, type } from "@/theme";
 export const commonStyles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        
+
     },
-    buttonContainer: {
-        backgroundColor: "#25123EC",
-        width: responsiveWidth(88),
-        height: responsiveHeight(2.5),
-        borderRadius:5,
-        marginHorizontal:5,
-        alignItems:"center",
-        justifyContent: "center"
-    
+    dotStyle: {
+        backgroundColor: color.border,
+        width: 8,
+        height: 8,
+        borderRadius: radius.pill,
+        marginHorizontal: space.xs,
+        bottom: 24,
     },
-    dotStyle:{
-        backgroundColor: "#001100",
-        width: responsiveWidth(2.25),
-        height: responsiveHeight(1.15),
-        borderRadius: 10,
-        marginHorizontal:5,
-        bottom: responsiveHeight(10), 
-    },
-    activeDotStyle:{
-        backgroundColor: "#69bf70",
-        width: responsiveWidth(2.25),
-        height: responsiveHeight(1.15),
-        borderRadius: 10,
-        marginHorizontal:5,
-        bottom: responsiveHeight(10), 
+    activeDotStyle: {
+        backgroundColor: color.brand,
+        width: 8,
+        height: 8,
+        borderRadius: radius.pill,
+        marginHorizontal: space.xs,
+        bottom: 24,
     },
     buttonText: {
         color: "white",
         textAlign: "center",
         fontSize: 20,
-       
+
         textAlignVertical: "center",
-        
+
         alignSelf:"center"
       },
 
       head:{
-       
-        fontSize: hp("3%"),
+
+        fontSize: type.h2,
         textAlign:"center",
       },
-      
+
     title:{
-       
-        fontSize: hp("3%"),
+
+        fontSize: type.h2,
         textAlign:"center",
          fontWeight: "700"
     },
     slideImage: {
-        marginTop: 50,
-        alignSelf: "center",
-        marginBottom: 10,
-        width: responsiveWidth(80), // 80% of screen width for a better fit
-        height: responsiveWidth(80) // Maintain aspect ratio (if necessary)
-      },
-      description: {
-        marginHorizontal: 60,
-        marginBottom:10,
-        fontSize: hp("2.1%"),
-        textAlign: "center",
-        color: "#575758",
-        
-      },
-      welcomeButtonContainer: {
-        backgroundColor: "#69bf70",
-        width: responsiveWidth(70),
-        height: responsiveHeight(6.5),
-        borderRadius: 50,
-        alignSelf: "center",
-        justifyContent: "center",
-        alignItems: "center",
-        position: "absolute",  // Ensures it stays at the bottom
-        bottom: responsiveHeight(5), // Adjust position for better touchability
-        paddingHorizontal: 10, // Extra padding to prevent edge issues
+        marginTop: space.lg,
+        alignSelf: 'center',
+        marginBottom: space.sm,
+        width: '70%',
+        aspectRatio: 1,
+        maxHeight: 260,
+        resizeMode: 'contain',
+    },
+    description: {
+        marginHorizontal: space.lg,
+        marginBottom: space.sm,
+        fontSize: type.caption,
+        textAlign: 'center',
+        color: color.muted,
+    },
+    welcomeButtonContainer: {
+        backgroundColor: color.brand,
+        width: '80%',
+        maxWidth: 360,
+        minHeight: 56,
+        borderRadius: radius.pill,
+        alignSelf: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: space.xl,
     },
     input: {
       height: 55,
@@ -91,13 +80,13 @@ export const commonStyles = StyleSheet.create({
       fontSize: 16,
       borderRadius: 10,
       marginBottom: 15,
-      
+
   },
     errorContainer: {
       flexDirection: "row",
       alignItems: "center",
-      marginHorizontal:16,	
+      marginHorizontal:16,
 
       },
-     
+
 });

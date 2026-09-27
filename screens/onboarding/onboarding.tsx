@@ -6,6 +6,8 @@ import { ActivityIndicator } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import styles from "../../styles/onboarding/onboarding"
 import { router } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { space } from '@/theme'
 
 const onboarding = () => {
     let [fontsLoaded, fontsError] = useFonts({
@@ -13,6 +15,7 @@ const onboarding = () => {
         Nunito_400Regular,
         Nunito_700Bold
     });
+    const insets = useSafeAreaInsets();
     if (!fontsLoaded && !fontsError) {
         return <ActivityIndicator size="large" color="#0000ff" />;
     }
@@ -41,7 +44,8 @@ const onboarding = () => {
                     </Text>
 
                 </View>
-                <TouchableOpacity style={styles.buttonWrapper}
+                <TouchableOpacity
+                    style={[styles.buttonWrapper, { bottom: insets.bottom + space.lg }]}
                     onPress={() => router.push("/(routes)/welcome-intro")}>
                     <Text style={[styles.buttonText, { fontFamily: "Nunito_700Bold" }]} >
                         Get Started</Text>

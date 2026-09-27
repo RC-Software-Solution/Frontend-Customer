@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { color, radius, space, type } from "@/theme";
 
 const styles = StyleSheet.create({
     firstContainer: {
@@ -9,50 +9,41 @@ const styles = StyleSheet.create({
         marginTop: 40
     },
     logo: {
-        width: wp("23%"),
-        height: hp("10%"),
-    }, titleWrapper: {
-        marginTop: 30,
-        flexDirection: "row",
+        width: 96,
+        aspectRatio: 1,
+        resizeMode: 'contain',
     },
-    titleTextShape1: {
-        position: "absolute",
-        right: 10,
-        top: 100,
+    titleWrapper: {
+        marginTop: space.lg,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
+    titleTextShape1: { position: 'absolute', right: -8, top: -18, width: 40, height: 40, resizeMode: 'contain' },
     titleText: {
-        fontSize: hp("2.9%"),
+        fontSize: type.h2,
         textAlign: "center",
         color: "#ffffff"
     },
-    titleTextShape2: {
-        position: "absolute",
-        left: -20,
-        bottom: 20
-    },
-    titleTextShape3: {
-        position: "absolute",
-        left: -80
-    
-    }, dscpWrapper: {
+    titleTextShape2: { position: 'absolute', left: -8, bottom: -14, width: 36, height: 36, resizeMode: 'contain' },
+    titleTextShape3: { position: 'absolute', left: -4, top: -20, width: 28, height: 28, resizeMode: 'contain' },
+    dscpWrapper: {
         marginTop: 5
     }
     ,
     dscpText: {
-        fontSize: hp("1.7%"),
+        fontSize: type.caption,
         textAlign: "center",
         color: "#ffffff"
     },
     buttonWrapper: {
-        backgroundColor: "transparent", 
+        backgroundColor: "transparent",
         borderWidth: 3,             // Thick border
-        borderColor: "#69bf70",    // Button border color
-        overflow: "hidden",
-        width: wp("70%"),
-        paddingVertical: 18,
-        borderRadius: 50,
-        marginTop: 40,
-        height: hp("8%"),
+        borderColor: color.brand,    // Button border color
+        width: '80%',
+        maxWidth: 360,
+        paddingVertical: space.md,
+        minHeight: 56,
+        borderRadius: radius.pill,
         justifyContent: 'center',  // Centers vertically
         alignItems: 'center',
        position: "absolute",
@@ -61,22 +52,24 @@ const styles = StyleSheet.create({
     buttonText: {
         color: "#ffffff",
         textAlign: "center",
-        fontSize: hp("1.75%"),
-        
-
+        fontSize: type.body,
     },
     backgroundImage: {
         flex: 1,
          width: "100%",
-          height: "100%", 
-          alignItems: "center", 
+          height: "100%",
+          alignItems: "center",
         justifyContent: "center"
     },
-    overlay:{
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: "rgba(0,0,0,0.5)"
+    overlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
     }
-    
+
 
 })
 

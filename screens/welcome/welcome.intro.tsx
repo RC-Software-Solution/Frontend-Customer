@@ -9,7 +9,7 @@ import { onboardingSwiperData } from '@/constants/constants'
 import { commonStyles } from '@/styles/common/common.styles'
 import Styles from '@/styles/onboarding/onboarding'
 import { LinearGradient } from 'expo-linear-gradient'
-import { responsiveWidth,responsiveHeight } from "react-native-responsive-dimensions";
+import { space } from '@/theme'
 
 export default function WelcomeIntroScreen() {
   let [fontsLoaded, fontsError] = useFonts({
@@ -25,7 +25,7 @@ export default function WelcomeIntroScreen() {
   const renderItem = ({ item }: { item: onboardingSwiperDataType }) => (
 
    
-      <View style={{ marginTop: 90 }}>
+      <View style={{ marginTop: space.xl, paddingHorizontal: space.md }}>
         <Text style={[commonStyles.head, { fontFamily: "Raleway_700Bold" }]}>{item.head}</Text>
         <Image
           source={item.image}
