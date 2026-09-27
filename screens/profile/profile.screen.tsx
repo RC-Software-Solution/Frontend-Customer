@@ -5,10 +5,11 @@ import { useEffect, useState } from 'react';
 import { authService } from '@/services';
 import { User } from '@/services/types/api.types';
 import { router, useFocusEffect } from 'expo-router';
-import { useScreenPadding } from '@/components/ui/Screen';
+import { Screen } from '@/components/ui/Screen';
+import { AppButton } from '@/components/ui/AppButton';
+import { color, space, shadow } from '@/theme';
 
 const Profile = () => {
-    const padding = useScreenPadding({ tabBar: true, gutters: false });
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -72,11 +73,11 @@ const Profile = () => {
 
      const [modalVisible, setModalVisible] = useState(false);
     return (
-        <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
-            <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: 15 }}>
+        <Screen scroll tabBar>
+            <View style={{ alignItems: 'flex-start', marginHorizontal: 15 }}>
                 <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
             </View>
-            <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 }}>
+            <View style={{ alignItems: 'flex-start', marginHorizontal: 15 }}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#69bf70' }}>Profile</Text>
             </View>
             {loading ? (
@@ -117,114 +118,55 @@ const Profile = () => {
 
             {!loading && (
                 <>
-                    <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                        <Text style={styles.logoutButtonText}>Logout</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity style={styles.deleteButton} onPress={() => setModalVisible(true)}>
-                        <Text style={styles.deleteButtonText}>Delete Account</Text>
-                    </TouchableOpacity>
+                    <AppButton title="Logout" onPress={handleLogout} />
+                    <AppButton
+                        title="Delete Account"
+                        variant="danger"
+                        onPress={() => setModalVisible(true)}
+                        style={{ marginTop: space.md }}
+                    />
                 </>
             )}
-            <CancelModal 
-                visible={modalVisible} 
-                onClose={() => setModalVisible(false)} 
+            <CancelModal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
                 onConfirm={handleDeleteAccount}
                 title="Delete Account"
                 message="Are you sure you want to delete your account? This action cannot be undone."
                 confirmText="Yes, Delete"
                 cancelText="Cancel"
             />
-        </View>
+        </Screen>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fff' },
     header: { alignItems: 'center', marginVertical: 30 },
     profileImage: {
-        width: 125, height: 125, borderRadius: 60, marginBottom: 10, top: -12, // Move it slightly upwards
-        left: -5, position: "absolute",
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
     },
     name: { fontSize: 24, fontWeight: 'bold', color: '#4A4A4A', marginTop: 12 },
     role: { fontSize: 16, color: '#777' },
     fieldContainer: { marginBottom: 16 },
-    label: { fontSize: 14, color: '#oaoaoa', marginBottom: 7, marginHorizontal: 16, },
+    label: { fontSize: 14, color: color.muted, marginBottom: 7 },
     input: {
         backgroundColor: '#f0f0f0',
         padding: 17,
         borderRadius: 20,
         fontSize: 16,
         color: '#333',
-        marginHorizontal: 16
     },
     profileImageContainer: {
-        width: 109,  // Slightly larger than the image
-        height: 109, // Keep it circular
-        borderRadius: 55,
-        overflow: "visible",  // Keeps part of the image inside
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-
-        backgroundColor: '#69bf70',
-        elevation: 5,
-
-        // iOS Shadow
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.4,
-        shadowRadius: 4,
-        marginTop: 10,
-    },
-
-    // profileImage: {
-    //     width: 120,  // Slightly bigger than container
-    //     height: 120,
-    //     borderRadius: 60, // Make it larger than the container
-    //     position: "absolute",
-    //     top: -5, // Move it slightly upwards
-    //     left: -5, // Move it slightly left
-    // },
-    deleteButton: {
-        backgroundColor: 'black',
-        padding: 15,
-        borderRadius: 20,
+        width: 112,
+        height: 112,
+        borderRadius: 56,
+        overflow: 'hidden',
         alignItems: 'center',
-        marginTop: 20,
-        marginHorizontal: 16,
-        elevation: 5,
-
-        // iOS Shadow
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-
-
-        width: 200,
-        alignSelf: 'flex-end',
-    },
-    deleteButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold', },
-    logoutButton: {
-        backgroundColor: '#69bf70',
-        padding: 15,
-        borderRadius: 20,
-        alignItems: 'center',
-        marginTop: 20,
-        marginHorizontal: 16,
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        width: 200,
-        alignSelf: 'flex-end',
-    },
-    logoutButtonText: { 
-        color: '#fff', 
-        fontSize: 16, 
-        fontWeight: 'bold' 
+        justifyContent: 'center',
+        backgroundColor: color.brand,
+        ...shadow.card,
     },
     loadingContainer: {
         flex: 1,
