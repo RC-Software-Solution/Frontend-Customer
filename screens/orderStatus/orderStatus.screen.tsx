@@ -6,6 +6,8 @@ import { orderService, useAuth, menuService } from '@/services';
 import { Order } from '@/services/types/api.types';
 import { useFocusEffect } from 'expo-router';
 import { useScreenPadding } from '@/components/ui/Screen';
+import { Card } from '@/components/ui/Card';
+import { color, radius, space } from '@/theme';
 
 const OrderStatus: React.FC = () => {
   const padding = useScreenPadding({ tabBar: true, gutters: false });
@@ -146,7 +148,7 @@ const OrderStatus: React.FC = () => {
   };
 
   const renderItem = ({ item }: { item: Order }) => (
-    <View style={styles.card}>
+    <Card style={{ marginHorizontal: space.md }}>
       <View style={styles.cardContent}>
         <View style={styles.cardTextContent}>
           <Text style={styles.orderNumber}>Order ID - {item.order_id}</Text>
@@ -161,14 +163,14 @@ const OrderStatus: React.FC = () => {
         </View>
       </View>
       <View style={styles.actionsRow}>
-        <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: '#0A0A0F' }]} 
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: '#0A0A0F' }]}
           onPress={() => handleOpenEdit(item)}
         >
           <Text style={{ color: 'white', fontWeight: 'bold' }}>Edit</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: '#d9534f' }]} 
+        <TouchableOpacity
+          style={[styles.actionButton, { backgroundColor: '#d9534f' }]}
           onPress={() => {
             setSelectedOrderId(item.order_id);
             setModalVisible(true);
@@ -177,7 +179,7 @@ const OrderStatus: React.FC = () => {
           <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </Card>
   );
 
   return (
@@ -200,23 +202,14 @@ const OrderStatus: React.FC = () => {
           <Text style={styles.emptySubText}>Your current orders will appear here</Text>
         </View>
       ) : (
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginTop: 30,
-            borderRadius: 20,
-            marginBottom: 15,
-          }}
-        >
-          <FlatList
-            data={orders}
-            keyExtractor={(item) => item.order_id}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: padding.paddingBottom }}
-          />
-        </View>
+        <FlatList
+          style={{ flex: 1, marginTop: space.md }}
+          data={orders}
+          keyExtractor={(item) => item.order_id}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: padding.paddingBottom }}
+        />
       )}
       <CancelModal 
         visible={modalVisible} 
@@ -236,7 +229,7 @@ const OrderStatus: React.FC = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Edit Order</Text>
-            <ScrollView style={{ maxHeight: 300 }}>
+            <ScrollView style={{ flexShrink: 1 }}>
               {editItems.map((it) => (
                 <View key={it.food_item_id} style={styles.editItemRow}>
                   <Text style={styles.editItemText}>{it.name} ({it.meal_type})</Text>
@@ -252,7 +245,7 @@ const OrderStatus: React.FC = () => {
 
             {/* Add new items */}
             <Text style={[styles.modalSubtitle, { marginTop: 10 }]}>Add Items</Text>
-            <ScrollView style={{ maxHeight: 160 }}>
+            <ScrollView style={{ flexShrink: 1 }}>
               {availableSessionItems
                 .filter((c) => !editItems.some((e) => e.food_item_id === c.food_item_id))
                 .map((c) => (
@@ -280,21 +273,6 @@ const OrderStatus: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  card: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 20,
-    marginBottom: 10,
-   marginHorizontal:15,
-    elevation: 5,
-    
-    // iOS Shadow
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    marginTop: 10,
-  },
 
   cardContent: {
     flexDirection: 'row', // Align text and button in a row
@@ -309,37 +287,38 @@ const styles = StyleSheet.create({
 
   orderNumber: {
     fontSize: 18,
-   
     fontWeight: 'bold',
     marginBottom: 14,
     color: '#0A0A0F',
-    marginHorizontal: 10,
   },
   itemText: {
     fontSize: 15,
     color: '#0A0A0F',
-    marginHorizontal: 10,
   },
   totalPrice: {
     fontSize: 14,
     fontWeight: 'bold',
     marginTop: 14,
     color: '#69bf70',
-    marginHorizontal: 10,
   },
 
-  actionsRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 10, marginHorizontal: 10 },
+  actionsRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 10 },
   actionButton: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 12 },
   statusText: {
     fontSize: 14,
     fontWeight: 'bold',
     color: '#69bf70',
-    marginHorizontal: 10,
     marginBottom: 5,
   },
   // Modal styles
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
-  modalContainer: { backgroundColor: '#fff', width: '90%', borderRadius: 16, padding: 16 },
+  modalContainer: {
+    backgroundColor: color.surface,
+    width: '90%',
+    maxHeight: '85%',
+    borderRadius: radius.lg,
+    padding: space.md,
+  },
   modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#0A0A0F', marginBottom: 10 },
   modalSubtitle: { fontSize: 14, fontWeight: 'bold', color: '#0A0A0F', marginBottom: 6 },
   editItemRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderColor: '#eee' },
@@ -355,7 +334,6 @@ const styles = StyleSheet.create({
   mealTimeText: {
     fontSize: 14,
     color: '#666',
-    marginHorizontal: 10,
     marginBottom: 10,
   },
   loadingContainer: {
