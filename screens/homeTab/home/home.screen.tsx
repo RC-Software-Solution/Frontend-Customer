@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, Image, Animated, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Animated, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import RenderItem from '@/components/flatList/flatList';
@@ -9,6 +9,8 @@ import { RootState } from '@/store';
 import { menuService, useAuth } from '@/services';
 import { FoodItem } from '@/services/types/api.types';
 import { useScreenPadding } from '@/components/ui/Screen';
+import { AppText } from '@/components/ui/AppText';
+import { color, space, radius, shadow } from '@/theme';
 
 // Define types for menu categories
 type MealType = 'breakfast' | 'lunch' | 'dinner';
@@ -298,39 +300,46 @@ const HomeScreen = () => {
         <View
           style={{
             flexDirection: 'row',
-            justifyContent: 'center',
-            marginTop: 30,
-            marginHorizontal: 15,
-            backgroundColor: '#fff',
-            borderRadius: 20,
-            marginBottom: 15,
+            marginTop: space.lg,
+            marginHorizontal: space.md,
+            backgroundColor: color.surface,
+            borderRadius: radius.lg,
+            marginBottom: space.md,
+            padding: space.xs,
           }}
         >
           {(['breakfast', 'lunch', 'dinner'] as MealType[]).map((category) => (
             <TouchableOpacity
               key={category}
               style={{
-                paddingVertical: 18,
-                paddingHorizontal: 43,
-                backgroundColor: activeButton === category ? '#69bf70' : 'transparent',
-                borderRadius: 16,
+                flex: 1,
+                paddingVertical: space.md,
+                paddingHorizontal: space.sm,
+                backgroundColor: activeButton === category ? color.brand : 'transparent',
+                borderRadius: radius.md,
                 alignItems: 'center',
+                justifyContent: 'center',
               }}
               onPress={() => setActiveButton(category)}
             >
-              <Text style={{ color: activeButton === category ? 'white' : '#69bf70', fontWeight: 'bold' }}>
+              <AppText
+                variant="caption"
+                weight="bold"
+                numberOfLines={1}
+                tone={activeButton === category ? 'inverse' : 'brand'}
+              >
                 {category.charAt(0).toUpperCase() + category.slice(1)}
-              </Text>
-              {dateLabels[category] && (
-                <Text style={{ 
-                  color: activeButton === category ? 'white' : '#69bf70', 
-                  fontSize: 12, 
-                  marginTop: 2,
-                  opacity: 0.8 
-                }}>
+              </AppText>
+              {dateLabels[category] ? (
+                <AppText
+                  variant="micro"
+                  numberOfLines={1}
+                  tone={activeButton === category ? 'inverse' : 'brand'}
+                  style={{ marginTop: 2, opacity: 0.8 }}
+                >
                   {dateLabels[category]}
-                </Text>
-              )}
+                </AppText>
+              ) : null}
             </TouchableOpacity>
           ))}
         </View>
@@ -348,30 +357,24 @@ const HomeScreen = () => {
             style={{ width: '100%', height: 150, alignSelf: 'center', borderRadius: 10 }}
           />
         </TouchableOpacity>
-        <Animated.View style={{ height: isVegExpanded ? undefined : 0, overflow: 'hidden', marginHorizontal: 15 }}>
+        <Animated.View style={{ height: isVegExpanded ? undefined : 0, overflow: 'hidden', marginHorizontal: space.md }}>
           {isVegExpanded && (
             <View>
-              <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10, color: '#69bf70' }}>
+              <AppText variant="body" weight="bold" tone="brand" style={{ marginBottom: space.sm }}>
                 Vegetarian Items ({menuData[currentCategory].Veg.length})
-              </Text>
-              <FlatList
-                data={menuData[currentCategory].Veg}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => {
-                  console.log('🥬 Rendering veg item:', item);
-                  return (
-                    <RenderItem
-                      item={{
-                        name: item.name,
-                        description: item.description,
-                        price: parseFloat(item.price)
-                      }}
-                      onPressCheckbox={handleMealSelection}
-                      isChecked={selectedItems[item.name] || false}
-                    />
-                  );
-                }}
-              />
+              </AppText>
+              {menuData[currentCategory].Veg.map((item) => (
+                <RenderItem
+                  key={item.id}
+                  item={{
+                    name: item.name,
+                    description: item.description,
+                    price: parseFloat(item.price),
+                  }}
+                  onPressCheckbox={handleMealSelection}
+                  isChecked={selectedItems[item.name] || false}
+                />
+              ))}
             </View>
           )}
         </Animated.View>
@@ -384,30 +387,24 @@ const HomeScreen = () => {
             style={{ width: '100%', height: 150, alignSelf: 'center', borderRadius: 10 }}
           />
         </TouchableOpacity>
-        <Animated.View style={{ height: isNonVegExpanded ? undefined : 0, overflow: 'hidden', marginHorizontal: 16 }}>
+        <Animated.View style={{ height: isNonVegExpanded ? undefined : 0, overflow: 'hidden', marginHorizontal: space.md }}>
           {isNonVegExpanded && (
             <View>
-              <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10, color: '#69bf70' }}>
+              <AppText variant="body" weight="bold" tone="brand" style={{ marginBottom: space.sm }}>
                 Non-Vegetarian Items ({menuData[currentCategory].NonVeg.length})
-              </Text>
-              <FlatList
-                data={menuData[currentCategory].NonVeg}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => {
-                  console.log('🍖 Rendering non-veg item:', item);
-                  return (
-                    <RenderItem
-                      item={{
-                        name: item.name,
-                        description: item.description,
-                        price: parseFloat(item.price)
-                      }}
-                      onPressCheckbox={handleMealSelection}
-                      isChecked={selectedItems[item.name] || false}
-                    />
-                  );
-                }}
-              />
+              </AppText>
+              {menuData[currentCategory].NonVeg.map((item) => (
+                <RenderItem
+                  key={item.id}
+                  item={{
+                    name: item.name,
+                    description: item.description,
+                    price: parseFloat(item.price),
+                  }}
+                  onPressCheckbox={handleMealSelection}
+                  isChecked={selectedItems[item.name] || false}
+                />
+              ))}
             </View>
           )}
         </Animated.View>
@@ -417,42 +414,32 @@ const HomeScreen = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-      <FlatList 
-        data={[1]} 
-        keyExtractor={() => 'mainContent'} 
-        renderItem={renderContent}
+      <ScrollView
         contentContainerStyle={{ paddingBottom: padding.paddingBottom }}
-      />
+        showsVerticalScrollIndicator={false}
+      >
+        {renderContent()}
+      </ScrollView>
       <TouchableOpacity
         style={{
           position: 'absolute',
-          bottom: 150,
-          right: 20,
-          backgroundColor: '#69bf70',
-          padding: 20,
-          borderRadius: 50,
-          elevation: 5,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.3,
-          shadowRadius: 3.84,
-          justifyContent: 'center',
-          alignItems: 'center',
-          overflow: 'visible',
+          bottom: padding.paddingBottom + space.sm,
+          right: space.md,
+          backgroundColor: color.brand,
+          borderRadius: radius.pill,
           width: 60,
           height: 60,
+          justifyContent: 'center',
+          alignItems: 'center',
+          ...shadow.card,
         }}
         onPress={handleViewCart}
+        accessibilityRole="button"
+        accessibilityLabel="View cart"
       >
         <Image
           source={require('../../../assets/cart.png')}
-          style={{
-            width: 80,
-            height: 80,
-            resizeMode: 'contain',
-            top: -7,
-            left: 5,
-          }}
+          style={{ width: 30, height: 30, resizeMode: 'contain' }}
         />
       </TouchableOpacity>
     </GestureHandlerRootView>
@@ -460,26 +447,6 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  cartButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#69bf70',
-    padding: 15,
-    borderRadius: 50,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.84,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cartIcon: {
-    width: 30,
-    height: 30,
-    resizeMode: 'contain',
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
