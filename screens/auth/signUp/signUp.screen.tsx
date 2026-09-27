@@ -9,8 +9,10 @@ import { router } from 'expo-router'
 import { Field } from '@/components/ui/Field'
 import { AppButton } from '@/components/ui/AppButton'
 import { color, space, shadow } from '@/theme'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function signUpScreen() {
+    const insets = useSafeAreaInsets();
     const [isPasswordVisible, setPasswordVisible] = useState(false);
     const [buttonSpinner, setButtonSpinner] = useState(false);
     const [userInfo, setUserInfo] = useState({
@@ -67,7 +69,7 @@ export default function signUpScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
                 <ScrollView
-                    contentContainerStyle={{ flexGrow: 1, paddingBottom: space.xl }}
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + space.xl }}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >

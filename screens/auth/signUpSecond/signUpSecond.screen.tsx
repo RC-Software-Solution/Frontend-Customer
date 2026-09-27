@@ -10,7 +10,9 @@ import { getFcmToken } from "@/services/push/push.service";
 import { Field } from '@/components/ui/Field';
 import { AppButton } from '@/components/ui/AppButton';
 import { color, space, shadow } from '@/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function signUpSecondScreen() {
+    const insets = useSafeAreaInsets();
     const params = useLocalSearchParams(); // Retrieve user data from previous screen
 
     const [passwordInfo, setPasswordInfo] = useState({
@@ -74,7 +76,7 @@ export default function signUpSecondScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
                 <ScrollView
-                    contentContainerStyle={{ flexGrow: 1, paddingBottom: space.xl }}
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + space.xl }}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >

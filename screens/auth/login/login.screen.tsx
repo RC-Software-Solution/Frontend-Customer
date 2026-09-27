@@ -15,9 +15,11 @@ import { getFcmToken } from "@/services/push/push.service";
 import { Field } from '@/components/ui/Field';
 import { AppButton } from '@/components/ui/AppButton';
 import { color, space, shadow } from '@/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 export default function LoginScreen() {
+    const insets = useSafeAreaInsets();
     const [buttonSpinner, setButtonSpinner] = useState(false);
     const [userInfo, setUserInfo] = useState({
         email: "",
@@ -100,7 +102,7 @@ const handleSignIn = async () => {
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
                 <ScrollView
-                    contentContainerStyle={{ flexGrow: 1, paddingBottom: space.xl }}
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + space.xl }}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
