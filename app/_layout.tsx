@@ -6,11 +6,13 @@ import { Stack } from 'expo-router'
 import TabsLayout from './(tabs)/_layout'
 import { Provider } from 'react-redux'
 import { store } from '@/store'
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const  RootLayout = () => {
   const [isLoggedIn,setisLoggedIn] = useState(false);
-  
+
   return (
+    <SafeAreaProvider>
     <Provider store={store}>
     {isLoggedIn ? (
       <><TabsLayout />
@@ -23,12 +25,13 @@ const  RootLayout = () => {
           <Stack.Screen name="(routes)/sign-up/index" />
           <Stack.Screen name="(routes)/login/forgot-password" />
           <Stack.Screen name="(routes)/verifyAccount/index" />
-         
+
       </Stack>
-   
+
     )}
   </Provider>
-   
+  </SafeAreaProvider>
+
   );
 }
 
