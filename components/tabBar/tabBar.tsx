@@ -3,22 +3,29 @@ import { useTheme } from 'expo-router/react-navigation';
 import { BottomTabBarProps } from 'expo-router/js-tabs';
 import { useState, useEffect } from 'react';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { color, radius, shadow, space } from '@/theme';
+import { TAB_BAR_GAP } from '@/theme/layout';
 import TabBarButton from '../tabBarButton.tsx/tabBarButton';
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
-  const [dimensions, setDimensions] = useState({ height: 50, width: 300 });
-  const buttonWidth = dimensions.width / state.routes.length;
+  const [dimensions, setDimensions] = useState<{ height: number; width: number } | null>(null);
+  const buttonWidth = dimensions ? dimensions.width / state.routes.length : 0;
   const tabPositionX = useSharedValue(0);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
+    if (!dimensions) return;
     tabPositionX.value = withSpring(buttonWidth * state.index, { damping: 95, stiffness: 180 });
-  }, [state.index, buttonWidth]);
+  }, [state.index, buttonWidth, dimensions]);
 
   const onTabbarLayout = (e: LayoutChangeEvent) => {
-    setDimensions({
-      height: e.nativeEvent.layout.height,
-      width: e.nativeEvent.layout.width,
-    });
+    const { height, width } = e.nativeEvent.layout;
+    const first = dimensions === null;
+    setDimensions({ height, width });
+    if (first) {
+      tabPositionX.value = (width / state.routes.length) * state.index;
+    }
   };
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -28,20 +35,25 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { colors } = useTheme();
 
   return (
-    <View onLayout={onTabbarLayout} style={styles.tabbar}>
-      <Animated.View
-        style={[
-          animatedStyle,
-          {
-            position: 'absolute',
-            backgroundColor: '#69bf70',
-            width: buttonWidth - 25,
-            height: dimensions.height - 15,
-            marginHorizontal: 12.5,
-            borderRadius: 20,
-          },
-        ]}
-      />
+    <View
+      onLayout={onTabbarLayout}
+      style={[styles.tabbar, { bottom: insets.bottom + TAB_BAR_GAP }]}
+    >
+      {dimensions ? (
+        <Animated.View
+          style={[
+            animatedStyle,
+            {
+              position: 'absolute',
+              backgroundColor: color.brand,
+              width: buttonWidth - 25,
+              height: dimensions.height - 15,
+              marginHorizontal: 12.5,
+              borderRadius: radius.lg,
+            },
+          ]}
+        />
+      ) : null}
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const label = options.tabBarLabel ?? options.title ?? route.name;
@@ -74,19 +86,14 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 const styles = StyleSheet.create({
   tabbar: {
     position: 'absolute',
-    bottom: 30,
+    left: space.md,
+    right: space.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'white',
-    marginHorizontal: 15,
-    borderRadius: 20,
+    backgroundColor: color.surface,
+    borderRadius: radius.lg,
     paddingVertical: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowRadius: 10,
-    shadowOpacity: 0.1,
-    elevation: 10,
-    width: '90%',
+    ...shadow.bar,
   },
 });
