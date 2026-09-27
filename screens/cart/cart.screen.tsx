@@ -6,6 +6,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
 import { updateQuantity, removeItem, clearCart } from '@/store/cartSlice';
 import { orderService, authService } from '@/services';
+import { useScreenPadding } from '@/components/ui/Screen';
+import { AppButton } from '@/components/ui/AppButton';
+import { space } from '@/theme';
 
 // Helper function to normalize meal_type
 const normalizeMealType = (mealType: string): 'veg' | 'non-veg' | 'other' => {
@@ -16,6 +19,7 @@ const normalizeMealType = (mealType: string): 'veg' | 'non-veg' | 'other' => {
 };
 
 const CartScreen = () => {
+  const padding = useScreenPadding({ gutters: false });
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -145,8 +149,14 @@ const handleConfirmOrder = async () => {
   await attemptOrder();
 };
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+    <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
+      <TouchableOpacity
+        style={[styles.backButton, { top: padding.paddingTop }]}
+        onPress={() => navigation.goBack()}
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+      >
         <Ionicons name='arrow-back' size={28} color='#000' />
       </TouchableOpacity>
 
@@ -154,6 +164,7 @@ const handleConfirmOrder = async () => {
       <FlatList
         data={cartItems}
         keyExtractor={(item) => item.id}
+        contentContainerStyle={{ paddingBottom: space.md }}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
             <Image source={item.image} style={styles.image} />
@@ -187,16 +198,18 @@ const handleConfirmOrder = async () => {
         <Text style={styles.summaryText}>Parcel Quantity: {totalQuantity}</Text>
         <Text style={styles.summaryText}>Total: Rs. {totalAmount.toFixed(2)}</Text>
       </View>
-      <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmOrder}>
-        <Text style={styles.confirmText}>CONFIRM ORDER</Text>
-      </TouchableOpacity>
+      <AppButton
+        title="CONFIRM ORDER"
+        onPress={handleConfirmOrder}
+        style={{ marginHorizontal: space.md, marginBottom: padding.paddingBottom }}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  header: { fontSize: 22, fontWeight: 'bold', color: '#69bf70', textAlign: 'center', marginBottom: 30, marginTop: 60 },
+  header: { fontSize: 22, fontWeight: 'bold', color: '#69bf70', textAlign: 'center', marginBottom: 30, marginTop: 0 },
   itemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -233,19 +246,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   summaryText: { fontSize: 16, fontWeight: 'bold' },
-  confirmButton: {
-    backgroundColor: '#69bf70',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 50,
-    width: '90%',
-    alignSelf: 'center',
-    marginHorizontal: 16,
-  },
-  confirmText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  backButton: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
+  backButton: { position: 'absolute', left: 20, zIndex: 10 },
 });
 
 export default CartScreen;

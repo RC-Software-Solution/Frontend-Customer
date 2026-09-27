@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity } from 'react-native';
+import { AppText } from '@/components/ui/AppText';
+import { color, radius, space } from '@/theme';
 
 interface ModalProps {
   visible: boolean;
@@ -29,11 +31,11 @@ const CancelModal: React.FC<ModalProps> = ({
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose}>
-              <Text style={styles.buttonText}>{cancelText}</Text>
+              <AppText variant="body" weight="bold" tone="ink">{cancelText}</AppText>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={onConfirm}>
-              <Text style={styles.buttonText}>{confirmText}</Text>
+              <AppText variant="body" weight="bold" tone="inverse">{confirmText}</AppText>
             </TouchableOpacity>
           </View>
         </View>
@@ -73,20 +75,17 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    padding: 10,
-    marginHorizontal: 5,
-    borderRadius: 5,
+    paddingVertical: space.md,
+    marginHorizontal: space.xs,
+    borderRadius: radius.md,
     alignItems: 'center',
+    minHeight: 48,
   },
   cancelButton: {
-    backgroundColor: '#69bf70',
+    backgroundColor: color.field,
   },
   confirmButton: {
-    backgroundColor: '#ccc',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    backgroundColor: color.danger,
   },
 });
 
