@@ -326,6 +326,8 @@ const HomeScreen = () => {
                 variant="caption"
                 weight="bold"
                 numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.85}
                 tone={activeButton === category ? 'inverse' : 'brand'}
               >
                 {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -334,6 +336,8 @@ const HomeScreen = () => {
                 <AppText
                   variant="micro"
                   numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.85}
                   tone={activeButton === category ? 'inverse' : 'brand'}
                   style={{ marginTop: 2, opacity: 0.8 }}
                 >
