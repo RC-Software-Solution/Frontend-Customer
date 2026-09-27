@@ -1,4 +1,4 @@
-package com.anonymous.RC_Customer
+package com.company.rc.customer
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

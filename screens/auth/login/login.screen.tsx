@@ -11,6 +11,7 @@ import { commonStyles } from '@/styles/common/common.styles'
 import { router } from 'expo-router'
 import ForgotPassword from '@/app/(routes)/login/forgot-password'
 import { authService } from '@/services';
+import { getFcmToken } from "@/services/push/push.service";
 
 
 export default function LoginScreen() {
@@ -70,7 +71,7 @@ const handleSignIn = async () => {
     const response = await authService.login({
       email: userInfo.email,
       password: userInfo.password,
-      fcm_token: "", // optional
+      fcm_token: (await getFcmToken()) ?? "",
     });
 
     console.log("✅ Login successful:", response);

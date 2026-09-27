@@ -1,4 +1,4 @@
-package com.anonymous.RC_Customer
+package com.company.rc.customer
 
 import android.app.Application
 import android.content.res.Configuration

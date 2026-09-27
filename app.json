@@ -8,14 +8,16 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.company.rc.customer"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.RC_Customer"
+      "package": "com.company.rc.customer",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",

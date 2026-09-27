@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { commonStyles } from '@/styles/common/common.styles';
 import { router, useLocalSearchParams } from 'expo-router';
 import { authService } from '@/services';
+import { getFcmToken } from "@/services/push/push.service";
 export default function signUpSecondScreen() {
     const params = useLocalSearchParams(); // Retrieve user data from previous screen
 
@@ -48,7 +49,7 @@ export default function signUpSecondScreen() {
       role: 'customer', // default role
       address: params.location as string,
       phone: params.phone as string,
-      fcm_token: '', // if you don't have FCM yet
+      fcm_token: (await getFcmToken()) ?? "",
     });
 
     console.log("✅ Signup successful:", response);
