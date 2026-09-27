@@ -5,7 +5,7 @@ import { Order } from '@/services/types/api.types';
 import { useFocusEffect } from 'expo-router';
 import { useScreenPadding } from '@/components/ui/Screen';
 import { Card } from '@/components/ui/Card';
-import { space } from '@/theme';
+import { color, space, type } from '@/theme';
 
 const PendingPaymentsScreen = () => {
     const padding = useScreenPadding({ tabBar: true, gutters: false });
@@ -110,8 +110,8 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         flexShrink: 1,
     },
-    details: { fontSize: 14, color: '#oaoaoa' },
-    price: { fontSize: 14, color: '#oaoaoa', fontWeight: 'bold', paddingTop: 10 },
+    details: { fontSize: type.caption, color: color.muted },
+    price: { fontSize: type.caption, color: color.ink, fontWeight: 'bold', paddingTop: space.sm },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
