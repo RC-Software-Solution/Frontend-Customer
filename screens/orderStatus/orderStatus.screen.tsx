@@ -184,10 +184,10 @@ const OrderStatus: React.FC = () => {
 
   return (
     <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
-      <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: 15 }}>
+      <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: space.md }}>
         <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
       </View>
-      <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 }}>
+      <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: space.md }}>
         <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#69bf70' }}>My Orders</Text>
       </View>
       
@@ -232,7 +232,7 @@ const OrderStatus: React.FC = () => {
             <ScrollView style={{ flexShrink: 1 }}>
               {editItems.map((it) => (
                 <View key={it.food_item_id} style={styles.editItemRow}>
-                  <Text style={styles.editItemText}>{it.name} ({it.meal_type})</Text>
+                  <Text style={styles.editItemText} numberOfLines={1}>{it.name} ({it.meal_type})</Text>
                   <View style={styles.qtyControls}>
                     <TouchableOpacity style={styles.qtyBtn} onPress={() => decrementItem(it.food_item_id)}><Text>-</Text></TouchableOpacity>
                     <Text style={styles.qtyVal}>{it.quantity}</Text>
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#0A0A0F', marginBottom: 10 },
   modalSubtitle: { fontSize: 14, fontWeight: 'bold', color: '#0A0A0F', marginBottom: 6 },
   editItemRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderColor: '#eee' },
-  editItemText: { fontSize: 15, color: '#0A0A0F' },
+  editItemText: { fontSize: 15, color: '#0A0A0F', flex: 1, marginRight: space.sm },
   qtyControls: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   qtyBtn: { backgroundColor: '#eee', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
   qtyVal: { minWidth: 20, textAlign: 'center', fontWeight: 'bold' },

@@ -292,7 +292,7 @@ const HomeScreen = () => {
 
     return (
       <View>
-        <View style={{ alignItems: 'flex-start', marginTop: padding.paddingTop, marginHorizontal: 15 }}>
+        <View style={{ alignItems: 'flex-start', marginTop: padding.paddingTop, marginHorizontal: space.md }}>
           <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>
             RC Caterings
           </Text>
@@ -347,14 +347,14 @@ const HomeScreen = () => {
             </TouchableOpacity>
           ))}
         </View>
-        <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 }}>
+        <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: space.md }}>
           <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#0A0A0F' }}>
             Choose Your Preference
           </Text>
         </View>
         <TouchableOpacity
           onPress={() => toggleVeg(currentCategory)}
-          style={{ marginTop: 20, marginHorizontal: 15 }}
+          style={{ marginTop: 20, marginHorizontal: space.md }}
         >
           <Image
             source={require('../../../assets/vegBack.jpg')}
@@ -384,7 +384,7 @@ const HomeScreen = () => {
         </Animated.View>
         <TouchableOpacity
           onPress={() => toggleNonVeg(currentCategory)}
-          style={{ marginTop: 20, marginHorizontal: 15 }}
+          style={{ marginTop: 20, marginHorizontal: space.md }}
         >
           <Image
             source={require('../../../assets/nonVegBackground.jpeg')}

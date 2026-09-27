@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { color, radius, shadow, space } from '@/theme';
-import { TAB_BAR_GAP } from '@/theme/layout';
+import { TAB_BAR_GAP, TAB_BAR_HEIGHT } from '@/theme/layout';
 import TabBarButton from '../tabBarButton.tsx/tabBarButton';
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: color.surface,
     borderRadius: radius.lg,
-    paddingVertical: 15,
+    height: TAB_BAR_HEIGHT,
     ...shadow.bar,
   },
 });

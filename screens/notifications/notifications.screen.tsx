@@ -34,10 +34,10 @@ const Notification = () => {
 
     return (
         <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
-            <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: 15 }}>
+            <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: space.md }}>
                 <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
             </View>
-            <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 }}>
+            <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: space.md }}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#69bf70',marginBottom:20 }}>Notifications</Text>
             </View>
             <FlatList

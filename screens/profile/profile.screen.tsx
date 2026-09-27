@@ -77,7 +77,7 @@ const Profile = () => {
             <View style={{ alignItems: 'flex-start' }}>
                 <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
             </View>
-            <View style={{ alignItems: 'flex-start' }}>
+            <View style={{ alignItems: 'flex-start', marginTop: 20 }}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#69bf70' }}>Profile</Text>
             </View>
             {loading ? (

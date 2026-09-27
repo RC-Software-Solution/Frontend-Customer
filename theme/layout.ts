@@ -1,5 +1,6 @@
-// Height of the floating tab bar's own box: paddingVertical 15*2 = 30,
-// icon 25, gap 8, label ~13.
+// Declared height of the floating tab bar's own box. `tabBar.tsx` sets its
+// `height` to this constant directly, so the two cannot drift; screens use
+// it (via useScreenPadding) to reserve clearance above the bar.
 //
 // ponytail: a constant, not a measured value. The bar is fixed-layout, so a
 // constant is honest and costs nothing to replace. If the bar ever becomes

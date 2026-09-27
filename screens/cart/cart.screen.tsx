@@ -195,8 +195,8 @@ const handleConfirmOrder = async () => {
       />
       
       <View style={styles.summary}>
-        <Text style={styles.summaryText}>Parcel Quantity: {totalQuantity}</Text>
-        <Text style={styles.summaryText}>Total: Rs. {totalAmount.toFixed(2)}</Text>
+        <Text style={styles.summaryText} numberOfLines={1}>Parcel Quantity: {totalQuantity}</Text>
+        <Text style={styles.summaryText} numberOfLines={1}>Total: Rs. {totalAmount.toFixed(2)}</Text>
       </View>
       <AppButton
         title="CONFIRM ORDER"
@@ -239,13 +239,13 @@ const styles = StyleSheet.create({
   summary: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 20,
+    padding: space.md,
     borderTopWidth: 1,
     borderColor: '#ddd',
     marginTop: 10,
     marginHorizontal: 16,
   },
-  summaryText: { fontSize: 16, fontWeight: 'bold' },
+  summaryText: { fontSize: 16, fontWeight: 'bold', flexShrink: 1 },
   backButton: { position: 'absolute', left: 20, zIndex: 10 },
 });
 

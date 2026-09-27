@@ -61,13 +61,13 @@ const PendingPaymentsScreen = () => {
 
     return (
         <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
-            <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: 15 }}>
+            <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: space.md }}>
                 <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
             </View>
-             <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 }}>
+             <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: space.md }}>
                     <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#69bf70' }}>Pending Payments</Text>
                   </View>
-                  <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 ,}}>
+                  <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: space.md }}>
                     <Text style={{ fontSize: 14, color: '#666', marginBottom: 25 }}>
                     If you have two unpaid orders, you won't be able to place new ones. Clear payments to continue.
                     </Text>
