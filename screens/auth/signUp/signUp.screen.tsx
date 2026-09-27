@@ -1,11 +1,14 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native'
 import React from 'react'
 import { Entypo, FontAwesome, Ionicons } from '@expo/vector-icons'
 import { useState, } from 'react'
-import { ScrollView, TextInput } from 'react-native-gesture-handler'
+import { ScrollView } from 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { commonStyles } from '@/styles/common/common.styles'
 import { router } from 'expo-router'
+import { Field } from '@/components/ui/Field'
+import { AppButton } from '@/components/ui/AppButton'
+import { color, space, shadow } from '@/theme'
 
 export default function signUpScreen() {
     const [isPasswordVisible, setPasswordVisible] = useState(false);
@@ -59,7 +62,15 @@ export default function signUpScreen() {
 
     return (
         <GestureHandlerRootView style={styles.container}>
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            >
+                <ScrollView
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: space.xl }}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
 
                 {/* Top background Image  */}
                 <Image source={require('../../../assets/signinback.jpg')} style={styles.signInImage} />
@@ -68,61 +79,43 @@ export default function signUpScreen() {
                 <View style={styles.formContainer}>
                     <Text style={styles.title}>Sign Up</Text>
 
-                    <TextInput style={commonStyles.input} placeholder="Full Name" value={userInfo.name} placeholderTextColor="#888" onChangeText={(text) => setUserInfo({ ...userInfo, name: text })} />
-                    {Error.nameError ? (
-                        <View style={[commonStyles.errorContainer, { marginTop: -10 }]}>
-                            <Entypo name="cross" size={24} color="red"  /> 
-                            <Text style={styles.errorText}> 
-                                {Error.nameError}
-                            </Text>
-                        </View>
-                    ) : null}
+                    <Field
+                        label="Full Name"
+                        placeholder="Full Name"
+                        value={userInfo.name}
+                        onChangeText={(text) => setUserInfo({ ...userInfo, name: text })}
+                        error={Error.nameError || undefined}
+                    />
 
-                    <TextInput style={[commonStyles.input, { marginTop: 30 }]} placeholder="Email" placeholderTextColor="#888" keyboardType='email-address' value={userInfo.email} onChangeText={(text) => setUserInfo({ ...userInfo, email: text })} />
-                    {Error.emailError ? (
-                        <View style={[commonStyles.errorContainer, { marginTop: -10 }]}>
-                            <Entypo name="cross" size={24} color="red" /> 
-                            <Text style={styles.errorText}>
-                                {Error.emailError}
-                            </Text>
-                        </View>
-                    ) : null}
+                    <Field
+                        label="Email"
+                        placeholder="Email"
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        value={userInfo.email}
+                        onChangeText={(text) => setUserInfo({ ...userInfo, email: text })}
+                        error={Error.emailError || undefined}
+                    />
 
-                    <TextInput style={[commonStyles.input, { marginTop: 30 }]} placeholder="Phone Number" placeholderTextColor="#888" keyboardType='numeric' maxLength={10} value={userInfo.phone} onChangeText={(text) => setUserInfo({ ...userInfo, phone: text })} />
-                    {Error.phoneError ? (
-                        <View style={[commonStyles.errorContainer, { marginTop: -10 }]}>
-                              <Entypo name="cross" size={24} color="red" /> 
-                            <Text style={styles.errorText}>
-                              {Error.phoneError}
-                            </Text>
-                        </View>
-                    ) : null}
+                    <Field
+                        label="Phone Number"
+                        placeholder="Phone Number"
+                        keyboardType="numeric"
+                        maxLength={10}
+                        value={userInfo.phone}
+                        onChangeText={(text) => setUserInfo({ ...userInfo, phone: text })}
+                        error={Error.phoneError || undefined}
+                    />
 
-                    <TextInput style={[commonStyles.input, { marginTop: 30 }]} placeholder="Location" placeholderTextColor="#888" value={userInfo.location} onChangeText={(text) => setUserInfo({ ...userInfo, location: text })} />
-                    {Error.locationError ? (
-                        <View style={[commonStyles.errorContainer, { marginTop: -10 }]}>
-                             <Entypo name="cross" size={24} color="red" />
-                            <Text style={styles.errorText}>
-                                {Error.locationError}
-                            </Text>
-                        </View>
-                    ) : null}
+                    <Field
+                        label="Location"
+                        placeholder="Location"
+                        value={userInfo.location}
+                        onChangeText={(text) => setUserInfo({ ...userInfo, location: text })}
+                        error={Error.locationError || undefined}
+                    />
 
-                    <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-                        {buttonSpinner ? (
-                            <ActivityIndicator size="small" color="white" />
-                        ) : (
-                            <Text
-                                style={{
-                                    color: "white",
-                                    textAlign: "center",
-                                    fontSize: 16,
-                                    fontFamily: "Raleway_700Bold",
-                                }}>
-                                Next
-                            </Text>
-                        )}
-                    </TouchableOpacity>
+                    <AppButton title="Next" onPress={handleNext} loading={buttonSpinner} />
 
                     <TouchableOpacity>
                                             <View style={styles.signUpRedirect}>
@@ -140,7 +133,8 @@ export default function signUpScreen() {
                                         </TouchableOpacity>
                     
                 </View>
-            </ScrollView>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </GestureHandlerRootView>
     );
 }
@@ -150,29 +144,15 @@ const styles = StyleSheet.create({
     signInImage: { width: "100%", height: 250, resizeMode: "cover" },
     formContainer:
     {
-        backgroundColor: "white",
-        flex: 1,
-        padding: 20,
+        backgroundColor: color.surface,
+        padding: space.lg,
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40,
-        shadowColor: "#000",
         marginTop: -40,
-        shadowOpacity: 0.2,
-        shadowRadius: 10,
-        elevation: 5.
+        ...shadow.card,
     },
     title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
-    input: { backgroundColor: "#f2f2f2", borderRadius: 8, padding: 12, marginBottom: 10, fontSize: 16 },
     errorText: { color: "red", fontSize: 14, marginTop: -1, },
-    nextButton: {
-        padding: 15,
-        borderRadius: 50,
-        marginTop: 30,
-        backgroundColor: "#69bf70",
-        alignItems: "center",
-        justifyContent: "center",
-        marginHorizontal: 16,
-    },
     buttonText: { color: "white", fontSize: 16, fontWeight: "bold" },
      signUpRedirect: {
         flexDirection: "row",

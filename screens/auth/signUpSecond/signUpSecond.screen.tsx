@@ -1,12 +1,15 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState } from 'react';
 import { Entypo, FontAwesome,Ionicons } from '@expo/vector-icons';
-import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { commonStyles } from '@/styles/common/common.styles';
 import { router, useLocalSearchParams } from 'expo-router';
 import { authService } from '@/services';
 import { getFcmToken } from "@/services/push/push.service";
+import { Field } from '@/components/ui/Field';
+import { AppButton } from '@/components/ui/AppButton';
+import { color, space, shadow } from '@/theme';
 export default function signUpSecondScreen() {
     const params = useLocalSearchParams(); // Retrieve user data from previous screen
 
@@ -15,7 +18,6 @@ export default function signUpSecondScreen() {
         confirmPassword: ""
     });
 
-    const [isPasswordVisible, setPasswordVisible] = useState(false);
     const [buttonSpinner, setButtonSpinner] = useState(false);
     const [Error, setError] = useState({ passwordError: "", confirmPasswordError: "" });
 
@@ -67,7 +69,15 @@ export default function signUpSecondScreen() {
 
     return (
         <GestureHandlerRootView style={styles.container}>
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            >
+                <ScrollView
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: space.xl }}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
 
                 {/* Top background Image  */}
                 <Image source={require('../../../assets/signinback.jpg')} style={styles.signInImage} />
@@ -76,62 +86,34 @@ export default function signUpSecondScreen() {
                 <View style={styles.formContainer}>
                     <Text style={styles.title}>Create a Password</Text>
 
-                    {/* Password Input */}
-                    
-                        <TextInput
-                            style={commonStyles.input}
-                            placeholder="Password"
-                            placeholderTextColor="#888"
-                            secureTextEntry={!isPasswordVisible}
-                            value={passwordInfo.password}
-                            onChangeText={(text) => setPasswordInfo({ ...passwordInfo, password: text })}
-                        />
-                        <TouchableOpacity onPress={() => setPasswordVisible(!isPasswordVisible)} style={[styles.eyeIcon,{top: 82}]}>
-                            {isPasswordVisible ? (
-                                <Ionicons name="eye-outline" size={23} color="black" />) :
-                                (<Ionicons name="eye-off-outline" size={23} color="black" />)}
-                        </TouchableOpacity>
-                    
-                    {Error.passwordError ? (
-                        <View style={commonStyles.errorContainer}>
-                            <Entypo name="cross" size={24} color="red" />
-                            <Text style={styles.errorText}>{Error.passwordError}</Text>
-                        </View>
-                    ) : null}
+                    <Field
+                        label="Password"
+                        secure
+                        placeholder="Password"
+                        value={passwordInfo.password}
+                        onChangeText={(text) => setPasswordInfo({ ...passwordInfo, password: text })}
+                        error={Error.passwordError || undefined}
+                    />
 
-                    {/* Confirm Password Input */}
-                    
-                        <TextInput
-                            style={commonStyles.input}
-                            placeholder="Confirm Password"
-                            placeholderTextColor="#888"
-                            secureTextEntry={!isPasswordVisible}
-                            value={passwordInfo.confirmPassword}
-                            onChangeText={(text) => setPasswordInfo({ ...passwordInfo, confirmPassword: text })}
-                        />
-                        <TouchableOpacity onPress={() => setPasswordVisible(!isPasswordVisible)} style={[styles.eyeIcon,{top: 152}]}>
-                            {isPasswordVisible ? (
-                                <Ionicons name="eye-outline" size={23} color="black" />) :
-                                (<Ionicons name="eye-off-outline" size={23} color="black" />)}
-                        </TouchableOpacity>
-                   
-                    {Error.confirmPasswordError ? (
-                        <View style={commonStyles.errorContainer}>
-                            <Entypo name="cross" size={24} color="red" />
-                            <Text style={styles.errorText}>{Error.confirmPasswordError}</Text>
-                        </View>
-                    ) : null}
+                    <Field
+                        label="Confirm Password"
+                        secure
+                        placeholder="Confirm Password"
+                        value={passwordInfo.confirmPassword}
+                        onChangeText={(text) =>
+                            setPasswordInfo({ ...passwordInfo, confirmPassword: text })
+                        }
+                        error={Error.confirmPasswordError || undefined}
+                    />
 
-                    {/* Next Button */}
-                    <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-                        {buttonSpinner ? (
-                            <ActivityIndicator size="small" color="white" />
-                        ) : (
-                            <Text style={styles.buttonText}>Complete SignUp</Text>
-                        )}
-                    </TouchableOpacity>
+                    <AppButton
+                        title="Complete SignUp"
+                        onPress={handleNext}
+                        loading={buttonSpinner}
+                    />
                 </View>
-            </ScrollView>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </GestureHandlerRootView>
     );
 }
@@ -140,29 +122,13 @@ const styles = StyleSheet.create({
     container: { flex: 1 },
     signInImage: { width: "100%", height: 250, resizeMode: "cover" },
     formContainer: {
-        backgroundColor: "white",
-        flex: 1,
-        padding: 20,
+        backgroundColor: color.surface,
+        padding: space.lg,
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40,
-        shadowColor: "#000",
         marginTop: -40,
-        shadowOpacity: 0.2,
-        shadowRadius: 10,
-        elevation: 5,
+        ...shadow.card,
     },
     title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
     errorText: { color: "red", fontSize: 14, marginTop: -1 },
-    passwordContainer: { flexDirection: "row", alignItems: "center" },
-    eyeIcon: { right: 15, position: "absolute", marginRight: 40 },
-    nextButton: {
-        padding: 15,
-        borderRadius: 50,
-        marginTop: 30,
-        backgroundColor: "#69bf70",
-        alignItems: "center",
-        justifyContent: "center",
-        marginHorizontal: 16,
-    },
-    buttonText: { color: "white", fontSize: 16, fontWeight: "bold" },
 });
