@@ -88,8 +88,10 @@ const Profile = () => {
             ) : (
                 <>
                     <View style={styles.header}>
-                        <View style={styles.profileImageContainer}>
-                            <Image source={require('../../assets/propic.png')} style={styles.profileImage} />
+                        <View style={styles.profileImageShadow}>
+                            <View style={styles.profileImageContainer}>
+                                <Image source={require('../../assets/propic.png')} style={styles.profileImage} />
+                            </View>
                         </View>
                         <Text style={styles.name}>{user?.full_name || "Unknown User"}</Text>
                     </View>
@@ -158,6 +160,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
     },
+    profileImageShadow: {
+        width: 112,
+        height: 112,
+        borderRadius: 56,
+        backgroundColor: color.brand,
+        ...shadow.card,
+    },
     profileImageContainer: {
         width: 112,
         height: 112,
@@ -165,8 +174,6 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: color.brand,
-        ...shadow.card,
     },
     loadingContainer: {
         flex: 1,
