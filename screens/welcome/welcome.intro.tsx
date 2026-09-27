@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image,TouchableOpacity } from 'react-native'
+import { View, Text, Image } from 'react-native'
 import React from 'react'
 import { Nunito_400Regular, Nunito_600SemiBold } from '@expo-google-fonts/nunito'
 import { useFonts, Raleway_700Bold } from "@expo-google-fonts/raleway"
@@ -7,9 +7,8 @@ import AppIntroSlider from 'react-native-app-intro-slider'
 import { router } from 'expo-router'
 import { onboardingSwiperData } from '@/constants/constants'
 import { commonStyles } from '@/styles/common/common.styles'
-import Styles from '@/styles/onboarding/onboarding'
-import { LinearGradient } from 'expo-linear-gradient'
 import { space } from '@/theme'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function WelcomeIntroScreen() {
   let [fontsLoaded, fontsError] = useFonts({
@@ -17,6 +16,7 @@ export default function WelcomeIntroScreen() {
     Nunito_400Regular,
     Nunito_600SemiBold
   });
+  const insets = useSafeAreaInsets();
 
   if (!fontsLoaded && !fontsError) {
     return <ActivityIndicator size="large" color="#0000ff" />;
@@ -24,8 +24,8 @@ export default function WelcomeIntroScreen() {
 
   const renderItem = ({ item }: { item: onboardingSwiperDataType }) => (
 
-   
-      <View style={{ marginTop: space.xl, paddingHorizontal: space.md }}>
+
+      <View style={{ marginTop: insets.top + space.md, paddingHorizontal: space.md }}>
         <Text style={[commonStyles.head, { fontFamily: "Raleway_700Bold" }]}>{item.head}</Text>
         <Image
           source={item.image}
