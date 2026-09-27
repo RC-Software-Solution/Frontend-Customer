@@ -1,21 +1,23 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native'
 import React from 'react'
 import { Entypo, FontAwesome, Fontisto, Ionicons, SimpleLineIcons } from '@expo/vector-icons'
 import { useFonts, Raleway_700Bold, Raleway_600SemiBold } from "@expo-google-fonts/raleway"
 import { Nunito_400Regular, Nunito_700Bold, Nunito_500Medium, Nunito_600SemiBold } from "@expo-google-fonts/nunito"
 import { useState, } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
-import { ScrollView, TextInput } from 'react-native-gesture-handler'
+import { ScrollView } from 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { commonStyles } from '@/styles/common/common.styles'
 import { router } from 'expo-router'
 import ForgotPassword from '@/app/(routes)/login/forgot-password'
 import { authService } from '@/services';
 import { getFcmToken } from "@/services/push/push.service";
+import { Field } from '@/components/ui/Field';
+import { AppButton } from '@/components/ui/AppButton';
+import { color, space, shadow } from '@/theme';
 
 
 export default function LoginScreen() {
-    const [isPasswordVisible, setPasswordVisible] = useState(false);
     const [buttonSpinner, setButtonSpinner] = useState(false);
     const [userInfo, setUserInfo] = useState({
         email: "",
@@ -93,7 +95,15 @@ const handleSignIn = async () => {
 
     return (
         <GestureHandlerRootView style={styles.container}>
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            >
+                <ScrollView
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: space.xl }}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
 
                 {/* Top background Image  */}
                 <Image source={require('../../../assets/signinback.jpg')} style={styles.signInImage} />
@@ -103,57 +113,24 @@ const handleSignIn = async () => {
 
                     <Text style={[styles.title, { fontFamily: "Raleway_700Bold" }]}>Sign In</Text>
 
-                    <View>
-                        <TextInput
-                            style={commonStyles.input}
-                            keyboardType='email-address'
-                            placeholder="example@gmail.com"
-                            placeholderTextColor="#888"
-                            value={userInfo.email}
-                            onChangeText={(text) => setUserInfo({ ...userInfo, email: text })}
-                        />
-                    </View >
-                    <View >
-                        {required && (
-                            <View style={commonStyles.errorContainer}>
-                                <Entypo name="cross" size={24} color="red" />
-                                <Text style={{ color: "red", fontSize: 14, marginTop: -1 }}>
-                                    {Error.passwordError}
-                                </Text>
-                            </View>
+                    <Field
+                        label="Email"
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        placeholder="example@gmail.com"
+                        value={userInfo.email}
+                        onChangeText={(text) => setUserInfo({ ...userInfo, email: text })}
+                        error={required && !userInfo.email ? 'Email is required' : undefined}
+                    />
 
-                        )}
-                    </View>
-                    <View style={{ marginTop: 30 }}>
-
-                      <TextInput
-  style={commonStyles.input}
-  placeholder="Password"
-  placeholderTextColor="#888"
-  secureTextEntry={!isPasswordVisible}
-  value={userInfo.password}
-  onChangeText={(text) => setUserInfo({ ...userInfo, password: text })}
-/>
-
-                        <TouchableOpacity
-                            style={styles.visibleIcon}
-                            onPress={() => setPasswordVisible(!isPasswordVisible)}>
-                            {isPasswordVisible ? (
-                                <Ionicons name="eye-off-outline" size={23} color="black" />) :
-                                (<Ionicons name="eye-outline" size={23} color="black" />)}
-                        </TouchableOpacity>
-                    </View>
-                    <View>
-                        {Error.passwordError && (
-                            <View style={commonStyles.errorContainer}>
-                                <Entypo name="cross" size={24} color="red" />
-                                <Text style={{ color: "red", fontSize: 14, marginTop: -1 }}>
-                                    {Error.passwordError}
-                                </Text>
-                            </View>
-                        )}
-
-                    </View>
+                    <Field
+                        label="Password"
+                        secure
+                        placeholder="Password"
+                        value={userInfo.password}
+                        onChangeText={(text) => setUserInfo({ ...userInfo, password: text })}
+                        error={Error.passwordError || undefined}
+                    />
                     <View>
                         <TouchableOpacity onPress={() => router.push("/(routes)/login/forgot-password")}>
                             <Text
@@ -168,26 +145,7 @@ const handleSignIn = async () => {
 
 
                     <View>
-
-                       <TouchableOpacity
-  style={styles.signUpButton}
-  onPress={handleSignIn}
->
-                            {buttonSpinner ? (
-                                <ActivityIndicator size="small" color="white" />
-                            ) : (
-                                <Text
-                                    style={{
-                                        color: "white",
-                                        textAlign: "center",
-                                        fontSize: 16,
-                                        fontFamily: "Raleway_700Bold",
-                                    }}>
-                                    Sign In
-                                </Text>
-                            )}
-
-                        </TouchableOpacity>
+                        <AppButton title="Sign In" onPress={handleSignIn} loading={buttonSpinner} />
                     </View>
                     <View style={{flexDirection:"row",justifyContent:"center",alignItems:"center",marginTop:20,gap:10}}>
                             <TouchableOpacity onPress={() => router.push("https://www.tiktok.com/@kauz64?_t=ZS-8tu51eNKGXp&_r=1")}>
@@ -213,7 +171,8 @@ const handleSignIn = async () => {
                     </TouchableOpacity>
 
                 </View>
-            </ScrollView>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </GestureHandlerRootView>
     );
 }
@@ -231,16 +190,12 @@ const styles = StyleSheet.create({
         resizeMode: "cover",
     },
     formContainer: {
-        backgroundColor: "white",
-        flex: 1,
-        padding: 20,
+        backgroundColor: color.surface,
+        padding: space.lg,
         marginTop: -40,
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40,
-        shadowColor: "#000",
-        shadowOpacity: 0.2,
-        shadowRadius: 10,
-        elevation: 5,
+        ...shadow.card,
     },
     title: {
         fontSize: 24,
@@ -248,28 +203,10 @@ const styles = StyleSheet.create({
         textAlign: "center",
         marginBottom: 20,
     },
-    
-    
-    visibleIcon: {
-        position: "absolute",
-        right: 30,
-        top: "40%",
-        transform: [{ translateY: -12 }], // Centers icon properly
-    },
     forgotSection: {
         textAlign: "right",
         fontSize: 16,
         marginTop: 10,
-        marginHorizontal: 16,
-
-    },
-    signUpButton: {
-        padding: 15,
-        borderRadius: 50,
-        marginTop: 30,
-        backgroundColor: "#69bf70",
-        alignItems: "center",
-        justifyContent: "center",
         marginHorizontal: 16,
 
     },
