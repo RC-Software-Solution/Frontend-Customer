@@ -5,8 +5,10 @@ import CancelModal from '@/components/popupmodel/popupModel';
 import { orderService, useAuth, menuService } from '@/services';
 import { Order } from '@/services/types/api.types';
 import { useFocusEffect } from 'expo-router';
+import { useScreenPadding } from '@/components/ui/Screen';
 
 const OrderStatus: React.FC = () => {
+  const padding = useScreenPadding({ tabBar: true, gutters: false });
   const { user, isAuthenticated } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -179,8 +181,8 @@ const OrderStatus: React.FC = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={{ alignItems: 'flex-start', marginTop: 70, marginHorizontal: 15 }}>
+    <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
+      <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: 15 }}>
         <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
       </View>
       <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 }}>
@@ -212,6 +214,7 @@ const OrderStatus: React.FC = () => {
             keyExtractor={(item) => item.order_id}
             renderItem={renderItem}
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: padding.paddingBottom }}
           />
         </View>
       )}

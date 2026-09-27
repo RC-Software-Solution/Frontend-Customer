@@ -8,6 +8,7 @@ import { addToCart } from '@/store/cartSlice';
 import { RootState } from '@/store';
 import { menuService, useAuth } from '@/services';
 import { FoodItem } from '@/services/types/api.types';
+import { useScreenPadding } from '@/components/ui/Screen';
 
 // Define types for menu categories
 type MealType = 'breakfast' | 'lunch' | 'dinner';
@@ -63,6 +64,7 @@ const HomeScreen = () => {
     dinner: '',
   });
 
+  const padding = useScreenPadding({ tabBar: true, gutters: false });
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
 
@@ -288,7 +290,7 @@ const HomeScreen = () => {
 
     return (
       <View>
-        <View style={{ alignItems: 'flex-start', marginTop: 70, marginHorizontal: 15 }}>
+        <View style={{ alignItems: 'flex-start', marginTop: padding.paddingTop, marginHorizontal: 15 }}>
           <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>
             RC Caterings
           </Text>
@@ -419,7 +421,7 @@ const HomeScreen = () => {
         data={[1]} 
         keyExtractor={() => 'mainContent'} 
         renderItem={renderContent}
-        contentContainerStyle={{ paddingBottom: 160 }}
+        contentContainerStyle={{ paddingBottom: padding.paddingBottom }}
       />
       <TouchableOpacity
         style={{

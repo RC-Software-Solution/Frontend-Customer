@@ -3,8 +3,10 @@ import { View, Text, FlatList, StyleSheet, Image, ActivityIndicator, Alert } fro
 import { orderService, useAuth } from '@/services';
 import { Order } from '@/services/types/api.types';
 import { useFocusEffect } from 'expo-router';
+import { useScreenPadding } from '@/components/ui/Screen';
 
 const PendingPaymentsScreen = () => {
+    const padding = useScreenPadding({ tabBar: true, gutters: false });
     const { isAuthenticated, user } = useAuth();
     const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
@@ -56,8 +58,8 @@ const PendingPaymentsScreen = () => {
     );
 
     return (
-        <View style={styles.container}>
-            <View style={{ alignItems: 'flex-start', marginTop: 70, marginHorizontal: 15 }}>
+        <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
+            <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: 15 }}>
                 <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
             </View>
              <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 }}>
@@ -83,7 +85,7 @@ const PendingPaymentsScreen = () => {
                     data={pendingOrders}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.order_id}
-                    contentContainerStyle={styles.list}
+                    contentContainerStyle={{ paddingBottom: padding.paddingBottom }}
                 />
             )}
         </View>

@@ -1,5 +1,6 @@
 import { View, Text ,FlatList, StyleSheet, Image } from 'react-native'
 import React from 'react'
+import { useScreenPadding } from '@/components/ui/Screen';
 
 interface Notification {
     id: string;
@@ -13,6 +14,7 @@ const notifications: Notification[] = [
 ];
 
 const Notification = () => {
+    const padding = useScreenPadding({ tabBar: true, gutters: false });
     const renderItem = ({ item }: { item: Notification }) => (
         <View style={styles.card}>
             <Image source={require('../../assets/bell.png')} style={styles.icon} />
@@ -24,8 +26,8 @@ const Notification = () => {
     );
 
     return (
-        <View style={styles.container}>
-            <View style={{ alignItems: 'flex-start', marginTop: 70, marginHorizontal: 15 }}>
+        <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
+            <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: 15 }}>
                 <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
             </View>
             <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 }}>
@@ -35,7 +37,7 @@ const Notification = () => {
                 data={notifications}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.list}
+                contentContainerStyle={{ paddingBottom: padding.paddingBottom }}
             />
         </View>
     );

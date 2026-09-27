@@ -5,8 +5,10 @@ import { useEffect, useState } from 'react';
 import { authService } from '@/services';
 import { User } from '@/services/types/api.types';
 import { router, useFocusEffect } from 'expo-router';
+import { useScreenPadding } from '@/components/ui/Screen';
 
 const Profile = () => {
+    const padding = useScreenPadding({ tabBar: true, gutters: false });
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -70,8 +72,8 @@ const Profile = () => {
 
      const [modalVisible, setModalVisible] = useState(false);
     return (
-        <View style={styles.container}>
-            <View style={{ alignItems: 'flex-start', marginTop: 70, marginHorizontal: 15 }}>
+        <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
+            <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: 15 }}>
                 <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
             </View>
             <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: 15 }}>
