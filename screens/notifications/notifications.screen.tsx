@@ -1,6 +1,9 @@
 import { View, Text ,FlatList, StyleSheet, Image } from 'react-native'
 import React from 'react'
 import { useScreenPadding } from '@/components/ui/Screen';
+import { Card } from '@/components/ui/Card';
+import { AppText } from '@/components/ui/AppText';
+import { space } from '@/theme';
 
 interface Notification {
     id: string;
@@ -16,13 +19,17 @@ const notifications: Notification[] = [
 const Notification = () => {
     const padding = useScreenPadding({ tabBar: true, gutters: false });
     const renderItem = ({ item }: { item: Notification }) => (
-        <View style={styles.card}>
+        <Card style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: space.md }}>
             <Image source={require('../../assets/bell.png')} style={styles.icon} />
-            <View>
-                <Text style={styles.message}>{item.message}</Text>
-                <Text style={styles.date}>{item.date}</Text>
+            <View style={{ flex: 1 }}>
+                <AppText variant="body" weight="bold" style={{ marginBottom: space.xs }}>
+                    {item.message}
+                </AppText>
+                <AppText variant="caption" tone="muted">
+                    {item.date}
+                </AppText>
             </View>
-        </View>
+        </Card>
     );
 
     return (
@@ -45,25 +52,7 @@ const Notification = () => {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#fff' },
-    list: { paddingBottom: 20 },
-    card: {
-        flexDirection: 'row',
-        backgroundColor: '#fff',
-        padding: 15,
-        borderRadius: 20,
-        alignItems: 'center',
-        marginBottom: 10,
-        marginHorizontal: 15,
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        marginTop: 10,
-    },
-    icon: { width: 60, height: 60, marginRight: 20 },
-    message: { fontSize: 16, fontWeight: 'bold', color: '#333', paddingBottom: 5 },
-    date: { fontSize: 14, color: '#666' },
+    icon: { width: 44, height: 44, marginRight: space.md },
 });
 
 

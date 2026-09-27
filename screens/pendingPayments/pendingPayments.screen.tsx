@@ -4,6 +4,8 @@ import { orderService, useAuth } from '@/services';
 import { Order } from '@/services/types/api.types';
 import { useFocusEffect } from 'expo-router';
 import { useScreenPadding } from '@/components/ui/Screen';
+import { Card } from '@/components/ui/Card';
+import { space } from '@/theme';
 
 const PendingPaymentsScreen = () => {
     const padding = useScreenPadding({ tabBar: true, gutters: false });
@@ -43,7 +45,7 @@ const PendingPaymentsScreen = () => {
     );
 
     const renderItem = ({ item }: { item: Order }) => (
-        <View style={styles.card}>
+        <Card style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: space.md }}>
             <Image source={require('../../assets/pendPay.png')} style={styles.icon} />
             <View style={styles.orderDetails}>
                 <Text style={styles.orderId} numberOfLines={1} ellipsizeMode="tail">
@@ -54,7 +56,7 @@ const PendingPaymentsScreen = () => {
                 </Text>
                 <Text style={styles.price}>Price: Rs. {item.total_price.toFixed(2)}</Text>
             </View>
-        </View>
+        </Card>
     );
 
     return (
@@ -96,25 +98,7 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#fff' },
     title: { fontSize: 20, fontWeight: 'bold', marginBottom: 5 },
     description: { fontSize: 14, color: '#666', marginBottom: 15 },
-    list: { paddingBottom: 20 },
-    card: {
-        flexDirection: 'row',
-        backgroundColor: '#fff',
-        padding: 15,
-        borderRadius: 20,
-        alignItems: 'center',
-        marginBottom: 10,
-        marginHorizontal: 15,
-        elevation: 5,
-        borderColor: '#oaoaoa',
-        // iOS Shadow
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        marginTop: 10,
-    },
-    icon: { width: 90, height: 90, marginRight: 15, marginLeft: 15 },
+    icon: { width: 56, height: 56, marginRight: space.md },
     orderDetails: {
         flex: 1,
         marginRight: 10,
