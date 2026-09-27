@@ -96,8 +96,6 @@ const PendingPaymentsScreen = () => {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#fff' },
-    title: { fontSize: 20, fontWeight: 'bold', marginBottom: 5 },
-    description: { fontSize: 14, color: '#666', marginBottom: 15 },
     icon: { width: 56, height: 56, marginRight: space.md },
     orderDetails: {
         flex: 1,
