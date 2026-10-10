@@ -2,14 +2,15 @@ import { View, Text, TextInput, StyleSheet, Image, Alert, ActivityIndicator } fr
 import React from 'react'
 import CancelModal from '@/components/popupmodel/popupModel';
 import { useEffect, useState } from 'react';
-import { authService } from '@/services';
+import { authService, useAuth } from '@/services';
 import { User } from '@/services/types/api.types';
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { Screen } from '@/components/ui/Screen';
 import { AppButton } from '@/components/ui/AppButton';
 import { color, space, shadow } from '@/theme';
 
 const Profile = () => {
+    const { logout, deleteAccount } = useAuth();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -31,8 +32,6 @@ const Profile = () => {
             setUser(currentUser);
         } catch (error) {
             console.error('Failed to load user:', error);
-            // If user is not authenticated, redirect to login
-            router.replace('/(routes)/login');
         } finally {
             setLoading(false);
         }
@@ -40,20 +39,9 @@ const Profile = () => {
 
     const handleDeleteAccount = async () => {
         try {
-            await authService.deleteAccount();
-            Alert.alert(
-                'Account Deleted',
-                'Your account has been successfully deleted.',
-                [
-                    {
-                        text: 'OK',
-                        onPress: () => {
-                            setModalVisible(false);
-                            router.replace('/(routes)/login');
-                        }
-                    }
-                ]
-            );
+            // Route guard sends us to login once the session is cleared
+            await deleteAccount();
+            Alert.alert('Account Deleted', 'Your account has been successfully deleted.');
         } catch (error) {
             console.error('Failed to delete account:', error);
             Alert.alert('Error', 'Failed to delete account. Please try again.');
@@ -62,8 +50,7 @@ const Profile = () => {
 
     const handleLogout = async () => {
         try {
-            await authService.logout();
-            router.replace('/(routes)/login');
+            await logout();
         } catch (error) {
             console.error('Failed to logout:', error);
             Alert.alert('Error', 'Failed to logout. Please try again.');

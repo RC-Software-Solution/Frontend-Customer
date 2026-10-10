@@ -43,6 +43,7 @@ export const API_CONFIG = {
     ACCESS_TOKEN: 'access_token',
     REFRESH_TOKEN: 'refresh_token',
     USER_DATA: 'user_data',
+    INTRO_SEEN: 'has_seen_intro',
   },
 } as const;
 

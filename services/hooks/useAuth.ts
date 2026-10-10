@@ -1,91 +1,109 @@
 /**
- * Authentication Hook
- * Custom hook for managing authentication state
+ * Authentication state
+ * One shared AuthProvider at the app root; useAuth() reads it from anywhere.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../types/api.types';
-import { authService } from '../index';
+import { authService } from '../instances';
+import { setAuthExpiredHandler } from '../clients/base-api.client';
+import { API_CONFIG } from '../config/api.config';
 
-export const useAuth = () => {
+type LoginCredentials = { email: string; password: string; fcm_token?: string };
+
+type AuthContextValue = {
+  user: User | null;
+  isAuthenticated: boolean;
+  /** true only while the saved session is being restored on app launch */
+  loading: boolean;
+  hasSeenIntro: boolean;
+  login: (credentials: LoginCredentials) => Promise<Awaited<ReturnType<typeof authService.login>>>;
+  logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+  markIntroSeen: () => Promise<void>;
+};
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasSeenIntro, setHasSeenIntro] = useState(false);
 
-  const loadUser = useCallback(async () => {
-    try {
-      setLoading(true);
-      const currentUser = await authService.getCurrentUser();
-      const authenticated = await authService.isAuthenticated();
-      
-      setUser(currentUser);
-      setIsAuthenticated(authenticated);
-    } catch (error) {
-      console.error('Failed to load user:', error);
-      setUser(null);
-      setIsAuthenticated(false);
-    } finally {
-      setLoading(false);
-    }
+  const reset = useCallback(() => {
+    setUser(null);
+    setIsAuthenticated(false);
   }, []);
 
-  const login = useCallback(async (credentials: { email: string; password: string; fcm_token?: string }) => {
+  const refreshUser = useCallback(async () => {
     try {
-      setLoading(true);
-      const response = await authService.login(credentials);
-      setUser(response.user);
-      setIsAuthenticated(true);
-      return response;
+      let ok = await authService.isAuthenticated();
+      // Access token expired but a refresh token is saved: try to renew silently
+      if (!ok && (await authService.getRefreshToken())) {
+        ok = await authService.refreshAccessToken();
+      }
+      setIsAuthenticated(ok);
+      setUser(ok ? await authService.getCurrentUser() : null);
     } catch (error) {
-      setUser(null);
-      setIsAuthenticated(false);
-      throw error;
-    } finally {
-      setLoading(false);
+      console.error('Failed to restore session:', error);
+      reset();
     }
+  }, [reset]);
+
+  // Restore session + intro flag on app launch
+  useEffect(() => {
+    (async () => {
+      const seen = await AsyncStorage.getItem(API_CONFIG.STORAGE_KEYS.INTRO_SEEN).catch(() => null);
+      setHasSeenIntro(seen === 'true');
+      await refreshUser();
+      setLoading(false);
+    })();
+  }, [refreshUser]);
+
+  const login = useCallback(async (credentials: LoginCredentials) => {
+    const response = await authService.login(credentials);
+    setUser(response.user);
+    setIsAuthenticated(true);
+    return response;
   }, []);
 
   const logout = useCallback(async () => {
     try {
-      setLoading(true);
       await authService.logout();
-      setUser(null);
-      setIsAuthenticated(false);
-    } catch (error) {
-      console.error('Logout failed:', error);
-      // Still clear local state even if API call fails
-      setUser(null);
-      setIsAuthenticated(false);
     } finally {
-      setLoading(false);
+      reset(); // clear local state even if the API call fails
     }
+  }, [reset]);
+
+  const deleteAccount = useCallback(async () => {
+    await authService.deleteAccount();
+    reset();
+  }, [reset]);
+
+  const markIntroSeen = useCallback(async () => {
+    setHasSeenIntro(true);
+    await AsyncStorage.setItem(API_CONFIG.STORAGE_KEYS.INTRO_SEEN, 'true').catch(() => {});
   }, []);
 
-  const refreshUser = useCallback(async () => {
-    await loadUser();
-  }, [loadUser]);
-
+  // API client calls this when the server rejects our token (401)
   useEffect(() => {
-    loadUser();
-  }, [loadUser]);
+    setAuthExpiredHandler(logout);
+    return () => setAuthExpiredHandler(null);
+  }, [logout]);
 
-  return {
-    user,
-    isAuthenticated,
-    loading,
-    login,
-    logout,
-    refreshUser,
-  };
+  const value = useMemo(
+    () => ({ user, isAuthenticated, loading, hasSeenIntro, login, logout, deleteAccount, refreshUser, markIntroSeen }),
+    [user, isAuthenticated, loading, hasSeenIntro, login, logout, deleteAccount, refreshUser, markIntroSeen],
+  );
+
+  return createElement(AuthContext.Provider, { value }, children);
 };
 
-
-
-
-
-
-
-
-
-
-
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
+  return ctx;
+};

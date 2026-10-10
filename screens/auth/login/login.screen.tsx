@@ -5,7 +5,7 @@ import { useState, } from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { router } from 'expo-router'
-import { authService } from '@/services';
+import { useAuth } from '@/services';
 import { getFcmToken } from "@/services/push/push.service";
 import { Field } from '@/components/ui/Field';
 import { AppButton } from '@/components/ui/AppButton';
@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
     const insets = useSafeAreaInsets();
+    const { login } = useAuth();
     const [buttonSpinner, setButtonSpinner] = useState(false);
     const [userInfo, setUserInfo] = useState({
         email: "",
@@ -67,16 +68,12 @@ const handleSignIn = async () => {
   }
 
   try {
-    const response = await authService.login({
+    // On success the route guard in app/_layout.tsx moves us into the app
+    await login({
       email: userInfo.email,
       password: userInfo.password,
       fcm_token: (await getFcmToken()) ?? "",
     });
-
-    console.log("✅ Login successful:", response);
-
-    // 👉 Navigate to main app
-    router.push("/(tabs)");
 
   } catch (error: any) {
     console.log("❌ Login error:", error);

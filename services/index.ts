@@ -26,17 +26,10 @@ export { OrderService } from './order/order.service';
 export { MenuService } from './menu/menu.service';
 
 // Export hooks
-export { useAuth } from './hooks/useAuth';
-
-// Create singleton instances for easy use
-import { AuthenticationService } from './auth/authentication.service';
-import { OrderService } from './order/order.service';
-import { MenuService } from './menu/menu.service';
+export { useAuth, AuthProvider } from './hooks/useAuth';
 
 // Singleton instances
-export const authService = new AuthenticationService();
-export const orderService = new OrderService();
-export const menuService = new MenuService();
+export { authService, orderService, menuService } from './instances';
 
 // Legacy API client for backward compatibility
 import axios from 'axios';

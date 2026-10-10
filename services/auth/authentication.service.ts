@@ -61,15 +61,13 @@ export class AuthenticationService {
    */
   async logout(): Promise<void> {
     try {
-      // Call logout API if user is authenticated
+      // Revoke the refresh token on the server (needs a valid access token)
       if (await this.isAuthenticated()) {
         await this.userApiClient.logout();
       }
     } catch (error) {
-      console.error('Logout API call failed:', error);
-      // Continue with local logout even if API call fails
+      console.warn('Server logout failed, clearing local session anyway');
     } finally {
-      // Clear local session regardless of API call result
       await this.clearUserSession();
     }
   }
@@ -132,8 +130,12 @@ export class AuthenticationService {
 
       const response = await this.userApiClient.refreshToken({ refresh_token: refreshToken });
       
-      // Save new tokens
-      await TokenUtils.saveTokens(response.access_token, response.refresh_token);
+      // Backend currently returns only a new access token; keep the existing refresh token
+      if (response.refresh_token) {
+        await TokenUtils.saveTokens(response.access_token, response.refresh_token);
+      } else {
+        await TokenUtils.saveAccessToken(response.access_token);
+      }
       
       return true;
     } catch (error) {
@@ -200,7 +202,9 @@ export class AuthenticationService {
    */
   async deleteAccount(): Promise<void> {
     try {
-      await this.userApiClient.deleteAccount();
+      const user = await this.getCurrentUser();
+      if (!user) throw new Error('Not signed in');
+      await this.userApiClient.deleteAccount(user.id);
       await this.clearUserSession();
     } catch (error) {
       console.error('Account deletion failed:', error);

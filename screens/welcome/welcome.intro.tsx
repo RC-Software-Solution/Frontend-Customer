@@ -8,6 +8,7 @@ import { router } from 'expo-router'
 import { onboardingSwiperData } from '@/constants/constants'
 import { commonStyles } from '@/styles/common/common.styles'
 import { space } from '@/theme'
+import { useAuth } from '@/services'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function WelcomeIntroScreen() {
@@ -17,6 +18,7 @@ export default function WelcomeIntroScreen() {
     Nunito_600SemiBold
   });
   const insets = useSafeAreaInsets();
+  const { markIntroSeen } = useAuth();
 
   if (!fontsLoaded && !fontsError) {
     return <ActivityIndicator size="large" color="#0000ff" />;
@@ -45,11 +47,11 @@ export default function WelcomeIntroScreen() {
       renderItem={renderItem}
       data={onboardingSwiperData}
       onDone={() => {
-        console.log("Done button pressehhhhd");
+        markIntroSeen();
         router.push("/sign-up")
       }}
       onSkip={() => {
-        console.log("Done button pressellllld");
+        markIntroSeen();
         router.push("/sign-up")
       }}
       renderNextButton={() => (

@@ -9,6 +9,12 @@ import { TokenUtils } from '../utils/token.utils';
 import { ErrorUtils } from '../utils/error.utils';
 import { ApiResponse, ApiError } from '../types/api.types';
 
+// AuthProvider registers this so a 401 from any client logs the user out of the UI
+let onAuthExpired: (() => void) | null = null;
+export const setAuthExpiredHandler = (handler: (() => void) | null) => {
+  onAuthExpired = handler;
+};
+
 export class BaseApiClient {
   protected client: AxiosInstance;
   protected serviceName: ServiceName;
@@ -89,7 +95,7 @@ export class BaseApiClient {
         if (ErrorUtils.isAuthError(error)) {
           console.log(`🔐 [${this.serviceName}] Authentication error, clearing tokens`);
           await TokenUtils.clearTokens();
-          // You might want to redirect to login here
+          onAuthExpired?.();
         }
 
         return Promise.reject(apiError);

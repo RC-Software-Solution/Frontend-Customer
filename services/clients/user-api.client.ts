@@ -99,8 +99,8 @@ export class UserApiClient extends BaseApiClient {
   /**
    * Delete user account
    */
-  async deleteAccount(): Promise<{ message: string }> {
-    const response = await this.delete<{ message: string }>('/users/account');
+  async deleteAccount(userId: string | number): Promise<{ message: string }> {
+    const response = await this.put<{ message: string }>(`/users/delete/${userId}`);
     return response.data;
   }
 
