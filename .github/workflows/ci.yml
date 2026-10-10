@@ -15,6 +15,5 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci --legacy-peer-deps
-      # ponytail: tsc is not gated yet, the repo has ~20 older type errors (mostly services/examples).
-      # Add `npx tsc --noEmit` here once they're fixed.
+      - run: npx tsc --noEmit
       - run: npm test -- --ci

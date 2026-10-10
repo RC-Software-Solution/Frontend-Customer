@@ -16,7 +16,7 @@ import {
   GetFoodItemsRequest,
   GetMealSessionsRequest,
   FoodItemsResponse,
-  MealSessionsResponse,
+  ApiResponse,
   InventoryDecrementRequest,
   InventoryIncrementRequest
 } from '../types/api.types';
@@ -81,7 +81,7 @@ export class MenuApiClient extends BaseApiClient {
   /**
    * Get all meal sessions
    */
-  async getMealSessions(params: GetMealSessionsRequest = {}): Promise<MealSessionsResponse> {
+  async getMealSessions(params: GetMealSessionsRequest = {}): Promise<ApiResponse<any>> {
     const queryParams = new URLSearchParams();
     
     if (params.page) queryParams.append('page', params.page.toString());

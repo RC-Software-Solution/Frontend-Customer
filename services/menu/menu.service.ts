@@ -17,7 +17,7 @@ import {
   GetFoodItemsRequest,
   GetMealSessionsRequest,
   FoodItemsResponse,
-  MealSessionsResponse,
+  ApiResponse,
   InventoryDecrementRequest,
   InventoryIncrementRequest
 } from '../types/api.types';
@@ -271,7 +271,7 @@ export class MenuService {
   /**
    * Get all meal sessions
    */
-  async getMealSessions(params: GetMealSessionsRequest = {}): Promise<MealSessionsResponse> {
+  async getMealSessions(params: GetMealSessionsRequest = {}): Promise<ApiResponse<any>> {
     try {
       const response = await this.menuApiClient.getMealSessions(params);
       return response;
