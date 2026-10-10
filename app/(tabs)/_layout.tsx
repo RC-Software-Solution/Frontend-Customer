@@ -42,15 +42,20 @@ import React from 'react'
 import { Tabs } from 'expo-router'
 import { Image } from 'react-native'
 import { TabBar } from '@/components/tabBar/tabBar'
+import { StatusBar } from 'expo-status-bar'
 
 export default function TabsLayout() {
   return (
-    <Tabs tabBar={props => <TabBar {...props} />}>  
+    <>
+    {/* Tab screens are light, so the clock/battery icons must be dark */}
+    <StatusBar style="dark" />
+    <Tabs tabBar={props => <TabBar {...props} />}>
     <Tabs.Screen name="index" options={{ title: 'Home', headerShown: false }} />
     <Tabs.Screen name="order-status/index" options={{ title: 'Orders', headerShown: false  }} />
     <Tabs.Screen name="pending-payments/index" options={{ title: 'Payments', headerShown: false  }} />
     <Tabs.Screen name="notification/index" options={{ title: 'Notifications', headerShown: false  }} />
     <Tabs.Screen name="profile/index" options={{ title: 'Profile', headerShown: false  }} />
 </Tabs>
+    </>
   )
 }

@@ -24,6 +24,21 @@ export function useScreenPadding({ tabBar = false, gutters = true }: PaddingOpts
   };
 }
 
+/**
+ * Opaque strip over the status-bar area. The status bar is transparent
+ * (edge-to-edge), so without this, scrolled content shows through behind the
+ * clock and icons.
+ */
+export function StatusBarScrim({ background }: { background: string }) {
+  const { top } = useSafeAreaInsets();
+  return (
+    <View
+      pointerEvents="none"
+      style={{ position: 'absolute', top: 0, left: 0, right: 0, height: top, backgroundColor: background, zIndex: 10 }}
+    />
+  );
+}
+
 type ScreenProps = PaddingOpts & {
   scroll?: boolean;
   background?: string;
@@ -43,14 +58,17 @@ export function Screen({
 
   if (scroll) {
     return (
-      <ScrollView
-        style={{ flex: 1, backgroundColor: background }}
-        contentContainerStyle={[{ flexGrow: 1, ...padding }, style]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        {children}
-      </ScrollView>
+      <View style={{ flex: 1, backgroundColor: background }}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={[{ flexGrow: 1, ...padding }, style]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {children}
+        </ScrollView>
+        <StatusBarScrim background={background} />
+      </View>
     );
   }
 

@@ -8,9 +8,11 @@ import { addToCart } from '@/store/cartSlice';
 import { RootState } from '@/store';
 import { menuService, useAuth } from '@/services';
 import { FoodItem } from '@/services/types/api.types';
-import { useScreenPadding } from '@/components/ui/Screen';
+import { useScreenPadding, StatusBarScrim } from '@/components/ui/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { color, space, radius, shadow } from '@/theme';
+
+const CART_FAB_SIZE = 60;
 
 // Define types for menu categories
 type MealType = 'breakfast' | 'lunch' | 'dinner';
@@ -418,12 +420,14 @@ const HomeScreen = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+      {/* Extra bottom room (FAB height + gap) so the last row can scroll clear of the cart button */}
       <ScrollView
-        contentContainerStyle={{ paddingBottom: padding.paddingBottom }}
+        contentContainerStyle={{ paddingBottom: padding.paddingBottom + CART_FAB_SIZE + space.lg }}
         showsVerticalScrollIndicator={false}
       >
         {renderContent()}
       </ScrollView>
+      <StatusBarScrim background="#f5f5f5" />
       <TouchableOpacity
         style={{
           position: 'absolute',
@@ -431,8 +435,8 @@ const HomeScreen = () => {
           right: space.md,
           backgroundColor: color.brand,
           borderRadius: radius.pill,
-          width: 60,
-          height: 60,
+          width: CART_FAB_SIZE,
+          height: CART_FAB_SIZE,
           justifyContent: 'center',
           alignItems: 'center',
           ...shadow.card,
