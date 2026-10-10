@@ -37,7 +37,7 @@ export interface User extends BaseEntity {
   email: string;
   phone: string;
   address: string;
-  role: 'customer' | 'admin' | 'delivery';
+  role: 'customer' | 'admin' | 'super_admin' | 'delivery_person';
   is_verified: boolean;
   fcm_token?: string;
 }

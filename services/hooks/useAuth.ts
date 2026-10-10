@@ -72,6 +72,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = useCallback(async (credentials: LoginCredentials) => {
     const response = await authService.login(credentials);
+    // Authorization: this is the customer app. Staff accounts are valid logins but not for here.
+    if (response.user.role !== 'customer') {
+      await authService.logout();
+      throw new Error('This app is for customers only. Please use the staff app for this account.');
+    }
     setUser(response.user);
     setIsAuthenticated(true);
     setSessionExpired(false);
