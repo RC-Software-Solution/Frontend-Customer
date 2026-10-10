@@ -61,8 +61,8 @@ export class AuthenticationService {
    */
   async logout(): Promise<void> {
     try {
-      // Revoke the refresh token on the server (needs a valid access token)
-      if (await this.isAuthenticated()) {
+      // Revoke the refresh token on the server (an expired access token is renewed by the API client)
+      if (await TokenUtils.getRefreshToken()) {
         await this.userApiClient.logout();
       }
     } catch (error) {
@@ -123,25 +123,13 @@ export class AuthenticationService {
    */
   async refreshAccessToken(): Promise<boolean> {
     try {
-      const refreshToken = await TokenUtils.getRefreshToken();
-      if (!refreshToken) {
-        return false;
-      }
-
-      const response = await this.userApiClient.refreshToken({ refresh_token: refreshToken });
-      
-      // Backend currently returns only a new access token; keep the existing refresh token
-      if (response.refresh_token) {
-        await TokenUtils.saveTokens(response.access_token, response.refresh_token);
-      } else {
-        await TokenUtils.saveAccessToken(response.access_token);
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Token refresh failed:', error);
-      // Clear session if refresh fails
+      if (await TokenUtils.refresh()) return true;
+      // Server rejected the refresh token (expired/revoked): the session is over
       await this.clearUserSession();
+      return false;
+    } catch (error) {
+      // Network error: keep the stored session, we just couldn't reach the server
+      console.warn('Token refresh failed (network?)');
       return false;
     }
   }

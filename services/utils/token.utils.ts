@@ -1,12 +1,19 @@
 /**
  * Token Utilities
- * Helper functions for JWT token management
+ * JWT helpers + token storage (encrypted via the OS Keychain/Keystore)
  */
 
+import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_CONFIG } from '../config/api.config';
 
+const { ACCESS_TOKEN, REFRESH_TOKEN } = API_CONFIG.STORAGE_KEYS;
+
 export class TokenUtils {
+  /** In-flight refresh, shared so parallel 401s trigger only one renewal */
+  private static refreshing: Promise<string | null> | null = null;
+
   /**
    * Check if a JWT token is expired
    */
@@ -22,7 +29,7 @@ export class TokenUtils {
           })
           .join('')
       );
-      
+
       const decoded = JSON.parse(jsonPayload);
       const now = Date.now() / 1000;
       return decoded.exp < now;
@@ -32,52 +39,45 @@ export class TokenUtils {
     }
   }
 
-  /**
-   * Get access token from storage
-   */
-  static async getAccessToken(): Promise<string | null> {
+  /** Read from SecureStore; on first run move a token saved by older versions out of AsyncStorage */
+  private static async read(key: string): Promise<string | null> {
     try {
-      return await AsyncStorage.getItem(API_CONFIG.STORAGE_KEYS.ACCESS_TOKEN);
+      const value = await SecureStore.getItemAsync(key);
+      if (value) return value;
+      const legacy = await AsyncStorage.getItem(key);
+      if (legacy) {
+        await SecureStore.setItemAsync(key, legacy);
+        await AsyncStorage.removeItem(key);
+      }
+      return legacy;
     } catch (error) {
-      console.error('Error getting access token:', error);
+      console.error(`Error reading ${key}:`, error);
       return null;
     }
   }
 
-  /**
-   * Get refresh token from storage
-   */
-  static async getRefreshToken(): Promise<string | null> {
+  private static async remove(key: string): Promise<void> {
     try {
-      return await AsyncStorage.getItem(API_CONFIG.STORAGE_KEYS.REFRESH_TOKEN);
+      await Promise.all([SecureStore.deleteItemAsync(key), AsyncStorage.removeItem(key)]);
     } catch (error) {
-      console.error('Error getting refresh token:', error);
-      return null;
+      console.error(`Error removing ${key}:`, error);
     }
   }
 
-  /**
-   * Save access token to storage
-   */
-  static async saveAccessToken(token: string): Promise<void> {
-    try {
-      await AsyncStorage.setItem(API_CONFIG.STORAGE_KEYS.ACCESS_TOKEN, token);
-    } catch (error) {
-      console.error('Error saving access token:', error);
-      throw error;
-    }
+  static getAccessToken(): Promise<string | null> {
+    return this.read(ACCESS_TOKEN);
   }
 
-  /**
-   * Save refresh token to storage
-   */
-  static async saveRefreshToken(token: string): Promise<void> {
-    try {
-      await AsyncStorage.setItem(API_CONFIG.STORAGE_KEYS.REFRESH_TOKEN, token);
-    } catch (error) {
-      console.error('Error saving refresh token:', error);
-      throw error;
-    }
+  static getRefreshToken(): Promise<string | null> {
+    return this.read(REFRESH_TOKEN);
+  }
+
+  static saveAccessToken(token: string): Promise<void> {
+    return SecureStore.setItemAsync(ACCESS_TOKEN, token);
+  }
+
+  static saveRefreshToken(token: string): Promise<void> {
+    return SecureStore.setItemAsync(REFRESH_TOKEN, token);
   }
 
   /**
@@ -95,40 +95,49 @@ export class TokenUtils {
     }
   }
 
-  /**
-   * Remove access token from storage
-   */
-  static async removeAccessToken(): Promise<void> {
-    try {
-      await AsyncStorage.removeItem(API_CONFIG.STORAGE_KEYS.ACCESS_TOKEN);
-    } catch (error) {
-      console.error('Error removing access token:', error);
-    }
+  static removeAccessToken(): Promise<void> {
+    return this.remove(ACCESS_TOKEN);
   }
 
-  /**
-   * Remove refresh token from storage
-   */
-  static async removeRefreshToken(): Promise<void> {
-    try {
-      await AsyncStorage.removeItem(API_CONFIG.STORAGE_KEYS.REFRESH_TOKEN);
-    } catch (error) {
-      console.error('Error removing refresh token:', error);
-    }
+  static removeRefreshToken(): Promise<void> {
+    return this.remove(REFRESH_TOKEN);
   }
 
   /**
    * Remove all tokens from storage
    */
   static async clearTokens(): Promise<void> {
-    try {
-      await Promise.all([
-        this.removeAccessToken(),
-        this.removeRefreshToken(),
-      ]);
-    } catch (error) {
-      console.error('Error clearing tokens:', error);
-    }
+    await Promise.all([this.removeAccessToken(), this.removeRefreshToken()]);
+  }
+
+  /**
+   * Exchange the refresh token for a new access token.
+   * Resolves to the new token, or null if the server rejected the refresh token.
+   * Throws on network errors, so callers can keep the session while offline.
+   */
+  static refresh(): Promise<string | null> {
+    this.refreshing ??= (async () => {
+      try {
+        const refreshToken = await this.getRefreshToken();
+        if (!refreshToken) return null;
+
+        // Plain axios (not BaseApiClient) so this call can't trigger its own refresh
+        const { data } = await axios.post(
+          `${API_CONFIG.BASE_URLS.USER_SERVICE}/users/refresh-token`,
+          { refresh_token: refreshToken },
+          { timeout: API_CONFIG.TIMEOUT },
+        );
+        await this.saveAccessToken(data.access_token);
+        if (data.refresh_token) await this.saveRefreshToken(data.refresh_token);
+        return data.access_token as string;
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response) return null; // server said no
+        throw error;
+      } finally {
+        this.refreshing = null;
+      }
+    })();
+    return this.refreshing;
   }
 
   /**
@@ -145,4 +154,3 @@ export class TokenUtils {
     }
   }
 }
-

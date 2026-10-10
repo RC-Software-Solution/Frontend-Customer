@@ -54,16 +54,10 @@ export class BaseApiClient {
     this.client.interceptors.request.use(
       async (config) => {
         try {
-          // Add authentication token if available
+          // Add authentication token if available. An expired one is still sent:
+          // the 401 handler below renews it and retries.
           const token = await TokenUtils.getAccessToken();
-          if (token && !TokenUtils.isTokenExpired(token)) {
-            config.headers.Authorization = `Bearer ${token}`;
-            
-          } else if (token) {
-            // Token is expired, remove it
-            console.log(`⏰ [${this.serviceName}] Token expired, removing from storage`);
-            await TokenUtils.removeAccessToken();
-          }
+          if (token) config.headers.Authorization = `Bearer ${token}`;
         } catch (error) {
           console.error(`❌ [${this.serviceName}] Error in request interceptor:`, error);
         }
@@ -91,9 +85,26 @@ export class BaseApiClient {
         
         
 
-        // Handle specific error cases
-        if (ErrorUtils.isAuthError(error)) {
-          console.log(`🔐 [${this.serviceName}] Authentication error, clearing tokens`);
+        const original = error.config as (AxiosRequestConfig & { _retried?: boolean }) | undefined;
+        // A wrong password on /login is also a 401; that's not an expired session
+        const isLogin = original?.url?.includes('/login');
+
+        if (ErrorUtils.isAuthError(error) && original && !isLogin) {
+          // Try to renew the access token once and replay the request
+          if (!original._retried) {
+            original._retried = true;
+            try {
+              const newToken = await TokenUtils.refresh();
+              if (newToken) {
+                original.headers = { ...original.headers, Authorization: `Bearer ${newToken}` };
+                return this.client.request(original);
+              }
+            } catch {
+              // Network error while refreshing: don't log the user out, just fail this request
+              return Promise.reject(apiError);
+            }
+          }
+          console.log(`🔐 [${this.serviceName}] Session expired, clearing tokens`);
           await TokenUtils.clearTokens();
           onAuthExpired?.();
         }

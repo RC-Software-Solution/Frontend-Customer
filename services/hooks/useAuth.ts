@@ -3,7 +3,7 @@
  * One shared AuthProvider at the app root; useAuth() reads it from anywhere.
  */
 
-import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../types/api.types';
 import { authService } from '../instances';
@@ -19,6 +19,9 @@ type AuthContextValue = {
   loading: boolean;
   hasSeenIntro: boolean;
   login: (credentials: LoginCredentials) => Promise<Awaited<ReturnType<typeof authService.login>>>;
+  /** true after the server ended the session (not after a normal logout) */
+  sessionExpired: boolean;
+  dismissSessionExpired: () => void;
   logout: () => Promise<void>;
   deleteAccount: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -32,6 +35,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [hasSeenIntro, setHasSeenIntro] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const authedRef = useRef(false);
+  const loggingOutRef = useRef(false);
+  authedRef.current = isAuthenticated;
 
   const reset = useCallback(() => {
     setUser(null);
@@ -67,14 +74,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const response = await authService.login(credentials);
     setUser(response.user);
     setIsAuthenticated(true);
+    setSessionExpired(false);
     return response;
   }, []);
 
   const logout = useCallback(async () => {
+    loggingOutRef.current = true;
     try {
       await authService.logout();
     } finally {
       reset(); // clear local state even if the API call fails
+      loggingOutRef.current = false;
     }
   }, [reset]);
 
@@ -90,13 +100,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // API client calls this when the server rejects our token (401)
   useEffect(() => {
-    setAuthExpiredHandler(logout);
+    setAuthExpiredHandler(() => {
+      // Only a signed-in user whose session was cut off needs the message, not someone logging out
+      if (authedRef.current && !loggingOutRef.current) setSessionExpired(true);
+      logout();
+    });
     return () => setAuthExpiredHandler(null);
   }, [logout]);
 
+  const dismissSessionExpired = useCallback(() => setSessionExpired(false), []);
+
   const value = useMemo(
-    () => ({ user, isAuthenticated, loading, hasSeenIntro, login, logout, deleteAccount, refreshUser, markIntroSeen }),
-    [user, isAuthenticated, loading, hasSeenIntro, login, logout, deleteAccount, refreshUser, markIntroSeen],
+    () => ({ user, isAuthenticated, loading, hasSeenIntro, sessionExpired, dismissSessionExpired, login, logout, deleteAccount, refreshUser, markIntroSeen }),
+    [user, isAuthenticated, loading, hasSeenIntro, sessionExpired, dismissSessionExpired, login, logout, deleteAccount, refreshUser, markIntroSeen],
   );
 
   return createElement(AuthContext.Provider, { value }, children);

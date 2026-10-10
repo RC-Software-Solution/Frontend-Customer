@@ -1,5 +1,5 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
-import React from 'react'
+import { View, Text, Image, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native'
+import React, { useEffect } from 'react'
 import { FontAwesome } from '@expo/vector-icons'
 import { useState, } from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -15,7 +15,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
     const insets = useSafeAreaInsets();
-    const { login } = useAuth();
+    const { login, sessionExpired, dismissSessionExpired } = useAuth();
+
+    useEffect(() => {
+        if (!sessionExpired) return;
+        Alert.alert('Session expired', 'For your security, please sign in again.');
+        dismissSessionExpired();
+    }, [sessionExpired, dismissSessionExpired]);
     const [buttonSpinner, setButtonSpinner] = useState(false);
     const [userInfo, setUserInfo] = useState({
         email: "",
