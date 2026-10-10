@@ -74,7 +74,7 @@ export default function signUpSecondScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
                 <ScrollView
-                    contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + space.xl }}
+                    contentContainerStyle={{ flexGrow: 1 }}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
@@ -83,7 +83,7 @@ export default function signUpSecondScreen() {
                 <Image source={require('../../../assets/signinback.jpg')} style={styles.signInImage} />
 
                 {/* White Curved Form Area */}
-                <View style={styles.formContainer}>
+                <View style={[styles.formContainer, { flexGrow: 1, paddingBottom: insets.bottom + space.xl }]}>
                     <Text style={styles.title}>Create a Password</Text>
 
                     <Field

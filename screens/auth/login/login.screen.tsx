@@ -100,7 +100,7 @@ const handleSignIn = async () => {
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
                 <ScrollView
-                    contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + space.xl }}
+                    contentContainerStyle={{ flexGrow: 1 }}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
@@ -109,7 +109,7 @@ const handleSignIn = async () => {
                 <Image source={require('../../../assets/signinback.jpg')} style={styles.signInImage} />
 
                 {/* White Curved Form Area */}
-                <View style={styles.formContainer}>
+                <View style={[styles.formContainer, { flexGrow: 1, paddingBottom: insets.bottom + space.xl }]}>
 
                     <Text style={[styles.title, { fontFamily: "Raleway_700Bold" }]}>Sign In</Text>
 

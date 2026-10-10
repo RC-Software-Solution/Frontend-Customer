@@ -66,7 +66,7 @@ export default function signUpScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
                 <ScrollView
-                    contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + space.xl }}
+                    contentContainerStyle={{ flexGrow: 1 }}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
@@ -75,7 +75,7 @@ export default function signUpScreen() {
                 <Image source={require('../../../assets/signinback.jpg')} style={styles.signInImage} />
 
                 {/* White Curved Form Area */}
-                <View style={styles.formContainer}>
+                <View style={[styles.formContainer, { flexGrow: 1, paddingBottom: insets.bottom + space.xl }]}>
                     <Text style={styles.title}>Sign Up</Text>
 
                     <Field

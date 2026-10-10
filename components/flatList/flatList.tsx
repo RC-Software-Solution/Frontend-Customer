@@ -15,6 +15,7 @@ const RenderItem: React.FC<Props> = ({ item, onPressCheckbox, isChecked }) => {
     <View
       style={{
         flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: 'white',
         padding: 10,
         marginVertical: 8,
@@ -37,7 +38,8 @@ const RenderItem: React.FC<Props> = ({ item, onPressCheckbox, isChecked }) => {
       />
 
       {/* Meal Info */}
-      <View style={{ flex: 1, marginLeft: 12, justifyContent: 'center' }}>
+      {/* flexGrow/flexShrink (not flex: 1): a zero flex-basis makes Android measure the text at ~0 width, one character per line, blowing up the row height */}
+      <View style={{ flexGrow: 1, flexShrink: 1, marginLeft: 12, justifyContent: 'center' }}>
         <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
           {item.name}
         </Text>
@@ -51,6 +53,8 @@ const RenderItem: React.FC<Props> = ({ item, onPressCheckbox, isChecked }) => {
 
       {/* Checkbox */}
       <BouncyCheckbox
+        disableText
+        style={{ alignSelf: 'center', marginLeft: 8 }}
         size={25}
         fillColor='#69bf70'
         unFillColor='#FFFFFF'
