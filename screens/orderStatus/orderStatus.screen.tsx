@@ -3,6 +3,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import CancelModal from '@/components/popupmodel/popupModel';
 import { orderService, useAuth, menuService } from '@/services';
+import { colomboToday } from '@/services/menu/todayMenu';
 import { Order } from '@/services/types/api.types';
 import { useFocusEffect } from 'expo-router';
 import { useScreenPadding } from '@/components/ui/Screen';
@@ -72,7 +73,7 @@ const OrderStatus: React.FC = () => {
       setEditingOrder(order);
       // Fetch session items for the order's target_date and meal_time
       // Cross-day handling: if the session crosses midnight and order is for tomorrow's breakfast/lunch/dinner, we must fetch by the order's own target_date
-      const targetDate = order.target_date || new Date().toISOString().split('T')[0];
+      const targetDate = order.target_date || colomboToday();
       const sessionItems = await menuService.getMealSessionItemsBySession(order.meal_time as any, targetDate);
       // Build lookup by name for id and meal_type
       const nameToInfo = new Map<string, { food_item_id: number; meal_type: 'veg' | 'non-veg' | 'other' }>();

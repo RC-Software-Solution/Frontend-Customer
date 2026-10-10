@@ -172,6 +172,33 @@ export interface SessionItem {
   foodItem?: FoodItem;
 }
 
+/** upcoming = not open yet, open = orderable now, closed = window over (computed by the server) */
+export type SessionState = 'upcoming' | 'open' | 'closed';
+
+export interface TodaySession {
+  id: number;
+  date: string;
+  meal_time: 'breakfast' | 'lunch' | 'dinner';
+  start_time: string;
+  end_time: string;
+  state: SessionState;
+  opens_at: string;
+  closes_at: string;
+  items: Array<{
+    id: number;
+    food_item_id: number;
+    available_quantity: number | null;
+    foodItem?: FoodItem;
+  }>;
+}
+
+/** GET /meal-sessions/today: sessions dated today in Sri Lanka; null = nothing published for that meal */
+export interface TodayMenu {
+  date: string;
+  now: string;
+  sessions: Record<'breakfast' | 'lunch' | 'dinner', TodaySession | null>;
+}
+
 export interface CreateFoodItemRequest {
   name: string;
   description: string;

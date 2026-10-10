@@ -17,6 +17,7 @@ import {
   GetMealSessionsRequest,
   FoodItemsResponse,
   ApiResponse,
+  TodayMenu,
   InventoryDecrementRequest,
   InventoryIncrementRequest
 } from '../types/api.types';
@@ -24,6 +25,14 @@ import {
 export class MenuApiClient extends BaseApiClient {
   constructor() {
     super('MENU_SERVICE');
+  }
+
+  /**
+   * Today's menu (Sri Lanka date) with each session's state, computed by the server.
+   */
+  async getTodaysMenu(): Promise<TodayMenu> {
+    const response = await this.get<{ success: boolean; data: TodayMenu }>('/meal-sessions/today');
+    return (response.data as any).data;
   }
 
   // Food Items API

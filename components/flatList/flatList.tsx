@@ -8,14 +8,17 @@ interface Props {
   item: MenuItem;
   onPressCheckbox: (meal: string, isChecked: boolean) => void;
   isChecked: boolean;
+  /** session not open: shown but can't be selected */
+  disabled?: boolean;
 }
 
-const RenderItem: React.FC<Props> = ({ item, onPressCheckbox, isChecked }) => {
+const RenderItem: React.FC<Props> = ({ item, onPressCheckbox, isChecked, disabled = false }) => {
   return (
     <View
       style={{
         flexDirection: 'row',
         alignItems: 'center',
+        opacity: disabled ? 0.55 : 1,
         backgroundColor: 'white',
         padding: 10,
         marginVertical: 8,
@@ -54,6 +57,7 @@ const RenderItem: React.FC<Props> = ({ item, onPressCheckbox, isChecked }) => {
       {/* Checkbox */}
       <BouncyCheckbox
         disableText
+        disabled={disabled}
         style={{ alignSelf: 'center', marginLeft: 8 }}
         size={25}
         fillColor='#69bf70'

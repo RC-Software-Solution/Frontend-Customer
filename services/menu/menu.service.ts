@@ -18,6 +18,7 @@ import {
   GetMealSessionsRequest,
   FoodItemsResponse,
   ApiResponse,
+  TodayMenu,
   InventoryDecrementRequest,
   InventoryIncrementRequest
 } from '../types/api.types';
@@ -30,112 +31,16 @@ export class MenuService {
   }
 
   /**
-   * Get smart meal session items - shows current session if active, otherwise next available
+   * Today's menu: sessions dated today in Sri Lanka, each upcoming/open/closed (server-computed).
+   * Never returns other days. See services/menu/todayMenu.ts for how it is rendered.
    */
-  async getSmartMealSessionItems(
-    mealTime: 'breakfast' | 'lunch' | 'dinner',
-    baseDate?: string
-  ): Promise<{ items: any[]; date: string | null; sessionId: number | null; isCurrentDay: boolean }> {
-    const today = baseDate ?? this.getLocalISODate();
-    
-    console.log(`🔍 [SMART_LOOKUP] Starting smart lookup for ${mealTime} on ${today}`);
-    
+  async getTodaysMenu(): Promise<TodayMenu> {
     try {
-      // First, check today's session window using session meta (local time)
-      console.log(`📤 [SMART_LOOKUP] Requesting today's session meta for ${mealTime} on ${today}`);
-      const todayMeta = await this.menuApiClient.getMealSessions({ meal_time: mealTime, date: today });
-      const todaySession = (todayMeta as any)?.data?.data?.mealSessions?.[0];
-      console.log(`📋 [SMART_LOOKUP] Today's session meta:`, JSON.stringify(todaySession, null, 2));
-      if (todaySession && todaySession.start_time && todaySession.end_time) {
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const now = new Date();
-        const startDateTime = this.combineDateAndTime(today, todaySession.start_time);
-        const endDateTime = this.combineDateAndTime(today, todaySession.end_time);
-        const isActiveNow = now >= startDateTime && now <= endDateTime;
-        console.log(`⏰ [SMART_LOOKUP] Today window check for ${mealTime}`, {
-          tz,
-          date: today,
-          start_time: todaySession.start_time,
-          end_time: todaySession.end_time,
-          now_local: this.formatLocalStamp(now),
-          now_iso: now.toISOString(),
-          start_local: this.formatLocalStamp(startDateTime),
-          start_iso: startDateTime.toISOString(),
-          end_local: this.formatLocalStamp(endDateTime),
-          end_iso: endDateTime.toISOString(),
-          now_ms: now.getTime(),
-          start_ms: startDateTime.getTime(),
-          end_ms: endDateTime.getTime(),
-          delta_to_start_ms: now.getTime() - startDateTime.getTime(),
-          delta_to_end_ms: endDateTime.getTime() - now.getTime(),
-          isActiveNow,
-        });
-
-        if (isActiveNow) {
-          console.log(`📤 [SMART_LOOKUP] Fetching today's items via by-session for ${mealTime}`);
-          const todayItems = await this.menuApiClient.getSessionItemsByMealTimeAndDate(mealTime, today, true);
-          console.log(`📥 [SMART_LOOKUP] Today's by-session items for ${mealTime}:`, Array.isArray(todayItems) ? todayItems.length : 0);
-          if (Array.isArray(todayItems) && todayItems.length > 0) {
-            return { items: todayItems, date: today, sessionId: todaySession.id, isCurrentDay: true };
-          }
-        } else {
-          console.log(`⏰ [SMART_LOOKUP] Today's session not active yet or expired for ${mealTime}`);
-        }
-      } else {
-        console.log(`❌ [SMART_LOOKUP] No session meta found for today's ${mealTime}`);
-      }
-
-      // Today's session is expired or doesn't exist, look for next available session
-      console.log(`🔍 [SMART_LOOKUP] Looking ahead for ${mealTime} starting from tomorrow`);
-      for (let dayOffset = 1; dayOffset <= 1; dayOffset++) {
-        const targetDate = this.addDaysToYyyyMmDd(today, dayOffset);
-        console.log(`📤 [SMART_LOOKUP] Checking day ${dayOffset} (${targetDate}) for ${mealTime}`);
-        
-        try {
-          // For future dates, fetch without availability gate so we can display tomorrow's menu
-          const items = await this.menuApiClient.getSessionItemsByMealTimeAndDate(mealTime, targetDate, false);
-          console.log(`📥 [SMART_LOOKUP] by-session items for ${mealTime} on ${targetDate}:`, Array.isArray(items) ? items.length : 0);
-          if (Array.isArray(items) && items.length > 0) {
-            console.log(`✅ [SMART_LOOKUP] Found ${items.length} items for ${mealTime} on ${targetDate}`);
-            return { items, date: targetDate, sessionId: null, isCurrentDay: false };
-          }
-        } catch (error) {
-          console.warn(`❌ [SMART_LOOKUP] Failed to get session for ${mealTime} on ${targetDate}:`, error);
-          continue;
-        }
-      }
-
-      console.log(`❌ [SMART_LOOKUP] No sessions found for ${mealTime} in the next 1 day`);
-      return { items: [], date: null, sessionId: null, isCurrentDay: false };
+      return await this.menuApiClient.getTodaysMenu();
     } catch (error) {
-      console.error(`❌ [SMART_LOOKUP] Failed to get smart meal session items for ${mealTime}:`, error);
-      return { items: [], date: null, sessionId: null, isCurrentDay: false };
+      console.error('Failed to get the menu for today:', error);
+      throw ErrorUtils.createApiError(error);
     }
-  }
-
-  /**
-   * Format date for display (Today, Tomorrow, or specific date)
-   */
-  formatDateForDisplay(dateString: string | null, isCurrentDay: boolean): string {
-    if (!dateString) return '';
-    
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = this.addDaysToYyyyMmDd(today, 1);
-    
-    if (isCurrentDay) {
-      return 'Today';
-    } else if (dateString === tomorrow) {
-      return 'Tomorrow';
-    } else {
-      // Format as "Oct 4" or similar
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
-  }
-
-  // Helper methods
-  private combineDateAndTime(dateString: string, timeString: string): Date {
-    return new Date(`${dateString}T${timeString}`);
   }
 
   private getLocalISODate(): string {
@@ -144,26 +49,6 @@ export class MenuService {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
-  }
-
-  private addDaysToYyyyMmDd(dateString: string, days: number): string {
-    const [y, m, d] = dateString.split('-').map(Number);
-    const date = new Date(y, m - 1, d);
-    date.setDate(date.getDate() + days);
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-  }
-
-  private formatLocalStamp(d: Date): string {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mi = String(d.getMinutes()).padStart(2, '0');
-    const ss = String(d.getSeconds()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
   }
 
   // Food Items Methods
