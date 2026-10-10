@@ -16,7 +16,8 @@
       "<rootDir>/jest.setup.ts"
     ],
     "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/$1"
+      "^@/(.*)$": "<rootDir>/$1",
+      "^react-redux$": "<rootDir>/node_modules/react-redux/dist/cjs/index.js"
     },
     "testPathIgnorePatterns": [
       "/node_modules/",

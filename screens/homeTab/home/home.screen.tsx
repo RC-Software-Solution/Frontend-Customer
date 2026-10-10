@@ -140,7 +140,12 @@ const HomeScreen = () => {
     disabled: boolean
   ) => (
     <>
-      <TouchableOpacity onPress={onToggle} style={{ marginTop: 20, marginHorizontal: space.md }}>
+      <TouchableOpacity
+        onPress={onToggle}
+        accessibilityRole="button"
+        accessibilityLabel={`Toggle ${title}`}
+        style={{ marginTop: 20, marginHorizontal: space.md }}
+      >
         <Image source={banner} style={{ width: '100%', height: 150, alignSelf: 'center', borderRadius: 10 }} />
       </TouchableOpacity>
       <Animated.View style={{ height: expanded ? undefined : 0, overflow: 'hidden', marginHorizontal: space.md }}>

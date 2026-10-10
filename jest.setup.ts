@@ -12,3 +12,9 @@ jest.mock('expo-secure-store', () => {
     __store: store, // tests read/reset this directly
   };
 });
+
+// Screens read safe-area insets; the library ships a ready-made jest mock.
+jest.mock('react-native-safe-area-context', () => require('react-native-safe-area-context/jest/mock').default);
+
+// Gesture-handler's native module doesn't exist under Jest.
+require('react-native-gesture-handler/jestSetup');

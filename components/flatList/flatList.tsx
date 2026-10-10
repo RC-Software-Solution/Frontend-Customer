@@ -58,6 +58,7 @@ const RenderItem: React.FC<Props> = ({ item, onPressCheckbox, isChecked, disable
       <BouncyCheckbox
         disableText
         disabled={disabled}
+        testID={`select-${item.name}`}
         style={{ alignSelf: 'center', marginLeft: 8 }}
         size={25}
         fillColor='#69bf70'
