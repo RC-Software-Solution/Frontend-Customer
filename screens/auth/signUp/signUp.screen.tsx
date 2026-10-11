@@ -1,11 +1,11 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { useState, } from 'react'
-import { ScrollView } from 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { router } from 'expo-router'
 import { Field } from '@/components/ui/Field'
 import { AppButton } from '@/components/ui/AppButton'
+import { KeyboardForm } from '@/components/ui/KeyboardForm';
 import { color, space, shadow } from '@/theme'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -61,15 +61,7 @@ export default function signUpScreen() {
 
     return (
         <GestureHandlerRootView style={styles.container}>
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            >
-                <ScrollView
-                    contentContainerStyle={{ flexGrow: 1 }}
-                    keyboardShouldPersistTaps="handled"
-                    showsVerticalScrollIndicator={false}
-                >
+            <KeyboardForm>
 
                 {/* Top background Image  */}
                 <Image source={require('../../../assets/signinback.jpg')} style={styles.signInImage} />
@@ -132,8 +124,7 @@ export default function signUpScreen() {
                                         </TouchableOpacity>
                     
                 </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                </KeyboardForm>
         </GestureHandlerRootView>
     );
 }

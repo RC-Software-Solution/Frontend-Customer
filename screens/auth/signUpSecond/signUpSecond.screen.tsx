@@ -1,12 +1,12 @@
-import { View, Text, Image, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
-import { ScrollView } from 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { router, useLocalSearchParams } from 'expo-router';
 import { authService } from '@/services';
 import { getFcmToken } from "@/services/push/push.service";
 import { Field } from '@/components/ui/Field';
 import { AppButton } from '@/components/ui/AppButton';
+import { KeyboardForm } from '@/components/ui/KeyboardForm';
 import { color, space, shadow } from '@/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function signUpSecondScreen() {
@@ -69,15 +69,7 @@ export default function signUpSecondScreen() {
 
     return (
         <GestureHandlerRootView style={styles.container}>
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            >
-                <ScrollView
-                    contentContainerStyle={{ flexGrow: 1 }}
-                    keyboardShouldPersistTaps="handled"
-                    showsVerticalScrollIndicator={false}
-                >
+            <KeyboardForm>
 
                 {/* Top background Image  */}
                 <Image source={require('../../../assets/signinback.jpg')} style={styles.signInImage} />
@@ -112,8 +104,7 @@ export default function signUpSecondScreen() {
                         loading={buttonSpinner}
                     />
                 </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                </KeyboardForm>
         </GestureHandlerRootView>
     );
 }

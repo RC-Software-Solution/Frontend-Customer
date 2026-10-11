@@ -1,13 +1,13 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native'
+import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native'
 import React, { useEffect } from 'react'
 import { FontAwesome } from '@expo/vector-icons'
 import { useState, } from 'react'
-import { ScrollView } from 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { router } from 'expo-router'
 import { useAuth } from '@/services';
 import { getFcmToken } from "@/services/push/push.service";
 import { Field } from '@/components/ui/Field';
+import { KeyboardForm } from '@/components/ui/KeyboardForm';
 import { AppButton } from '@/components/ui/AppButton';
 import { color, space, shadow } from '@/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -95,15 +95,7 @@ const handleSignIn = async () => {
 
     return (
         <GestureHandlerRootView style={styles.container}>
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            >
-                <ScrollView
-                    contentContainerStyle={{ flexGrow: 1 }}
-                    keyboardShouldPersistTaps="handled"
-                    showsVerticalScrollIndicator={false}
-                >
+            <KeyboardForm>
 
                 {/* Top background Image  */}
                 <Image source={require('../../../assets/signinback.jpg')} style={styles.signInImage} />
@@ -171,8 +163,7 @@ const handleSignIn = async () => {
                     </TouchableOpacity>
 
                 </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                </KeyboardForm>
         </GestureHandlerRootView>
     );
 }
