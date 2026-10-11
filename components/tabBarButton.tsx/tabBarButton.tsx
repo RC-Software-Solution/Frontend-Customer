@@ -12,12 +12,14 @@ const TabBarButton = ({
     routeName,
     color,
     label,
+    badge = 0,
 }: {
     onPress: () => void;  // ✅ Updated type
     onLongPress: () => void;  // ✅ Updated type
     isFocused: boolean;
     routeName: string;
     color: string;
+    badge?: number;
     label: string | ((props: { focused: boolean; color: string; position: any; children: string }) => React.ReactNode);
 }) => {
 
@@ -65,6 +67,11 @@ const TabBarButton = ({
                 {icon[routeName]!({
                     color: isFocused ? "#fff" : "#222"
                 })}
+                {badge > 0 ? (
+                    <View style={styles.badge} accessibilityLabel={`${badge} unread`}>
+                        <Text style={styles.badgeText}>{badge > 9 ? '9+' : badge}</Text>
+                    </View>
+                ) : null}
             </Animated.View>
             {/* ✅ Updated to use labelContent */}
             <Animated.Text style={[{ color: isFocused ? '#69bf70' : "#222", fontSize: 11 }, animatedTestStyle]}>
@@ -84,5 +91,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         gap: 8,
-    }
+    },
+    badge: {
+        position: 'absolute',
+        top: -6,
+        right: -10,
+        minWidth: 16,
+        height: 16,
+        borderRadius: 8,
+        paddingHorizontal: 4,
+        backgroundColor: '#d9534f',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    badgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
 })

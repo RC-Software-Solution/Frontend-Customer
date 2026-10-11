@@ -2,6 +2,8 @@ import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { useTheme } from 'expo-router/react-navigation';
 import { BottomTabBarProps } from 'expo-router/js-tabs';
 import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { color, radius, shadow, space } from '@/theme';
@@ -13,6 +15,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const buttonWidth = dimensions ? dimensions.width / state.routes.length : 0;
   const tabPositionX = useSharedValue(0);
   const insets = useSafeAreaInsets();
+  const unread = useSelector((s: RootState) => s.notices.unread);
 
   useEffect(() => {
     if (!dimensions) return;
@@ -76,6 +79,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             routeName={route.name}
             color={isFocused ? '#69bf70' : '#222'}
             label={label}
+            badge={route.name === 'notification/index' ? unread : 0}
           />
         );
       })}

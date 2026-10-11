@@ -1,18 +1,24 @@
 import { View, FlatList, StyleSheet, Image, ActivityIndicator, Pressable } from 'react-native'
 import React, { useCallback, useRef, useState } from 'react'
 import { useFocusEffect } from 'expo-router';
+import { useDispatch } from 'react-redux';
 import { useScreenPadding } from '@/components/ui/Screen';
 import { Card } from '@/components/ui/Card';
 import { AppText } from '@/components/ui/AppText';
 import { color, space } from '@/theme';
 import { authService } from '@/services/instances';
 import { Notice } from '@/services/types/api.types';
+import { useAuth } from '@/services/hooks/useAuth';
+import { markSeen } from '@/services/push/unread';
+import { setUnread } from '@/store/noticesSlice';
 
 const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Colombo' });
 
 const Notification = () => {
     const padding = useScreenPadding({ tabBar: true, gutters: false });
+    const dispatch = useDispatch();
+    const userId = useAuth().user?.id;
     const [notices, setNotices] = useState<Notice[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -21,7 +27,11 @@ const Notification = () => {
 
     const load = useCallback(async () => {
         try {
-            setNotices(await authService.getNotices());
+            const list = await authService.getNotices();
+            setNotices(list);
+            // Opening the tab is what clears the badge
+            if (userId) await markSeen(userId, list);
+            dispatch(setUnread(0));
             setFailed(false);
             hasLoaded.current = true;
         } catch (error) {
@@ -32,7 +42,7 @@ const Notification = () => {
             setLoading(false);
             setRefreshing(false);
         }
-    }, []);
+    }, [userId, dispatch]);
 
     // Reload whenever the tab is focused (also runs on first mount)
     useFocusEffect(useCallback(() => { load(); }, [load]));
