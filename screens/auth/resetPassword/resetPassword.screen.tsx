@@ -28,7 +28,7 @@ export default function ResetPasswordScreen() {
 
   if (!email) {
     return (
-      <AuthLayout title="Reset Password">
+      <AuthLayout title="Reset Password" onBack={() => router.back()}>
         <AppText tone="muted" style={{ textAlign: 'center', marginBottom: space.lg }}>
           Start from "Forgot Password" so we know which account to reset.
         </AppText>
@@ -50,7 +50,7 @@ export default function ResetPasswordScreen() {
     try {
       await authService.resetPassword(email, code.trim(), password);
       Alert.alert('Password updated', 'Your password has been changed. Please sign in with the new one.', [
-        { text: 'Sign in', onPress: () => router.replace('/(routes)/login') },
+        { text: 'Sign in', onPress: () => router.dismissTo('/(routes)/login') },
       ]);
     } catch (e: any) {
       setErrors({ form: e.message || 'Could not reset the password. Please try again.' });
@@ -71,7 +71,7 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <AuthLayout title="Reset Password" subtitle={`We sent a 6-digit code to ${email}. It expires in 15 minutes.`}>
+    <AuthLayout title="Reset Password" onBack={() => router.back()} subtitle={`We sent a 6-digit code to ${email}. It expires in 15 minutes.`}>
       <Field
         label="Code"
         placeholder="123456"
@@ -95,6 +95,15 @@ export default function ResetPasswordScreen() {
       <TouchableOpacity onPress={resend} disabled={cooldown > 0} style={{ marginTop: space.lg, alignItems: 'center', opacity: cooldown > 0 ? 0.5 : 1 }}>
         <AppText weight="bold" tone="brand">
           {cooldown > 0 ? `Send a new code in ${cooldown}s` : 'Send a new code'}
+        </AppText>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => router.back()} style={{ marginTop: space.md, alignItems: 'center' }}>
+        <AppText tone="muted">Wrong email? Use a different one</AppText>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.dismissTo('/(routes)/login')} style={{ marginTop: space.md, alignItems: 'center' }}>
+        <AppText weight="bold" tone="brand">
+          Back to sign in
         </AppText>
       </TouchableOpacity>
     </AuthLayout>

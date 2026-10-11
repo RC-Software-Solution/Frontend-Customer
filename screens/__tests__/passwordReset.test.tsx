@@ -12,7 +12,7 @@ jest.mock('@/services/instances', () => ({
   menuService: {},
 }));
 jest.mock('expo-router', () => ({
-  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() },
+  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), dismissTo: jest.fn() },
   useLocalSearchParams: jest.fn(),
 }));
 
@@ -61,10 +61,11 @@ describe('Forgot password screen', () => {
     expect(router.push).not.toHaveBeenCalled();
   });
 
-  it('can go back to sign in', async () => {
+  it('can go back to sign in, from the link or the back arrow', async () => {
     await render(<ForgotPasswordScreen />);
     await fireEvent.press(screen.getByText('Back to sign in'));
-    expect(router.back).toHaveBeenCalled();
+    await fireEvent.press(screen.getByLabelText('Go back'));
+    expect(router.back).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -117,7 +118,8 @@ describe('Reset password screen', () => {
     // pressing "Sign in" on the confirmation sends the user to the login screen
     const buttons = alert.mock.calls.find((c) => c[0] === 'Password updated')![2] as any[];
     buttons.find((b) => b.text === 'Sign in').onPress();
-    expect(router.replace).toHaveBeenCalledWith('/(routes)/login');
+    // pops back to the existing login screen instead of stacking a second one
+    expect(router.dismissTo).toHaveBeenCalledWith('/(routes)/login');
   });
 
   it('shows a wrong or expired code from the server and does not claim success', async () => {
@@ -154,6 +156,19 @@ describe('Reset password screen', () => {
     await waitFor(() => expect(auth.forgotPassword).toHaveBeenCalledWith('ann@example.com'));
     expect(alert).toHaveBeenCalledWith('Code sent', expect.any(String));
     expect(screen.getByText('Send a new code in 30s')).toBeTruthy(); // waiting again
+  });
+
+  it('has a back arrow, a way to change the email, and a way back to sign in', async () => {
+    await render(<ResetPasswordScreen />);
+
+    await fireEvent.press(screen.getByLabelText('Go back'));
+    expect(router.back).toHaveBeenCalledTimes(1);
+
+    await fireEvent.press(screen.getByText('Wrong email? Use a different one'));
+    expect(router.back).toHaveBeenCalledTimes(2);
+
+    await fireEvent.press(screen.getByText('Back to sign in'));
+    expect(router.dismissTo).toHaveBeenCalledWith('/(routes)/login');
   });
 
   it('without an email (opened directly) sends the user back to start', async () => {
