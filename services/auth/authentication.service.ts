@@ -85,6 +85,13 @@ export class AuthenticationService {
   }
 
   /**
+   * Announcements for the logged-in customer. Throws on failure so the screen can show an error.
+   */
+  async getNotices() {
+    return (await this.userApiClient.getNotices()).notices;
+  }
+
+  /**
    * Get current user
    */
   async getCurrentUser(): Promise<User | null> {

@@ -1,49 +1,89 @@
-import { View, Text ,FlatList, StyleSheet, Image } from 'react-native'
-import React from 'react'
+import { View, FlatList, StyleSheet, Image, ActivityIndicator, Pressable } from 'react-native'
+import React, { useCallback, useRef, useState } from 'react'
+import { useFocusEffect } from 'expo-router';
 import { useScreenPadding } from '@/components/ui/Screen';
 import { Card } from '@/components/ui/Card';
 import { AppText } from '@/components/ui/AppText';
-import { space } from '@/theme';
+import { color, space } from '@/theme';
+import { authService } from '@/services/instances';
+import { Notice } from '@/services/types/api.types';
 
-interface Notification {
-    id: string;
-    message: string;
-    date: string;
-}
-
-const notifications: Notification[] = [
-    { id: '1', message: 'Your order #5012 has been confirmed.', date: '2024/06/22' },
-    { id: '2', message: 'Payment for order #5013 is pending.', date: '2024/06/23' },
-];
+const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Colombo' });
 
 const Notification = () => {
     const padding = useScreenPadding({ tabBar: true, gutters: false });
-    const renderItem = ({ item }: { item: Notification }) => (
+    const [notices, setNotices] = useState<Notice[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [failed, setFailed] = useState(false);
+    const hasLoaded = useRef(false);
+
+    const load = useCallback(async () => {
+        try {
+            setNotices(await authService.getNotices());
+            setFailed(false);
+            hasLoaded.current = true;
+        } catch (error) {
+            console.error('Failed to load notices:', error);
+            // Keep showing the last good list on a refresh failure
+            if (!hasLoaded.current) setFailed(true);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, []);
+
+    // Reload whenever the tab is focused (also runs on first mount)
+    useFocusEffect(useCallback(() => { load(); }, [load]));
+
+    const retry = () => { setFailed(false); setLoading(true); load(); };
+
+    const renderItem = ({ item }: { item: Notice }) => (
         <Card style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: space.md }}>
             <Image source={require('../../assets/bell.png')} style={styles.icon} />
             <View style={{ flex: 1 }}>
                 <AppText variant="body" weight="bold" style={{ marginBottom: space.xs }}>
-                    {item.message}
+                    {item.title}
+                </AppText>
+                <AppText variant="caption" style={{ marginBottom: space.xs }}>
+                    {item.body}
                 </AppText>
                 <AppText variant="caption" tone="muted">
-                    {item.date}
+                    {formatDate(item.createdAt)}
                 </AppText>
             </View>
         </Card>
     );
 
+    const renderEmpty = () => {
+        if (loading) return <ActivityIndicator size="large" color={color.brand} style={styles.center} />;
+        if (failed) {
+            return (
+                <Pressable onPress={retry} style={styles.center} accessibilityRole="button">
+                    <AppText tone="muted">Could not load notifications.</AppText>
+                    <AppText weight="bold" style={{ color: color.brand, marginTop: space.sm }}>Tap to retry</AppText>
+                </Pressable>
+            );
+        }
+        return <AppText tone="muted" style={styles.center}>No notifications yet.</AppText>;
+    };
+
     return (
         <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
             <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: space.md }}>
-                <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
+                <AppText variant="h1" weight="bold">RC Caterings</AppText>
             </View>
             <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: space.md }}>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#69bf70',marginBottom:20 }}>Notifications</Text>
+                <AppText variant="h2" weight="bold" style={{ color: color.brand, marginBottom: 20 }}>Notifications</AppText>
             </View>
             <FlatList
-                data={notifications}
+                data={notices}
                 renderItem={renderItem}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => String(item.id)}
+                ListEmptyComponent={renderEmpty}
+                refreshing={refreshing}
+                onRefresh={() => { setRefreshing(true); load(); }}
                 contentContainerStyle={{ paddingBottom: padding.paddingBottom }}
             />
         </View>
@@ -53,6 +93,7 @@ const Notification = () => {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#fff' },
     icon: { width: 44, height: 44, marginRight: space.md },
+    center: { marginTop: 80, alignItems: 'center', textAlign: 'center' },
 });
 
 

@@ -14,7 +14,8 @@ import {
   ResetPasswordRequest,
   RefreshTokenRequest,
   RefreshTokenResponse,
-  ChangePasswordResponse
+  ChangePasswordResponse,
+  NoticesResponse
 } from '../types/api.types';
 
 export class UserApiClient extends BaseApiClient {
@@ -43,6 +44,14 @@ export class UserApiClient extends BaseApiClient {
    */
   async getProfile(): Promise<User> {
     const response = await this.get<User>('/users/profile');
+    return response.data;
+  }
+
+  /**
+   * Announcements for this customer (global + their area), newest first
+   */
+  async getNotices(limit = 50): Promise<NoticesResponse> {
+    const response = await this.get<NoticesResponse>(`/users/notices?limit=${limit}`);
     return response.data;
   }
 

@@ -42,6 +42,22 @@ export interface User extends BaseEntity {
   fcm_token?: string;
 }
 
+/** GET /users/notices: admin announcements; area_id null = sent to everyone */
+export interface Notice {
+  id: number | string; // BIGINT: mysql2 may return it as a string
+  title: string;
+  body: string;
+  area_id: number | string | null;
+  createdAt: string;
+}
+
+export interface NoticesResponse {
+  notices: Notice[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;
