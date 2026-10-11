@@ -135,8 +135,17 @@ export interface ForgotPasswordRequest {
 }
 
 export interface ResetPasswordRequest {
-  token: string;
+  email: string;
+  /** the 6-digit code from the email */
+  code: string;
   new_password: string;
+}
+
+export interface ChangePasswordResponse {
+  message: string;
+  /** fresh tokens for this device; every other device is signed out */
+  access_token?: string;
+  refresh_token?: string;
 }
 
 // Menu related types

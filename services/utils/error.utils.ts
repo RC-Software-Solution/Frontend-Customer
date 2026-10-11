@@ -10,6 +10,12 @@ export class ErrorUtils {
    * Create a standardized API error object
    */
   static createApiError(error: any): ApiError {
+    // Already normalised (the response interceptor does it, then each request wrapper again):
+    // keep its status and code instead of flattening them to 0 / UNKNOWN_ERROR the second time.
+    if (error && !error.response && !error.request && typeof error.status === 'number' && typeof error.message === 'string') {
+      return error as ApiError;
+    }
+
     if (error.response) {
       // Server responded with error status
       return {

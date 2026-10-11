@@ -63,6 +63,7 @@ const routes = {
   '(routes)/welcome-intro/index': stub('INTRO SCREEN'),
   '(routes)/login/index': LoginStub,
   '(routes)/login/forgot-password': stub('FORGOT SCREEN'),
+  '(routes)/login/reset-password': stub('RESET SCREEN'),
   '(routes)/sign-up/index': stub('SIGNUP SCREEN'),
   '(routes)/sign-up/signUpSecond': stub('SIGNUP2 SCREEN'),
   '(routes)/verifyAccount/index': stub('VERIFY SCREEN'),
@@ -168,6 +169,28 @@ describe('screens behind the guard cannot be reached by navigating directly', ()
 
     expect(screen.queryByText('LOGIN SCREEN')).toBeNull();
     expect(screen.queryByText('SIGNUP SCREEN')).toBeNull();
+  });
+
+  it('a logged-out user can reach the forgot-password and reset-password screens', async () => {
+    await AsyncStorage.setItem(API_CONFIG.STORAGE_KEYS.INTRO_SEEN, 'true');
+    await renderRouter(routes, { initialUrl: '/' });
+    await screen.findByText('LOGIN SCREEN');
+
+    await act(async () => router.push('/(routes)/login/forgot-password'));
+    expect(await screen.findByText('FORGOT SCREEN')).toBeTruthy();
+    await act(async () => router.push('/(routes)/login/reset-password'));
+    expect(await screen.findByText('RESET SCREEN')).toBeTruthy();
+  });
+
+  it('a logged-in user cannot open the forgot-password or reset-password screens', async () => {
+    savedSession();
+    await renderRouter(routes, { initialUrl: '/' });
+    await screen.findByText('HOME SCREEN');
+
+    await act(async () => router.push('/(routes)/login/forgot-password'));
+    await act(async () => router.push('/(routes)/login/reset-password'));
+    expect(screen.queryByText('FORGOT SCREEN')).toBeNull();
+    expect(screen.queryByText('RESET SCREEN')).toBeNull();
   });
 
   it('a logged-in user can open the cart', async () => {

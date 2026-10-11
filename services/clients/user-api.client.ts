@@ -13,7 +13,8 @@ import {
   ForgotPasswordRequest,
   ResetPasswordRequest,
   RefreshTokenRequest,
-  RefreshTokenResponse
+  RefreshTokenResponse,
+  ChangePasswordResponse
 } from '../types/api.types';
 
 export class UserApiClient extends BaseApiClient {
@@ -56,8 +57,8 @@ export class UserApiClient extends BaseApiClient {
   /**
    * Change password
    */
-  async changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
-    const response = await this.post<{ message: string }>('/users/change-password', {
+  async changePassword(currentPassword: string, newPassword: string): Promise<ChangePasswordResponse> {
+    const response = await this.post<ChangePasswordResponse>('/users/change-password', {
       current_password: currentPassword,
       new_password: newPassword,
     });
@@ -68,7 +69,8 @@ export class UserApiClient extends BaseApiClient {
    * Forgot password
    */
   async forgotPassword(data: ForgotPasswordRequest): Promise<{ message: string }> {
-    const response = await this.post<{ message: string }>('/users/forgot-password', data);
+    // client: 'mobile' asks the server for a 6-digit code instead of the web link
+    const response = await this.post<{ message: string }>('/users/forgot-password', { ...data, client: 'mobile' });
     return response.data;
   }
 
@@ -76,7 +78,11 @@ export class UserApiClient extends BaseApiClient {
    * Reset password
    */
   async resetPassword(data: ResetPasswordRequest): Promise<{ message: string }> {
-    const response = await this.post<{ message: string }>('/users/reset-password', data);
+    const response = await this.post<{ message: string }>('/users/reset-password', {
+      email: data.email,
+      code: data.code,
+      newPassword: data.new_password, // the server's field name
+    });
     return response.data;
   }
 

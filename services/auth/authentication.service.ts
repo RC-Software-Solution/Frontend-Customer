@@ -154,7 +154,11 @@ export class AuthenticationService {
    */
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
     try {
-      await this.userApiClient.changePassword(currentPassword, newPassword);
+      const response = await this.userApiClient.changePassword(currentPassword, newPassword);
+      // the server signs every other device out and hands this one fresh tokens
+      if (response.access_token && response.refresh_token) {
+        await TokenUtils.saveTokens(response.access_token, response.refresh_token);
+      }
     } catch (error) {
       console.error('Password change failed:', error);
       throw ErrorUtils.createApiError(error);
@@ -176,9 +180,9 @@ export class AuthenticationService {
   /**
    * Reset password
    */
-  async resetPassword(token: string, newPassword: string): Promise<void> {
+  async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
     try {
-      await this.userApiClient.resetPassword({ token, new_password: newPassword });
+      await this.userApiClient.resetPassword({ email, code, new_password: newPassword });
     } catch (error) {
       console.error('Password reset failed:', error);
       throw ErrorUtils.createApiError(error);

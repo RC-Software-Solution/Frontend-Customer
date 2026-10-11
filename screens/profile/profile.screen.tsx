@@ -7,12 +7,16 @@ import { User } from '@/services/types/api.types';
 import { useFocusEffect } from 'expo-router';
 import { Screen } from '@/components/ui/Screen';
 import { AppButton } from '@/components/ui/AppButton';
+import { EditProfileForm } from '@/components/profile/EditProfileForm';
+import { ChangePasswordModal } from '@/components/profile/ChangePasswordModal';
 import { color, space, shadow } from '@/theme';
 
 const Profile = () => {
-    const { logout, deleteAccount } = useAuth();
+    const { logout, deleteAccount, refreshUser } = useAuth();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [editing, setEditing] = useState(false);
+    const [changingPassword, setChangingPassword] = useState(false);
 
     useEffect(() => {
         loadCurrentUser();
@@ -59,6 +63,21 @@ const Profile = () => {
 
 
      const [modalVisible, setModalVisible] = useState(false);
+
+    if (editing && user) {
+        return (
+            <EditProfileForm
+                user={user}
+                onCancel={() => setEditing(false)}
+                onSaved={async (updated) => {
+                    setUser(updated);
+                    setEditing(false);
+                    await refreshUser();
+                }}
+            />
+        );
+    }
+
     return (
         <Screen scroll tabBar>
             <View style={{ alignItems: 'flex-start' }}>
@@ -107,7 +126,14 @@ const Profile = () => {
 
             {!loading && (
                 <>
-                    <AppButton title="Logout" onPress={handleLogout} />
+                    <AppButton title="Edit Profile" onPress={() => setEditing(true)} disabled={!user} />
+                    <AppButton
+                        title="Change Password"
+                        variant="secondary"
+                        onPress={() => setChangingPassword(true)}
+                        style={{ marginTop: space.md }}
+                    />
+                    <AppButton title="Logout" variant="secondary" onPress={handleLogout} style={{ marginTop: space.md }} />
                     <AppButton
                         title="Delete Account"
                         variant="danger"
@@ -116,6 +142,7 @@ const Profile = () => {
                     />
                 </>
             )}
+            <ChangePasswordModal visible={changingPassword} onClose={() => setChangingPassword(false)} />
             <CancelModal
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
