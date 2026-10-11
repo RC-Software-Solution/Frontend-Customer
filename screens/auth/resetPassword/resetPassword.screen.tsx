@@ -71,7 +71,7 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <AuthLayout title="Reset Password" onBack={() => router.back()} subtitle={`We sent a 6-digit code to ${email}. It expires in 15 minutes.`}>
+    <AuthLayout title="Reset Password" onBack={() => router.back()} subtitle={`If there is an account for ${email}, we have sent it a 6-digit code (valid for 15 minutes). Check your spam folder too. No email? The address may not be the one you registered with.`}>
       <Field
         label="Code"
         placeholder="123456"

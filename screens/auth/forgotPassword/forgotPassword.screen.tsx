@@ -35,7 +35,7 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <AuthLayout title="Forgot Password" onBack={() => router.back()} subtitle="Enter the email you signed up with and we'll send you a 6-digit code.">
+    <AuthLayout title="Forgot Password" onBack={() => router.back()} subtitle="Enter the email you signed up with. If it matches an account, we'll send a 6-digit code to it.">
       <Field
         label="Email"
         placeholder="example@gmail.com"

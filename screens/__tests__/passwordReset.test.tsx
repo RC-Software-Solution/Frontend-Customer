@@ -79,9 +79,12 @@ describe('Reset password screen', () => {
   };
   const submit = async () => fireEvent.press(screen.getByText('Reset password', { exact: true }));
 
-  it('says which email the code was sent to', async () => {
+  it('says which email it is for, without promising an email was sent (unknown emails look identical)', async () => {
     await render(<ResetPasswordScreen />);
-    expect(screen.getByText(/ann@example\.com/)).toBeTruthy();
+    const text = screen.getByText(/ann@example\.com/).props.children as string;
+    expect(text).toMatch(/If there is an account/i);
+    expect(text).not.toMatch(/we sent/i);
+    expect(text).toMatch(/spam/i);
   });
 
   it('only accepts digits in the code box', async () => {
