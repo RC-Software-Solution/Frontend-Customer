@@ -22,6 +22,13 @@ describe('Onboarding screen', () => {
     expect(StyleSheet.flatten(screen.getByText('Crave. Order. Enjoy!').props.style).fontFamily).toBe('Nunito_700Bold');
   });
 
+  it('gives the logo a fixed square box so it can never render at its 500 px natural size', async () => {
+    await render(<Onboarding />);
+    const style = StyleSheet.flatten(screen.getByTestId('onboarding-logo').props.style);
+    expect(style.width).toBe(96);
+    expect(style.height).toBe(96);
+  });
+
   it('opens the welcome intro from Get Started', async () => {
     await render(<Onboarding />);
     await fireEvent.press(screen.getByText('Get Started'));

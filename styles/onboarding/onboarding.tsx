@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
     },
     logo: {
         width: 96,
-        aspectRatio: 1,
+        height: 96,
         resizeMode: 'contain',
     },
     titleWrapper: {

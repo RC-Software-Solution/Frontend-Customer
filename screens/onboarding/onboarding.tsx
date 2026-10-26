@@ -14,7 +14,7 @@ const onboarding = () => {
             <View style={styles.overlay} />
             <View style={styles.firstContainer}>
                 <View>
-                    <Image
+                    <Image testID="onboarding-logo"
                         source={require("@/assets/logo.png")} style={styles.logo}></Image>
                 </View>
 
