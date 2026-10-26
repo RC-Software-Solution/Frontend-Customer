@@ -5,18 +5,22 @@ import { Provider } from 'react-redux'
 import { store } from '@/store'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '@/services';
+import { useFonts, Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold } from '@expo-google-fonts/nunito';
 
 // Keep the splash screen up until the saved session has been checked
 SplashScreen.preventAutoHideAsync();
 
 const RootNavigator = () => {
   const { isAuthenticated, loading } = useAuth();
+  const [fontsLoaded, fontError] = useFonts({ Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold });
+  // A font failure must not trap the user on the splash screen: fall back to the system font.
+  const ready = !loading && (fontsLoaded || !!fontError);
 
   useEffect(() => {
-    if (!loading) SplashScreen.hideAsync();
-  }, [loading]);
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
 
-  if (loading) return null;
+  if (!ready) return null;
 
   // Stack.Protected: routes in a guarded group are unreachable (and redirect to "index") when guard is false
   return (

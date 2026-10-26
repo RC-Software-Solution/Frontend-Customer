@@ -18,3 +18,11 @@ jest.mock('react-native-safe-area-context', () => require('react-native-safe-are
 
 // Gesture-handler's native module doesn't exist under Jest.
 require('react-native-gesture-handler/jestSetup');
+
+// Web fonts need the native font loader, which never resolves under Jest: report them as loaded.
+jest.mock('@expo-google-fonts/nunito', () => ({
+  useFonts: () => [true, null],
+  Nunito_400Regular: 'Nunito_400Regular',
+  Nunito_600SemiBold: 'Nunito_600SemiBold',
+  Nunito_700Bold: 'Nunito_700Bold',
+}));
