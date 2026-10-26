@@ -117,10 +117,9 @@ export class OrderService {
   /**
    * Get order history
    */
-  async getOrderHistory(mealTime?: 'breakfast' | 'lunch' | 'dinner'): Promise<Order[]> {
+  async getOrderHistory(page = 1, limit = 20): Promise<Order[]> {
     try {
-      const orders = await this.orderApiClient.getOrderHistory(mealTime);
-      return orders;
+      return await this.orderApiClient.getOrders({ type: 'all', page, limit });
     } catch (error) {
       console.error('❌ Failed to get order history:', error);
       throw ErrorUtils.createApiError(error);

@@ -128,7 +128,7 @@ export interface UpdateOrderRequest {
 }
 
 export interface GetOrdersRequest {
-  type?: 'current' | 'history' | 'all' | 'pending';
+  type?: 'current' | 'pending' | 'completed' | 'all';
   meal_time?: 'breakfast' | 'lunch' | 'dinner';
   status?: string; // comma-separated values like "pending,preparing"
   payment_status?: 'pending' | 'paid' | 'unpaid' | 'ignored';

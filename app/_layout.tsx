@@ -31,6 +31,7 @@ const RootNavigator = () => {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(routes)/cart/index" />
         <Stack.Screen name="(routes)/menu/index" />
+        <Stack.Screen name="(routes)/order-history/index" />
       </Stack.Protected>
 
       <Stack.Protected guard={!isAuthenticated}>

@@ -95,16 +95,6 @@ export class OrderApiClient extends BaseApiClient {
   }
 
   /**
-   * Get order history
-   */
-  async getOrderHistory(mealTime?: 'breakfast' | 'lunch' | 'dinner'): Promise<Order[]> {
-    const params: GetOrdersRequest = { type: 'history' };
-    if (mealTime) params.meal_time = mealTime;
-    
-    return this.getOrders(params);
-  }
-
-  /**
    * Update order
    */
   async updateOrder(orderId: string, orderData: UpdateOrderRequest): Promise<{ message: string }> {

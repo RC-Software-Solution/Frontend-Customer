@@ -71,3 +71,11 @@ describe('what getOrders returns', () => {
     expect(o.failure_reason).toBeUndefined();
   });
 });
+
+describe('order history paging', () => {
+  it('getOrders type all, page 2 of 20 sends type=all&offset=20&limit=20', async () => {
+    api.onGet(/\/orders/).reply(200, { orders: [] });
+    await client.getOrders({ type: 'all', page: 2, limit: 20 });
+    expect(api.history.get[0].url).toBe('/orders?type=all&offset=20&limit=20');
+  });
+});

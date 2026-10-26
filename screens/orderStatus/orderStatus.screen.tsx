@@ -6,7 +6,7 @@ import CancelModal from '@/components/popupmodel/popupModel';
 import { orderService, useAuth, menuService } from '@/services';
 import { colomboToday } from '@/services/menu/todayMenu';
 import { Order } from '@/services/types/api.types';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, router } from 'expo-router';
 import { useScreenPadding } from '@/components/ui/Screen';
 import { Card } from '@/components/ui/Card';
 import { AppText } from '@/components/ui/AppText';
@@ -207,8 +207,17 @@ const OrderStatus: React.FC = () => {
       <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: space.md }}>
         <AppText variant="h1" weight="bold">RC Caterings</AppText>
       </View>
-      <View style={{ alignItems: 'flex-start', marginTop: space.sm + space.xs, marginHorizontal: space.md }}>
+      <View style={styles.titleRow}>
         <AppText variant="h2" weight="bold">My Orders</AppText>
+        <TouchableOpacity
+          style={styles.historyLink}
+          onPress={() => router.push('/(routes)/order-history' as never)}
+          accessibilityRole="button"
+          accessibilityLabel="Order history"
+        >
+          <AppText variant="caption" weight="bold" tone="brand">Order history</AppText>
+          <Ionicons name="chevron-forward" size={18} color={color.brandStrong} />
+        </TouchableOpacity>
       </View>
 
       {loading ? (
@@ -322,6 +331,8 @@ const OrderStatus: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: color.bg },
+  titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: space.sm + space.xs, marginHorizontal: space.md },
+  historyLink: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', minHeight: 48, paddingHorizontal: space.xs },
 
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: space.sm },
   cardTitle: { flex: 1 },

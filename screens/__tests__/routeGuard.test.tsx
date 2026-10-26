@@ -59,6 +59,7 @@ const routes = {
   '(tabs)/_layout': () => <Slot />,
   '(tabs)/index': HomeStub,
   '(routes)/cart/index': stub('CART SCREEN'),
+  '(routes)/order-history/index': stub('HISTORY SCREEN'),
   '(routes)/onboarding/index': stub('ONBOARDING SCREEN'),
   '(routes)/welcome-intro/index': stub('INTRO SCREEN'),
   '(routes)/login/index': LoginStub,
@@ -199,5 +200,23 @@ describe('screens behind the guard cannot be reached by navigating directly', ()
     await screen.findByText('HOME SCREEN');
     await act(async () => router.push('/(routes)/cart'));
     expect(await screen.findByText('CART SCREEN')).toBeTruthy();
+  });
+
+  it('a logged-out user cannot open the order history', async () => {
+    await AsyncStorage.setItem(API_CONFIG.STORAGE_KEYS.INTRO_SEEN, 'true');
+    await renderRouter(routes, { initialUrl: '/' });
+    await screen.findByText('LOGIN SCREEN');
+
+    await act(async () => router.push('/(routes)/order-history' as never));
+
+    expect(screen.queryByText('HISTORY SCREEN')).toBeNull();
+  });
+
+  it('a logged-in user can open the order history', async () => {
+    savedSession();
+    await renderRouter(routes, { initialUrl: '/' });
+    await screen.findByText('HOME SCREEN');
+    await act(async () => router.push('/(routes)/order-history' as never));
+    expect(await screen.findByText('HISTORY SCREEN')).toBeTruthy();
   });
 });

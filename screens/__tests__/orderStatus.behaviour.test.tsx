@@ -143,3 +143,23 @@ describe('editing', () => {
     expect(screen.getByText('Save Changes')).toBeTruthy();
   });
 });
+
+describe('the Order history link', () => {
+  const { StyleSheet } = require('react-native');
+  const { router } = require('expo-router');
+
+  it('is a button of at least 48 dp that opens the history route', async () => {
+    await mount();
+    const link = await screen.findByLabelText('Order history');
+    expect(link.props.accessibilityRole).toBe('button');
+    expect(StyleSheet.flatten(link.props.style).minHeight).toBeGreaterThanOrEqual(48);
+    await fireEvent.press(link);
+    expect(router.push).toHaveBeenCalledWith('/(routes)/order-history');
+  });
+
+  it('is still there when there are no orders today', async () => {
+    await mount([]);
+    expect(await screen.findByLabelText('Order history')).toBeTruthy();
+    expect(screen.getByText('No orders found')).toBeTruthy();
+  });
+});

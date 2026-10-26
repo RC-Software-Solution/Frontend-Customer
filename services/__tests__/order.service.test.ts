@@ -40,3 +40,16 @@ describe('getPendingPaymentOrders', () => {
     expect(mockGetOrders).toHaveBeenCalledWith({ type: 'all', payment_status: 'unpaid', limit: 50 });
   });
 });
+
+describe('getOrderHistory', () => {
+  it('pages type "all" with the page and limit it is given', async () => {
+    await new OrderService().getOrderHistory(2, 20);
+    expect(mockGetOrders).toHaveBeenCalledTimes(1);
+    expect(mockGetOrders).toHaveBeenCalledWith({ type: 'all', page: 2, limit: 20 });
+  });
+
+  it('defaults to page 1, 20 a page', async () => {
+    await new OrderService().getOrderHistory();
+    expect(mockGetOrders).toHaveBeenCalledWith({ type: 'all', page: 1, limit: 20 });
+  });
+});

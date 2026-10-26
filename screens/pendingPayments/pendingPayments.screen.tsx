@@ -3,6 +3,7 @@ import { View, FlatList, StyleSheet, ActivityIndicator, Alert } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { orderService, useAuth } from '@/services';
 import { Order } from '@/services/types/api.types';
+import { mealTitle } from '@/services/utils/order-title';
 import { useFocusEffect } from 'expo-router';
 import { useScreenPadding } from '@/components/ui/Screen';
 import { Card } from '@/components/ui/Card';
@@ -10,17 +11,6 @@ import { AppText } from '@/components/ui/AppText';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { color, radius, space, status } from '@/theme';
-
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-// "Mon, 26 Oct, Lunch" from the meal's own date (YYYY-MM-DD), read from its parts so no timezone can shift the day.
-// ponytail: the created_at fallback takes its UTC date, which can be a day off Colombo late in the evening; target_date is always present in practice.
-const mealTitle = (o: Order) => {
-    const [y, m, d] = (o.target_date || o.created_at.slice(0, 10)).split('-').map(Number);
-    const day = DAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
-    return `${day}, ${d} ${MONTHS[m - 1]}, ${o.meal_time.charAt(0).toUpperCase()}${o.meal_time.slice(1)}`;
-};
 
 const PendingPaymentsScreen = () => {
     const padding = useScreenPadding({ tabBar: true, gutters: false });
