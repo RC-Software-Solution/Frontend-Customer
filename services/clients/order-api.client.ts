@@ -41,6 +41,7 @@ export class OrderApiClient extends BaseApiClient {
     if (params.type) queryParams.append('type', params.type);
     if (params.meal_time) queryParams.append('meal_time', params.meal_time);
     if (params.status) queryParams.append('status', params.status);
+    if (params.payment_status) queryParams.append('payment_status', params.payment_status);
     if (params.date_range) queryParams.append('date_range', params.date_range);
     if (params.start_date) queryParams.append('start_date', params.start_date);
     if (params.end_date) queryParams.append('end_date', params.end_date);
@@ -77,6 +78,8 @@ export class OrderApiClient extends BaseApiClient {
       total_price: Number(o.total_price),
       meal_time: o.meal_time,
       status: o.status,
+      payment_status: o.payment_status,
+      failure_reason: o.failure_reason ?? undefined,
     }));
     return mapped;
   }

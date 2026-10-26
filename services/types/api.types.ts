@@ -110,6 +110,8 @@ export interface Order extends BaseEntity {
   total_price: number;
   meal_time: 'breakfast' | 'lunch' | 'dinner';
   status: 'pending' | 'preparing' | 'delivering' | 'delivered' | 'completed' | 'cancelled' | 'delivery_failed';
+  payment_status?: 'pending' | 'paid' | 'unpaid' | 'ignored';
+  failure_reason?: string;
   created_at: string;
   updated_at: string;
 }
@@ -129,6 +131,7 @@ export interface GetOrdersRequest {
   type?: 'current' | 'history' | 'all' | 'pending';
   meal_time?: 'breakfast' | 'lunch' | 'dinner';
   status?: string; // comma-separated values like "pending,preparing"
+  payment_status?: 'pending' | 'paid' | 'unpaid' | 'ignored';
   date_range?: 'today' | 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'custom';
   start_date?: string; // when date_range = 'custom'
   end_date?: string;   // when date_range = 'custom'

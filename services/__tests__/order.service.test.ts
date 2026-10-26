@@ -32,3 +32,11 @@ describe('getUndeliveredOrdersToday', () => {
     });
   });
 });
+
+describe('getPendingPaymentOrders', () => {
+  it('asks for every unpaid order of any status, the same set checkout counts', async () => {
+    await new OrderService().getPendingPaymentOrders();
+    expect(mockGetOrders).toHaveBeenCalledTimes(1);
+    expect(mockGetOrders).toHaveBeenCalledWith({ type: 'all', payment_status: 'unpaid', limit: 50 });
+  });
+});

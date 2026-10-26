@@ -104,12 +104,10 @@ export class OrderService {
    */
   async getPendingPaymentOrders(): Promise<Order[]> {
     try {
-      // Use backend 'pending' type which returns delivered + unpaid for the authenticated customer
-      const params: GetOrdersRequest = { type: 'pending' };
-      console.log('🔍 Fetching pending payment orders with params:', params);
-      const orders = await this.orderApiClient.getOrders(params);
-      console.log('📋 Received pending payment orders:', orders);
-      return orders;
+      // Checkout blocks on every unpaid order of any status (order.controller.js:31-36), so ask for exactly those; type 'pending' hid delivery_failed ones.
+      // ponytail: 50 is far above the 2-order block (the backend's default limit is 10); page it if the rule ever changes
+      const params: GetOrdersRequest = { type: 'all', payment_status: 'unpaid', limit: 50 };
+      return await this.orderApiClient.getOrders(params);
     } catch (error) {
       console.error('❌ Failed to get pending payment orders:', error);
       throw ErrorUtils.createApiError(error);
