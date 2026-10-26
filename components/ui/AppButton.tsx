@@ -16,10 +16,16 @@ const fills: Record<Variant, string> = {
   danger: color.danger,
 };
 
-const labelTones: Record<Variant, 'inverse' | 'ink'> = {
-  primary: 'inverse',
+const labelTones: Record<Variant, 'onBrand' | 'ink' | 'inverse'> = {
+  primary: 'onBrand',
   secondary: 'ink',
   danger: 'inverse',
+};
+
+const spinnerColors: Record<Variant, string> = {
+  primary: color.onBrand,
+  secondary: color.ink,
+  danger: color.brandInk,
 };
 
 export function AppButton({
@@ -43,6 +49,7 @@ export function AppButton({
       onPress={onPress}
       disabled={inert}
       accessibilityRole="button"
+      accessibilityLabel={title}
       accessibilityState={{ disabled: inert, busy: loading }}
       style={[
         {
@@ -59,7 +66,7 @@ export function AppButton({
       ]}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={color.brandInk} />
+        <ActivityIndicator size="small" color={spinnerColors[variant]} />
       ) : (
         <AppText variant="body" weight="bold" tone={labelTones[variant]}>
           {title}
