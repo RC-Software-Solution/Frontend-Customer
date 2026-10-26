@@ -211,15 +211,13 @@ const handleConfirmOrder = async () => {
         )}
       />
 
-      <View style={styles.summary}>
-        <AppText variant="body" weight="bold" numberOfLines={1}>Parcel Quantity: {totalQuantity}</AppText>
-        <AppText variant="body" weight="bold" numberOfLines={1}>Total: Rs. {totalAmount.toFixed(2)}</AppText>
+      <View style={[styles.sheet, { paddingBottom: padding.paddingBottom }]}>
+        <View style={styles.summary}>
+          <AppText variant="body" weight="bold" numberOfLines={1}>Parcel Quantity: {totalQuantity}</AppText>
+          <AppText variant="body" weight="bold" numberOfLines={1}>Total: Rs. {totalAmount.toFixed(2)}</AppText>
+        </View>
+        <AppButton title="CONFIRM ORDER" onPress={handleConfirmOrder} />
       </View>
-      <AppButton
-        title="CONFIRM ORDER"
-        onPress={handleConfirmOrder}
-        style={{ marginHorizontal: space.md, marginBottom: padding.paddingBottom }}
-      />
     </View>
   );
 };
@@ -237,16 +235,15 @@ const styles = StyleSheet.create({
   priceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.xs },
   lineTotal: { flexShrink: 1, textAlign: 'right' },
   iconButton: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
-  summary: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: space.sm,
+  sheet: {
+    gap: space.md,
     padding: space.md,
     backgroundColor: color.surface,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
     ...shadow.bar,
   },
+  summary: { flexDirection: 'row', justifyContent: 'space-between', gap: space.sm },
 });
 
 export default CartScreen;
