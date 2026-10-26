@@ -1,4 +1,5 @@
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView } from 'react-native';
+import { View, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { useState, useEffect } from 'react';
 import CancelModal from '@/components/popupmodel/popupModel';
@@ -8,6 +9,10 @@ import { Order } from '@/services/types/api.types';
 import { useFocusEffect } from 'expo-router';
 import { useScreenPadding } from '@/components/ui/Screen';
 import { Card } from '@/components/ui/Card';
+import { AppText } from '@/components/ui/AppText';
+import { AppButton } from '@/components/ui/AppButton';
+import { StatusChip } from '@/components/ui/StatusChip';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { color, radius, space } from '@/theme';
 
 const OrderStatus: React.FC = () => {
@@ -20,7 +25,7 @@ const OrderStatus: React.FC = () => {
   const [editVisible, setEditVisible] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [editItems, setEditItems] = useState<Array<{ food_item_id: number; name: string; meal_type: 'veg' | 'non-veg' | 'other'; quantity: number }>>([]);
-  const [availableSessionItems, setAvailableSessionItems] = useState<Array<{ food_item_id: number; name: string; meal_type: 'veg' | 'non-veg' | 'other' }>>([]);
+  const [availableSessionItems, setAvailableSessionItems] = useState<Array<{ food_item_id: number; name: string; meal_type: 'veg' | 'non-veg' | 'other'; price: number }>>([]);
 
   const loadOrders = async () => {
     if (!isAuthenticated || !user) {
@@ -77,13 +82,13 @@ const OrderStatus: React.FC = () => {
       const sessionItems = await menuService.getMealSessionItemsBySession(order.meal_time as any, targetDate);
       // Build lookup by name for id and meal_type
       const nameToInfo = new Map<string, { food_item_id: number; meal_type: 'veg' | 'non-veg' | 'other' }>();
-      const allChoices: Array<{ food_item_id: number; name: string; meal_type: 'veg' | 'non-veg' | 'other' }> = [];
+      const allChoices: Array<{ food_item_id: number; name: string; meal_type: 'veg' | 'non-veg' | 'other'; price: number }> = [];
       sessionItems.forEach((si: any) => {
         const fi = si.foodItem || si.food_item;
         if (fi) {
           const mt = (fi.meal_type === 'non-veg' || fi.meal_type === 'nonveg') ? 'non-veg' : (fi.meal_type === 'veg' ? 'veg' : 'other');
           nameToInfo.set(fi.name, { food_item_id: fi.id, meal_type: mt });
-          allChoices.push({ food_item_id: fi.id, name: fi.name, meal_type: mt });
+          allChoices.push({ food_item_id: fi.id, name: fi.name, meal_type: mt, price: parseFloat(fi.price) || 0 });
         }
       });
       setAvailableSessionItems(allChoices);
@@ -150,35 +155,37 @@ const OrderStatus: React.FC = () => {
 
   const renderItem = ({ item }: { item: Order }) => (
     <Card style={{ marginHorizontal: space.md }}>
-      <View style={styles.cardContent}>
-        <View style={styles.cardTextContent}>
-          <Text style={styles.orderNumber}>Order ID - {item.order_id}</Text>
-          <Text style={styles.statusText}>Status - {item.status.toUpperCase()}</Text>
-          <Text style={styles.mealTimeText}>Meal Time - {item.meal_time.toUpperCase()}</Text>
-          {item.items.map((food, index: number) => (
-            <Text key={index} style={styles.itemText}>
-              {food.food_name} - {food.quantity} ({food.meal_type})
-            </Text>
-          ))}
-          <Text style={styles.totalPrice}>Total Price - Rs. {item.total_price.toFixed(2)}</Text>
+      <View style={styles.cardTop}>
+        <View style={styles.cardTitle}>
+          <AppText variant="body" weight="bold">{item.meal_time.charAt(0).toUpperCase() + item.meal_time.slice(1)}</AppText>
+          <AppText variant="micro" tone="muted" numberOfLines={1}>{item.order_id}</AppText>
         </View>
+        <StatusChip value={item.status} />
       </View>
-      <View style={styles.actionsRow}>
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: '#0A0A0F' }]}
-          onPress={() => handleOpenEdit(item)}
-        >
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: '#d9534f' }]}
-          onPress={() => {
-            setSelectedOrderId(item.order_id);
-            setModalVisible(true);
-          }}
-        >
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
-        </TouchableOpacity>
+      {item.items.map((food, index: number) => (
+        <View key={index} style={styles.itemLine}>
+          <AppText variant="caption" style={styles.itemName}>{food.food_name} x {food.quantity}</AppText>
+          <AppText variant="caption" tone="muted">{food.meal_type}</AppText>
+        </View>
+      ))}
+      <View style={styles.separator} />
+      <View style={styles.footer}>
+        <View>
+          <AppText variant="caption" tone="muted">Total</AppText>
+          <AppText variant="h2" weight="bold">Rs. {item.total_price.toFixed(2)}</AppText>
+        </View>
+        <View style={styles.actionsRow}>
+          <AppButton title="Edit" variant="outline" onPress={() => handleOpenEdit(item)} style={styles.actionButton} />
+          <AppButton
+            title="Cancel"
+            variant="dangerOutline"
+            onPress={() => {
+              setSelectedOrderId(item.order_id);
+              setModalVisible(true);
+            }}
+            style={styles.actionButton}
+          />
+        </View>
       </View>
     </Card>
   );
@@ -186,21 +193,20 @@ const OrderStatus: React.FC = () => {
   return (
     <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
       <View style={{ alignItems: 'flex-start', marginTop: 0, marginHorizontal: space.md }}>
-        <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
+        <AppText variant="h1" weight="bold">RC Caterings</AppText>
       </View>
-      <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: space.md }}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#69bf70' }}>My Orders</Text>
+      <View style={{ alignItems: 'flex-start', marginTop: space.sm + space.xs, marginHorizontal: space.md }}>
+        <AppText variant="h2" weight="bold">My Orders</AppText>
       </View>
-      
+
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#69bf70" />
-          <Text style={styles.loadingText}>Loading orders...</Text>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={color.brandStrong} />
+          <AppText tone="brand" style={{ marginTop: space.sm }}>Loading orders...</AppText>
         </View>
       ) : orders.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No orders found</Text>
-          <Text style={styles.emptySubText}>Your current orders will appear here</Text>
+        <View style={styles.centered}>
+          <EmptyState icon="receipt-outline" title="No orders found" message="Your current orders will appear here" />
         </View>
       ) : (
         <FlatList
@@ -212,12 +218,12 @@ const OrderStatus: React.FC = () => {
           contentContainerStyle={{ paddingBottom: padding.paddingBottom }}
         />
       )}
-      <CancelModal 
-        visible={modalVisible} 
+      <CancelModal
+        visible={modalVisible}
         onClose={() => {
           setModalVisible(false);
           setSelectedOrderId(null);
-        }} 
+        }}
         onConfirm={handleCancelOrder}
         title="Cancel Order"
         message="Are you sure you want to cancel this order? This action cannot be undone."
@@ -229,41 +235,71 @@ const OrderStatus: React.FC = () => {
       <Modal visible={editVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Edit Order</Text>
+            <AppText variant="h2" weight="bold" style={{ marginBottom: space.sm }}>Edit Order</AppText>
             <ScrollView style={{ flexShrink: 1 }}>
               {editItems.map((it) => (
                 <View key={it.food_item_id} style={styles.editItemRow}>
-                  <Text style={styles.editItemText} numberOfLines={1}>{it.name} ({it.meal_type})</Text>
+                  <View style={styles.rowText}>
+                    <AppText variant="body" weight="bold" numberOfLines={1}>{it.name}</AppText>
+                    <AppText variant="caption" tone="muted" numberOfLines={1}>{it.meal_type}</AppText>
+                  </View>
                   <View style={styles.qtyControls}>
-                    <TouchableOpacity style={styles.qtyBtn} onPress={() => decrementItem(it.food_item_id)}><Text>-</Text></TouchableOpacity>
-                    <Text style={styles.qtyVal}>{it.quantity}</Text>
-                    <TouchableOpacity style={styles.qtyBtn} onPress={() => incrementItem(it.food_item_id)}><Text>+</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.removeBtn} onPress={() => removeItem(it.food_item_id)}><Text style={{ color: '#d9534f' }}>Remove</Text></TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.iconButton, { backgroundColor: color.field }]}
+                      onPress={() => decrementItem(it.food_item_id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Decrease quantity of ${it.name}`}
+                    >
+                      <Ionicons name="remove" size={24} color={color.ink} />
+                    </TouchableOpacity>
+                    <AppText variant="body" weight="bold" style={styles.qtyVal}>{it.quantity}</AppText>
+                    <TouchableOpacity
+                      style={[styles.iconButton, { backgroundColor: color.brand }]}
+                      onPress={() => incrementItem(it.food_item_id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Increase quantity of ${it.name}`}
+                    >
+                      <Ionicons name="add" size={24} color={color.onBrand} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.iconButton}
+                      onPress={() => removeItem(it.food_item_id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Remove ${it.name}`}
+                    >
+                      <Ionicons name="trash-outline" size={22} color={color.danger} />
+                    </TouchableOpacity>
                   </View>
                 </View>
               ))}
             </ScrollView>
 
             {/* Add new items */}
-            <Text style={[styles.modalSubtitle, { marginTop: 10 }]}>Add Items</Text>
+            <AppText variant="body" weight="bold" style={{ marginTop: space.sm, marginBottom: space.xs }}>Add Items</AppText>
             <ScrollView style={{ flexShrink: 1 }}>
               {availableSessionItems
                 .filter((c) => !editItems.some((e) => e.food_item_id === c.food_item_id))
                 .map((c) => (
-                  <TouchableOpacity key={c.food_item_id} style={styles.addChoiceRow} onPress={() => addItem(c)}>
-                    <Text style={styles.addChoiceText}>{c.name} ({c.meal_type})</Text>
-                    <Text style={{ color: '#69bf70', fontWeight: 'bold' }}>+ Add</Text>
-                  </TouchableOpacity>
+                  <View key={c.food_item_id} style={styles.editItemRow}>
+                    <View style={styles.rowText}>
+                      <AppText variant="body" weight="bold" numberOfLines={1}>{c.name}</AppText>
+                      <AppText variant="caption" tone="muted" numberOfLines={1}>{c.meal_type} · Rs. {c.price.toFixed(2)}</AppText>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.addButton}
+                      onPress={() => addItem(c)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Add ${c.name}`}
+                    >
+                      <AppText variant="caption" weight="bold" tone="brand">+ Add</AppText>
+                    </TouchableOpacity>
+                  </View>
                 ))}
             </ScrollView>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity style={[styles.modalBtn, { backgroundColor: '#ddd' }]} onPress={() => { setEditVisible(false); setEditingOrder(null); }}>
-                <Text>Close</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalBtn, { backgroundColor: '#69bf70' }]} onPress={handleSaveEdits}>
-                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Save Changes</Text>
-              </TouchableOpacity>
+              <AppButton title="Close" variant="secondary" onPress={() => { setEditVisible(false); setEditingOrder(null); }} style={styles.modalBtn} />
+              <AppButton title="Save Changes" onPress={handleSaveEdits} style={styles.modalBtn} />
             </View>
           </View>
         </View>
@@ -273,46 +309,18 @@ const OrderStatus: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: color.bg },
 
-  cardContent: {
-    flexDirection: 'row', // Align text and button in a row
-    justifyContent: 'space-between', // Space between text and button
-    alignItems: 'flex-start', // Align items to the top
-    position: 'relative',
-  },
-
-  cardTextContent: {
-    flex: 1, // Allow text content to take up remaining space
-  },
-
-  orderNumber: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 14,
-    color: '#0A0A0F',
-  },
-  itemText: {
-    fontSize: 15,
-    color: '#0A0A0F',
-  },
-  totalPrice: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginTop: 14,
-    color: '#69bf70',
-  },
-
-  actionsRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 10 },
-  actionButton: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 12 },
-  statusText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#69bf70',
-    marginBottom: 5,
-  },
+  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: space.sm },
+  cardTitle: { flex: 1 },
+  itemLine: { flexDirection: 'row', justifyContent: 'space-between', gap: space.sm, marginTop: space.sm + 2 },
+  itemName: { flex: 1 },
+  separator: { height: 1, backgroundColor: color.border, marginVertical: space.sm + space.xs },
+  footer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.sm },
+  actionsRow: { flexDirection: 'row', gap: space.sm },
+  actionButton: { paddingHorizontal: space.md },
   // Modal styles
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
+  modalOverlay: { flex: 1, backgroundColor: color.scrim, justifyContent: 'center', alignItems: 'center' },
   modalContainer: {
     backgroundColor: color.surface,
     width: '90%',
@@ -320,50 +328,18 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: space.md,
   },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#0A0A0F', marginBottom: 10 },
-  modalSubtitle: { fontSize: 14, fontWeight: 'bold', color: '#0A0A0F', marginBottom: 6 },
-  editItemRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderColor: '#eee' },
-  editItemText: { fontSize: 15, color: '#0A0A0F', flex: 1, marginRight: space.sm },
-  qtyControls: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  qtyBtn: { backgroundColor: '#eee', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
-  qtyVal: { minWidth: 20, textAlign: 'center', fontWeight: 'bold' },
-  removeBtn: { marginLeft: 8 },
-  addChoiceRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderColor: '#f0f0f0' },
-  addChoiceText: { fontSize: 14 },
-  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 14 },
-  modalBtn: { paddingVertical: 10, paddingHorizontal: 14, borderRadius: 10 },
-  mealTimeText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 10,
-  },
-  loadingContainer: {
+  editItemRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.sm, paddingVertical: space.xs, borderBottomWidth: 1, borderColor: color.border },
+  rowText: { flex: 1 },
+  qtyControls: { flexDirection: 'row', alignItems: 'center' },
+  qtyVal: { minWidth: 32, textAlign: 'center' },
+  iconButton: { width: 48, height: 48, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  addButton: { minHeight: 48, paddingHorizontal: space.sm, alignItems: 'center', justifyContent: 'center' },
+  modalActions: { flexDirection: 'row', gap: space.sm, marginTop: space.md },
+  modalBtn: { flex: 1 },
+  centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 100,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#69bf70',
-    fontWeight: '500',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 100,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#666',
-    marginBottom: 5,
-  },
-  emptySubText: {
-    fontSize: 14,
-    color: '#999',
   },
 });
 

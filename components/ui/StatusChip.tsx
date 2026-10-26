@@ -18,7 +18,7 @@ const labels: Record<OrderStatus, string> = {
 // `value` is a plain string because it comes from the server: a status added later must degrade to a
 // neutral chip with its raw text, not crash the screen.
 export function StatusChip({ value }: { value: string }) {
-  const known = value in status;
+  const known = Object.prototype.hasOwnProperty.call(status, value);
   const { fg, bg } = known ? status[value as OrderStatus] : status.cancelled;
   return (
     <View

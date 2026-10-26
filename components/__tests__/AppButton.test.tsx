@@ -18,3 +18,16 @@ test('keeps its accessible name while loading (no "busy" announcement)', async (
   await render(<AppButton title="Go" onPress={jest.fn()} loading />);
   expect(screen.getByLabelText('Go')).toBeTruthy();
 });
+
+test.each([
+  ['outline', color.ink],
+  ['dangerOutline', color.danger],
+] as const)('%s is transparent with a 2 px border and a label in the same colour', async (variant, tone) => {
+  await render(<AppButton title="Edit" variant={variant} onPress={jest.fn()} />);
+  expect(StyleSheet.flatten(screen.getByText('Edit').props.style).color).toBe(tone);
+  const button = StyleSheet.flatten(screen.getByLabelText('Edit').props.style);
+  expect(button.backgroundColor).toBe('transparent');
+  expect(button.borderWidth).toBe(2);
+  expect(button.borderColor).toBe(tone);
+  expect(button.minHeight).toBe(52);
+});

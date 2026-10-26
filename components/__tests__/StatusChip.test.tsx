@@ -23,3 +23,9 @@ test('an unknown status from the server shows its raw text on a neutral chip', a
   const style = StyleSheet.flatten(screen.getByText('on_hold').props.style);
   expect(style.color).toBe(status.cancelled.fg);
 });
+
+test.each(['__proto__', 'constructor', 'toString'])('the inherited key "%s" renders its raw text on the neutral chip', async (value) => {
+  await render(<StatusChip value={value} />);
+  const style = StyleSheet.flatten(screen.getByText(value).props.style);
+  expect(style.color).toBe(status.cancelled.fg);
+});
