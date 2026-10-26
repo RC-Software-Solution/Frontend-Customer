@@ -1,40 +1,31 @@
-import { View, Text, Image } from 'react-native'
+import { View, Image } from 'react-native'
 import React from 'react'
-import { Nunito_400Regular, Nunito_600SemiBold } from '@expo-google-fonts/nunito'
-import { useFonts, Raleway_700Bold } from "@expo-google-fonts/raleway"
-import { ActivityIndicator } from 'react-native'
 import AppIntroSlider from 'react-native-app-intro-slider'
 import { router } from 'expo-router'
 import { onboardingSwiperData } from '@/constants/constants'
 import { commonStyles } from '@/styles/common/common.styles'
 import { space } from '@/theme'
+import { AppText } from '@/components/ui/AppText'
 import { useAuth } from '@/services'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+const centered = { textAlign: 'center' } as const
+
 export default function WelcomeIntroScreen() {
-  let [fontsLoaded, fontsError] = useFonts({
-    Raleway_700Bold,
-    Nunito_400Regular,
-    Nunito_600SemiBold
-  });
   const insets = useSafeAreaInsets();
   const { markIntroSeen } = useAuth();
-
-  if (!fontsLoaded && !fontsError) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
-  }
 
   const renderItem = ({ item }: { item: onboardingSwiperDataType }) => (
 
 
       <View style={{ marginTop: insets.top + space.md, paddingHorizontal: space.md }}>
-        <Text style={[commonStyles.head, { fontFamily: "Raleway_700Bold" }]}>{item.head}</Text>
+        <AppText variant="h2" weight="bold" style={centered}>{item.head}</AppText>
         <Image
           source={item.image}
           style={commonStyles.slideImage} />
         <View style={{ marginTop: 3}}>
-          <Text style={[commonStyles.title, { fontFamily: "Nunito_400Regular" }]}>{item.title}</Text>
-          <Text style={[commonStyles.description, { fontFamily: "Nunito_400Regular" }]}>{item.description}</Text>
+          <AppText variant="h2" weight="bold" style={centered}>{item.title}</AppText>
+          <AppText variant="caption" tone="muted" style={[centered, commonStyles.description]}>{item.description}</AppText>
           </View>
       </View>
     
@@ -57,18 +48,16 @@ export default function WelcomeIntroScreen() {
       renderNextButton={() => (
         <View style={commonStyles.welcomeButtonContainer}>
           
-          <Text
-            style={[commonStyles.buttonText, { fontFamily: "Nunito_600SemiBold" }]}>
+          <AppText variant="body" weight="bold" tone="onBrand" style={centered}>
             Next
-          </Text>
+          </AppText>
         </View>
       )}
       renderDoneButton={() => (
         <View style={commonStyles.welcomeButtonContainer}>
-          <Text
-            style={[commonStyles.buttonText, { fontFamily: "Nunito_600SemiBold" }]}>
+          <AppText variant="body" weight="bold" tone="onBrand" style={centered}>
             Done
-          </Text>
+          </AppText>
         </View>
       )}
 

@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { color, radius, space, type } from "@/theme";
+import { color, radius, space } from "@/theme";
 export const commonStyles = StyleSheet.create({
     dotStyle: {
         backgroundColor: color.border,
@@ -17,28 +17,6 @@ export const commonStyles = StyleSheet.create({
         marginHorizontal: space.xs,
         bottom: 24,
     },
-    buttonText: {
-        color: "white",
-        textAlign: "center",
-        fontSize: 20,
-
-        textAlignVertical: "center",
-
-        alignSelf:"center"
-      },
-
-      head:{
-
-        fontSize: type.h2,
-        textAlign:"center",
-      },
-
-    title:{
-
-        fontSize: type.h2,
-        textAlign:"center",
-         fontWeight: "700"
-    },
     slideImage: {
         marginTop: space.lg,
         alignSelf: 'center',
@@ -51,9 +29,6 @@ export const commonStyles = StyleSheet.create({
     description: {
         marginHorizontal: space.lg,
         marginBottom: space.sm,
-        fontSize: type.caption,
-        textAlign: 'center',
-        color: color.muted,
     },
     welcomeButtonContainer: {
         backgroundColor: color.brand,

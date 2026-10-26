@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { color, radius, space, type } from "@/theme";
+import { color, radius, space } from "@/theme";
 
 const styles = StyleSheet.create({
     firstContainer: {
@@ -20,9 +20,7 @@ const styles = StyleSheet.create({
     },
     titleTextShape1: { position: 'absolute', right: -8, top: -18, width: 40, height: 40, resizeMode: 'contain' },
     titleText: {
-        fontSize: type.h2,
         textAlign: "center",
-        color: "#ffffff"
     },
     titleTextShape2: { position: 'absolute', left: -8, bottom: -14, width: 36, height: 36, resizeMode: 'contain' },
     titleTextShape3: { position: 'absolute', left: -4, top: -20, width: 28, height: 28, resizeMode: 'contain' },
@@ -31,9 +29,7 @@ const styles = StyleSheet.create({
     }
     ,
     dscpText: {
-        fontSize: type.caption,
         textAlign: "center",
-        color: "#ffffff"
     },
     buttonWrapper: {
         backgroundColor: "transparent",
@@ -50,9 +46,7 @@ const styles = StyleSheet.create({
         bottom: 50
     },
     buttonText: {
-        color: "#ffffff",
         textAlign: "center",
-        fontSize: type.body,
     },
     backgroundImage: {
         flex: 1,
@@ -67,7 +61,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: color.scrim,
     }
 
 
