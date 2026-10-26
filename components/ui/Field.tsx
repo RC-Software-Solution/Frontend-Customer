@@ -4,10 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
 import { color, radius, space, type } from '@/theme';
 
+const TOGGLE_SIZE = 48;
+
 type FieldProps = TextInputProps & {
   label?: string;
   error?: string;
   secure?: boolean;
+  ref?: React.Ref<TextInput>;
 };
 
 export function Field({ label, error, secure = false, style, onFocus, onBlur, ...rest }: FieldProps) {
@@ -31,7 +34,7 @@ export function Field({ label, error, secure = false, style, onFocus, onBlur, ..
               backgroundColor: focused ? color.surface : color.field,
               borderRadius: radius.md,
               paddingHorizontal: space.md,
-              paddingRight: secure ? 48 : space.md,
+              paddingRight: secure ? TOGGLE_SIZE : space.md,
               minHeight: 52,
               fontSize: type.body,
               color: color.ink,
@@ -58,7 +61,7 @@ export function Field({ label, error, secure = false, style, onFocus, onBlur, ..
             onPress={() => setRevealed((v) => !v)}
             accessibilityRole="button"
             accessibilityLabel={revealed ? 'Hide password' : 'Show password'}
-            style={{ position: 'absolute', right: 0, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}
+            style={{ position: 'absolute', right: 0, width: TOGGLE_SIZE, height: TOGGLE_SIZE, alignItems: 'center', justifyContent: 'center' }}
           >
             <Ionicons
               name={revealed ? 'eye-off-outline' : 'eye-outline'}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, TextInput } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Field } from '../ui/Field';
 import { color } from '@/theme';
@@ -41,4 +41,21 @@ test('password toggle flips its label and is a 48dp target', async () => {
   expect(s.height).toBeGreaterThanOrEqual(48);
   await fireEvent.press(toggle);
   expect(screen.getByLabelText('Hide password')).toBeTruthy();
+});
+
+test('background is color.field unfocused and color.surface focused', async () => {
+  await render(<Field placeholder="Email" />);
+  const input = screen.getByPlaceholderText('Email');
+  const bg = () => StyleSheet.flatten(screen.getByPlaceholderText('Email').props.style).backgroundColor;
+  expect(bg()).toBe(color.field);
+  await fireEvent(input, 'focus');
+  expect(bg()).toBe(color.surface);
+  await fireEvent(input, 'blur');
+  expect(bg()).toBe(color.field);
+});
+
+test('a ref passed to Field reaches the TextInput', async () => {
+  const ref = React.createRef<TextInput>();
+  await render(<Field placeholder="Email" ref={ref} />);
+  expect(typeof ref.current?.focus).toBe('function');
 });

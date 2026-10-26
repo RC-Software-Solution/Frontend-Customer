@@ -1,16 +1,11 @@
-import { View, Text, Image, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { router, useLocalSearchParams } from 'expo-router';
 import { authService } from '@/services';
 import { getFcmToken } from "@/services/push/push.service";
 import { Field } from '@/components/ui/Field';
 import { AppButton } from '@/components/ui/AppButton';
-import { KeyboardForm } from '@/components/ui/KeyboardForm';
-import { color, space, shadow } from '@/theme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AuthLayout } from '@/components/ui/AuthLayout';
 export default function signUpSecondScreen() {
-    const insets = useSafeAreaInsets();
     const params = useLocalSearchParams(); // Retrieve user data from previous screen
 
     const [passwordInfo, setPasswordInfo] = useState({
@@ -68,57 +63,37 @@ export default function signUpSecondScreen() {
 
 
     return (
-        <GestureHandlerRootView style={styles.container}>
-            <KeyboardForm>
+        <AuthLayout
+            title="Create a Password"
+            eyebrow="Step 2 of 2"
+            subtitle="At least 8 characters, with a number and a special character."
+            onBack={() => router.back()}
+        >
+            <Field
+                label="Password"
+                secure
+                placeholder="Password"
+                value={passwordInfo.password}
+                onChangeText={(text) => setPasswordInfo({ ...passwordInfo, password: text })}
+                error={Error.passwordError || undefined}
+            />
 
-                {/* Top background Image  */}
-                <Image source={require('../../../assets/signinback.jpg')} style={styles.signInImage} />
+            <Field
+                label="Confirm Password"
+                secure
+                placeholder="Confirm Password"
+                value={passwordInfo.confirmPassword}
+                onChangeText={(text) =>
+                    setPasswordInfo({ ...passwordInfo, confirmPassword: text })
+                }
+                error={Error.confirmPasswordError || undefined}
+            />
 
-                {/* White Curved Form Area */}
-                <View style={[styles.formContainer, { flexGrow: 1, paddingBottom: insets.bottom + space.xl }]}>
-                    <Text style={styles.title}>Create a Password</Text>
-
-                    <Field
-                        label="Password"
-                        secure
-                        placeholder="Password"
-                        value={passwordInfo.password}
-                        onChangeText={(text) => setPasswordInfo({ ...passwordInfo, password: text })}
-                        error={Error.passwordError || undefined}
-                    />
-
-                    <Field
-                        label="Confirm Password"
-                        secure
-                        placeholder="Confirm Password"
-                        value={passwordInfo.confirmPassword}
-                        onChangeText={(text) =>
-                            setPasswordInfo({ ...passwordInfo, confirmPassword: text })
-                        }
-                        error={Error.confirmPasswordError || undefined}
-                    />
-
-                    <AppButton
-                        title="Complete SignUp"
-                        onPress={handleNext}
-                        loading={buttonSpinner}
-                    />
-                </View>
-                </KeyboardForm>
-        </GestureHandlerRootView>
+            <AppButton
+                title="Create account"
+                onPress={handleNext}
+                loading={buttonSpinner}
+            />
+        </AuthLayout>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1 },
-    signInImage: { width: "100%", height: 250, resizeMode: "cover" },
-    formContainer: {
-        backgroundColor: color.surface,
-        padding: space.lg,
-        borderTopLeftRadius: 40,
-        borderTopRightRadius: 40,
-        marginTop: -40,
-        ...shadow.card,
-    },
-    title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
-});

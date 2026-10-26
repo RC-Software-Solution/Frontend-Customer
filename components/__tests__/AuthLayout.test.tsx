@@ -55,3 +55,10 @@ test('AuthFooterLink shows both texts and the action is a 48dp button', async ()
   await fireEvent.press(screen.getByText('Sign Up'));
   expect(fn).toHaveBeenCalledTimes(1);
 });
+
+test('eyebrow renders above the title when given and not otherwise', async () => {
+  const { rerender } = await render(<AuthLayout title="Sign Up"><Text>c</Text></AuthLayout>);
+  expect(screen.queryByText('Step 1 of 2')).toBeNull();
+  await rerender(<AuthLayout title="Sign Up" eyebrow="Step 1 of 2"><Text>c</Text></AuthLayout>);
+  expect(screen.getByText('Step 1 of 2')).toBeTruthy();
+});

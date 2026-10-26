@@ -14,11 +14,14 @@ import { color, radius, space, status } from '@/theme';
 export function AuthLayout({
   title,
   subtitle,
+  eyebrow,
   onBack,
   children,
 }: {
   title: string;
   subtitle?: string;
+  /** small brand line above the title, e.g. "Step 1 of 2" */
+  eyebrow?: string;
   /** shows a back arrow over the photo */
   onBack?: () => void;
   children: ReactNode;
@@ -54,6 +57,11 @@ export function AuthLayout({
         ) : null}
       </View>
       <View style={[styles.sheet, { paddingBottom: insets.bottom + space.xl }]}>
+        {eyebrow ? (
+          <AppText variant="caption" weight="bold" tone="brand" style={styles.eyebrow}>
+            {eyebrow}
+          </AppText>
+        ) : null}
         <AppText variant="h1" weight="bold" style={styles.title}>
           {title}
         </AppText>
@@ -136,6 +144,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
   },
+  eyebrow: { textAlign: 'left', marginBottom: space.xs },
   title: { textAlign: 'left', marginBottom: space.xs },
   subtitle: { textAlign: 'left', marginBottom: space.lg },
   banner: {

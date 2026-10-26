@@ -1,16 +1,11 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { useState, } from 'react'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { router } from 'expo-router'
 import { Field } from '@/components/ui/Field'
 import { AppButton } from '@/components/ui/AppButton'
-import { KeyboardForm } from '@/components/ui/KeyboardForm';
-import { color, space, shadow } from '@/theme'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { AuthFooterLink, AuthLayout } from '@/components/ui/AuthLayout'
 
 export default function signUpScreen() {
-    const insets = useSafeAreaInsets();
     const [buttonSpinner, setButtonSpinner] = useState(false);
     const [userInfo, setUserInfo] = useState({
         name: "",
@@ -60,95 +55,54 @@ export default function signUpScreen() {
     };
 
     return (
-        <GestureHandlerRootView style={styles.container}>
-            <KeyboardForm>
+        <AuthLayout
+            title="Sign Up"
+            eyebrow="Step 1 of 2"
+            subtitle="Create your account to start ordering."
+        >
+            <Field
+                label="Full Name"
+                placeholder="Full Name"
+                value={userInfo.name}
+                onChangeText={(text) => setUserInfo({ ...userInfo, name: text })}
+                error={Error.nameError || undefined}
+            />
 
-                {/* Top background Image  */}
-                <Image source={require('../../../assets/signinback.jpg')} style={styles.signInImage} />
+            <Field
+                label="Email"
+                placeholder="Email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={userInfo.email}
+                onChangeText={(text) => setUserInfo({ ...userInfo, email: text })}
+                error={Error.emailError || undefined}
+            />
 
-                {/* White Curved Form Area */}
-                <View style={[styles.formContainer, { flexGrow: 1, paddingBottom: insets.bottom + space.xl }]}>
-                    <Text style={styles.title}>Sign Up</Text>
+            <Field
+                label="Phone Number"
+                placeholder="Phone Number"
+                keyboardType="numeric"
+                maxLength={10}
+                value={userInfo.phone}
+                onChangeText={(text) => setUserInfo({ ...userInfo, phone: text })}
+                error={Error.phoneError || undefined}
+            />
 
-                    <Field
-                        label="Full Name"
-                        placeholder="Full Name"
-                        value={userInfo.name}
-                        onChangeText={(text) => setUserInfo({ ...userInfo, name: text })}
-                        error={Error.nameError || undefined}
-                    />
+            <Field
+                label="Location"
+                placeholder="Location"
+                value={userInfo.location}
+                onChangeText={(text) => setUserInfo({ ...userInfo, location: text })}
+                error={Error.locationError || undefined}
+            />
 
-                    <Field
-                        label="Email"
-                        placeholder="Email"
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        value={userInfo.email}
-                        onChangeText={(text) => setUserInfo({ ...userInfo, email: text })}
-                        error={Error.emailError || undefined}
-                    />
+            <AppButton title="Next" onPress={handleNext} loading={buttonSpinner} />
 
-                    <Field
-                        label="Phone Number"
-                        placeholder="Phone Number"
-                        keyboardType="numeric"
-                        maxLength={10}
-                        value={userInfo.phone}
-                        onChangeText={(text) => setUserInfo({ ...userInfo, phone: text })}
-                        error={Error.phoneError || undefined}
-                    />
-
-                    <Field
-                        label="Location"
-                        placeholder="Location"
-                        value={userInfo.location}
-                        onChangeText={(text) => setUserInfo({ ...userInfo, location: text })}
-                        error={Error.locationError || undefined}
-                    />
-
-                    <AppButton title="Next" onPress={handleNext} loading={buttonSpinner} />
-
-                    <TouchableOpacity>
-                                            <View style={styles.signUpRedirect}>
-                                                <Text style={{ fontSize: 16, fontFamily: "Raleway_600SemiBold" }}
-                                                 onPress={() => router.push("/(routes)/login")}>
-                                                   Already have an account?
-                                                    <Text
-                                                        style={{ fontFamily: "Raleway_700Bold", color: "#69bf70" }}
-                                                       
-                                                    >
-                                                        {" "}Sign In
-                                                    </Text>
-                                                </Text>
-                                            </View>
-                                        </TouchableOpacity>
-                    
-                </View>
-                </KeyboardForm>
-        </GestureHandlerRootView>
+            <AuthFooterLink
+                prompt="Already have an account?"
+                action="Sign In"
+                onPress={() => router.push("/(routes)/login")}
+            />
+        </AuthLayout>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1 },
-    signInImage: { width: "100%", height: 250, resizeMode: "cover" },
-    formContainer:
-    {
-        backgroundColor: color.surface,
-        padding: space.lg,
-        borderTopLeftRadius: 40,
-        borderTopRightRadius: 40,
-        marginTop: -40,
-        ...shadow.card,
-    },
-    title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
-     signUpRedirect: {
-        flexDirection: "row",
-        justifyContent: "center",
-        marginBottom: 20,
-        marginHorizontal: 16,
-        marginTop: 20,
-    }
-
-});
-
