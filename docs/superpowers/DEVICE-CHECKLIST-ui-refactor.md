@@ -136,3 +136,63 @@ These were settled by reading code or arithmetic, and do not need checking:
   `authService` calls, redux dispatches, focus effects.
 - The build holds at 21 pre-existing errors in two out-of-scope `services/` files, with
   zero errors in any file this branch touched.
+
+## UI modernization (feat/ui-modernization) — checks
+
+Date: 2026-10-26. Run on a real device. Test account: `qa.customer@test.local` / `Passw0rd!`.
+
+### a. Every order status (`ui-ord-*` orders)
+Active cards on Orders only show on their creation day (Orders filters `created_at` today). If missing, re-seed with the Backend's scripts. Order history shows all statuses with no Edit/Cancel.
+- [ ] pending: Edit + Cancel visible (Orders)
+- [ ] preparing: no actions, status chip only
+- [ ] delivering: shows "On the way"
+- [ ] delivered: renders correctly
+- [ ] completed: renders correctly
+- [ ] cancelled: renders correctly
+- [ ] delivery_failed: renders correctly
+- [ ] Order history lists all of the above with no Edit/Cancel
+
+### b. Backend status guard (Backend branch `fix/order-status-guard`)
+Check by API only, on a throwaway order, never on real data. NEVER confirm a cancel on the shared dev phone.
+- [ ] Refused cancel of a non-pending order shows "Only pending orders can be cancelled" in the dialog
+- [ ] Refused edit of a non-pending order shows "Only pending orders can be edited" in the dialog
+
+### c. Light-mode lock
+- [ ] Phone set to dark theme (system): app stays light
+- [ ] Backgrounds, status bar, inputs, modals stay light
+- [ ] Keyboard and Alert dialogs follow light
+
+### d. Slow / offline behaviour (jest-only so far)
+Airplane mode, or stop Metro/backend, on a test device.
+- [ ] Home, Menu list, Orders, Payments, History, Notifications each show the offline panel "Check your connection and try again." with "Try again"
+- [ ] With data already loaded, last data stays with the muted "Couldn't refresh. Pull down to try again." line
+- [ ] Sign In shows the offline banner
+- [ ] Slow network: skeleton cards, no layout jump
+
+### e. Checkout refusals (jest-only so far; throwaway account only)
+- [ ] Unpaid >= 2: banner + Try again
+- [ ] No area (flow.noarea): banner + Try again
+- [ ] Session closed: banner + Try again
+- [ ] Stale basket: banner + Try again
+- [ ] Server error: banner + Try again
+- [ ] CONFIRM ORDER double tap sends exactly one order
+
+### f. Retry wording
+- [ ] Every retry action reads "Try again"
+
+### g. iOS pass (when an iPhone is available)
+- [ ] Nunito fonts load, no system-font flash
+- [ ] Shadows: card/bar elevation vs iOS shadow props look right
+- [ ] Safe-area insets: tab bar, cart bar, sign-in footer, modals (notch/home indicator)
+- [ ] Keyboard avoidance: Sign In, Sign Up, Reset, Edit Profile, Change Password, Delete Account type-DELETE dialog
+- [ ] Status bar style
+- [ ] Pull-to-refresh
+- [ ] Back swipe gesture on Menu and History
+- [ ] VoiceOver labels (TalkBack equivalents): tab unread count, status chips, buttons
+
+### Known device-unverified
+- 360dp wrapping
+- Notifications label at 360dp
+- Checkout banners
+- Offline panels
+- Preparing/delivering cards on days without seeded data
