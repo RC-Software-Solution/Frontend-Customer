@@ -1,5 +1,4 @@
 import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
-import { useTheme } from 'expo-router/react-navigation';
 import { BottomTabBarProps } from 'expo-router/js-tabs';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
@@ -8,7 +7,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { color, radius, shadow, space } from '@/theme';
 import { TAB_BAR_GAP, TAB_BAR_HEIGHT } from '@/theme/layout';
-import TabBarButton from '../tabBarButton.tsx/tabBarButton';
+import TabBarButton from '../tabBarButton/tabBarButton';
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const [dimensions, setDimensions] = useState<{ height: number; width: number } | null>(null);
@@ -35,8 +34,6 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     transform: [{ translateX: tabPositionX.value }],
   }));
 
-  const { colors } = useTheme();
-
   return (
     <View
       onLayout={onTabbarLayout}
@@ -49,9 +46,9 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             {
               position: 'absolute',
               backgroundColor: color.brand,
-              width: buttonWidth - 25,
-              height: dimensions.height - 15,
-              marginHorizontal: 12.5,
+              width: buttonWidth - space.sm,
+              height: dimensions.height - space.md,
+              marginHorizontal: space.xs,
               borderRadius: radius.lg,
             },
           ]}
@@ -59,7 +56,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       ) : null}
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
-        const label = options.tabBarLabel ?? options.title ?? route.name;
+        const label = options.title ?? route.name;
         const isFocused = state.index === index;
 
         const onPress = () => {
@@ -77,7 +74,6 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             onLongPress={() => navigation.emit({ type: 'tabLongPress', target: route.key })}
             isFocused={isFocused}
             routeName={route.name}
-            color={isFocused ? '#69bf70' : '#222'}
             label={label}
             badge={route.name === 'notification/index' ? unread : 0}
           />

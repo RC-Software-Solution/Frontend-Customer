@@ -1,5 +1,3 @@
-import { JSX } from 'react';
-import { Image } from 'react-native';
 export const onboardingSwiperData: onboardingSwiperDataType[] = [
     {
         id: 1,
@@ -23,41 +21,3 @@ export const onboardingSwiperData: onboardingSwiperDataType[] = [
         image: require("../assets/swiperImages/image3.png")
     },
 ]
-
-export const icon: Record<string, (props: any) => JSX.Element> = {
-    index: (props) => (
-        <Image
-            style={{ width: 25, height: 25, tintColor: props.color }}
-            source={require('@/assets/navbarIcons/homeIcon.png')}
-            {...props}
-        /> 
-    ),
-    "order-status/index": (props) => (
-        <Image
-            style={{ width: 25, height: 25, tintColor: props.color }}
-            source={require('@/assets/navbarIcons/orderStatus.png')}
-            {...props}
-        /> 
-    ),
-    "pending-payments/index": (props) => (
-        <Image
-            style={{ width: 25, height: 25, tintColor: props.color }}
-            source={require('@/assets/navbarIcons/payUp.png')}
-            {...props}
-        /> 
-    ),
-    "notification/index": (props) => (
-        <Image
-            style={{ width: 25, height: 25, tintColor: props.color }}
-            source={require('@/assets/navbarIcons/notify.png')}
-            {...props}
-        /> 
-    ),
-    "profile/index": (props) => (
-        <Image
-            style={{ width: 25, height: 25, tintColor: props.color }}
-            source={require('@/assets/navbarIcons/prof.png')}
-            {...props}
-        /> 
-    ),
-};

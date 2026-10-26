@@ -40,11 +40,11 @@ export const shadow = {
     shadowRadius: 4,
   },
   bar: {
-    elevation: 10,
+    elevation: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 10,
+    shadowRadius: 8,
   },
 } as const;
 
