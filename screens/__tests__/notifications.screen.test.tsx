@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, within, act } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NotificationsScreen from '../notifications/notifications.screen';
@@ -56,5 +56,51 @@ describe('notifications screen', () => {
     await screen.findByText('Newer');
     expect(store.getState().notices.unread).toBe(0);
     expect(await AsyncStorage.getItem('notices_seen_u1')).toBe('7');
+  });
+
+  describe('unread cards', () => {
+    const open = async () => {
+      svc.getNotices.mockResolvedValue([notice(7, 'Newer', 'x'), notice(3, 'Older', 'x')]);
+      await render(<Provider store={store}><NotificationsScreen /></Provider>);
+      await screen.findByText('Newer');
+    };
+    const isUnread = (id: number) => within(screen.getByTestId(`notice-${id}`)).queryByLabelText('Unread') !== null;
+
+    it('marks only the notices newer than the last seen one as unread', async () => {
+      await AsyncStorage.setItem('notices_seen_u1', '3');
+      await open();
+      expect(isUnread(7)).toBe(true);
+      expect(isUnread(3)).toBe(false);
+    });
+
+    it('treats every notice as unread on the first open', async () => {
+      await open();
+      expect(isUnread(7)).toBe(true);
+      expect(isUnread(3)).toBe(true);
+    });
+
+    it('keeps the cards that were unread on open highlighted after a pull to refresh', async () => {
+      await AsyncStorage.setItem('notices_seen_u1', '3');
+      await open();
+      expect(await AsyncStorage.getItem('notices_seen_u1')).toBe('7');
+      await act(async () => { screen.getByTestId('notices-list').props.refreshControl.props.onRefresh(); });
+      expect(svc.getNotices).toHaveBeenCalledTimes(2);
+      expect(isUnread(7)).toBe(true);
+      expect(isUnread(3)).toBe(false);
+    });
+  });
+
+  it('shows the error state with a retry button', async () => {
+    svc.getNotices.mockRejectedValue(new Error('network'));
+    await render(<Provider store={store}><NotificationsScreen /></Provider>);
+    expect(await screen.findByText('Could not load notifications.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Tap to retry' })).toBeTruthy();
+  });
+
+  it('shows the empty state title and message', async () => {
+    svc.getNotices.mockResolvedValue([]);
+    await render(<Provider store={store}><NotificationsScreen /></Provider>);
+    expect(await screen.findByText('No notifications yet.')).toBeTruthy();
+    expect(screen.getByText('Announcements from RC Caterings appear here.')).toBeTruthy();
   });
 });

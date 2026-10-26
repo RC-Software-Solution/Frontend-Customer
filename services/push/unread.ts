@@ -14,7 +14,7 @@ const maxId = (notices: Notice[]) => notices.reduce((m, n) => Math.max(m, Number
 export const countUnread = (notices: Notice[], seenId: number) =>
   notices.filter((n) => Number(n.id) > seenId).length;
 
-const readSeen = async (userId: string | number) => Number((await AsyncStorage.getItem(key(userId))) ?? 0) || 0;
+export const readSeen = async (userId: string | number) => Number((await AsyncStorage.getItem(key(userId))) ?? 0) || 0;
 
 /** Fetch the notices and count the ones newer than what the user last saw. */
 export async function fetchUnread(userId: string | number): Promise<number> {
