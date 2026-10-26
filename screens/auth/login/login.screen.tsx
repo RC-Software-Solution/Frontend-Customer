@@ -1,6 +1,5 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native'
 import React, { useEffect } from 'react'
-import { FontAwesome } from '@expo/vector-icons'
 import { useState, } from 'react'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { router } from 'expo-router'
@@ -139,13 +138,9 @@ const handleSignIn = async () => {
                     <View>
                         <AppButton title="Sign In" onPress={handleSignIn} loading={buttonSpinner} />
                     </View>
-                    <View style={{flexDirection:"row",justifyContent:"center",alignItems:"center",marginTop:20,gap:10}}>
-                            <TouchableOpacity onPress={() => router.push("https://www.tiktok.com/@kauz64?_t=ZS-8tu51eNKGXp&_r=1")}>
-                                <FontAwesome name="google" size={30} color="black" />
-                                
-                            </TouchableOpacity>
-                            
-                    </View>
+                    {/* TODO(google-auth): "Sign in with Google" is not built yet. Needs a Google Cloud OAuth setup,
+                        POST /api/users/google in user-service, @react-native-google-signin/google-signin and a dev build
+                        (no Expo Go). Decide sign-in only vs sign-up too first. */}
 
                     <TouchableOpacity>
                         <View style={styles.signUpRedirect}>
