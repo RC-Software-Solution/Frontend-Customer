@@ -1,39 +1,18 @@
-import {
-  View,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  Animated,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-  AppState,
-} from "react-native";
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-} from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import RenderItem from "@/components/flatList/flatList";
-import { router, useFocusEffect } from "expo-router";
-import { useDispatch, useSelector } from "react-redux";
-import { addToCart } from "@/store/cartSlice";
-import { RootState } from "@/store";
-import { menuService, useAuth } from "@/services";
-import { FoodItem, TodayMenu } from "@/services/types/api.types";
-import {
-  MealType,
-  MEAL_TYPES,
-  buildTabs,
-  nextTransitionMs,
-} from "@/services/menu/todayMenu";
-import { useScreenPadding, StatusBarScrim } from "@/components/ui/Screen";
-import { AppText } from "@/components/ui/AppText";
-import { Ionicons } from "@expo/vector-icons";
-import { color, space, radius, shadow, status } from "@/theme";
+import { View, TouchableOpacity, ScrollView, Image, Animated, StyleSheet, ActivityIndicator, Alert, AppState } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import RenderItem from '@/components/flatList/flatList';
+import { router, useFocusEffect } from 'expo-router';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '@/store/cartSlice';
+import { RootState } from '@/store';
+import { menuService, useAuth } from '@/services';
+import { FoodItem, TodayMenu } from '@/services/types/api.types';
+import { MealType, MEAL_TYPES, buildTabs, nextTransitionMs } from '@/services/menu/todayMenu';
+import { useScreenPadding, StatusBarScrim } from '@/components/ui/Screen';
+import { AppText } from '@/components/ui/AppText';
+import { Ionicons } from '@expo/vector-icons';
+import { color, space, radius, shadow, status } from '@/theme';
 
 const CART_FAB_SIZE = 56;
 
@@ -47,10 +26,8 @@ type Expansion = { [key in MealType]: { Veg: boolean; NonVeg: boolean } };
 
 const HomeScreen = () => {
   const { isAuthenticated } = useAuth();
-  const [selectedItems, setSelectedItems] = useState<{
-    [key: string]: boolean;
-  }>({});
-  const [activeButton, setActiveButton] = useState<MealType>("breakfast");
+  const [selectedItems, setSelectedItems] = useState<{ [key: string]: boolean }>({});
+  const [activeButton, setActiveButton] = useState<MealType>('breakfast');
   const [loading, setLoading] = useState(true);
   const [menu, setMenu] = useState<TodayMenu | null>(null);
   const [expansionState, setExpansionState] = useState<Expansion>({
@@ -79,9 +56,8 @@ const HomeScreen = () => {
       setMenu(await menuService.getTodaysMenu());
       hasLoaded.current = true;
     } catch (error) {
-      console.error("Failed to load menu data:", error);
-      if (!hasLoaded.current)
-        Alert.alert("Error", "Failed to load menu items. Please try again.");
+      console.error('Failed to load menu data:', error);
+      if (!hasLoaded.current) Alert.alert('Error', 'Failed to load menu items. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -91,15 +67,12 @@ const HomeScreen = () => {
   useFocusEffect(
     useCallback(() => {
       loadMenuData();
-    }, [loadMenuData]),
+    }, [loadMenuData])
   );
 
   // ...when the app returns from the background (the day may have changed overnight)
   useEffect(() => {
-    const sub = AppState.addEventListener(
-      "change",
-      (s) => s === "active" && loadMenuData(),
-    );
+    const sub = AppState.addEventListener('change', (s) => s === 'active' && loadMenuData());
     return () => sub.remove();
   }, [loadMenuData]);
 
@@ -115,9 +88,7 @@ const HomeScreen = () => {
   const handleViewCart = () => {
     const tab = tabs?.[activeButton];
     // only an open session can be ordered from; selections in other tabs are ignored
-    const selectedList = tab?.orderable
-      ? Object.keys(selectedItems).filter((name) => selectedItems[name])
-      : [];
+    const selectedList = tab?.orderable ? Object.keys(selectedItems).filter((name) => selectedItems[name]) : [];
 
     const cartFormattedItems = selectedList.flatMap((name) => {
       const vegItem = tab!.veg.find((item) => item.name === name);
@@ -132,10 +103,8 @@ const HomeScreen = () => {
           name,
           price: parseFloat(foodItem.price),
           quantity: 1,
-          image: foodItem.image_url
-            ? { uri: foodItem.image_url }
-            : require("../../../assets/plate.jpeg"),
-          meal_type: (vegItem ? "veg" : "non-veg") as "veg" | "non-veg",
+          image: foodItem.image_url ? { uri: foodItem.image_url } : require('../../../assets/plate.jpeg'),
+          meal_type: (vegItem ? 'veg' : 'non-veg') as 'veg' | 'non-veg',
           meal_time: activeButton,
           description: foodItem.description,
           // the session's own date (today), sent as the order's target_date
@@ -145,18 +114,14 @@ const HomeScreen = () => {
     });
 
     const itemsToAdd = cartFormattedItems.filter(
-      (newItem) =>
-        !cartItems.some(
-          (existingItem: { name: string }) =>
-            existingItem.name === newItem.name,
-        ),
+      (newItem) => !cartItems.some((existingItem: { name: string }) => existingItem.name === newItem.name)
     );
     itemsToAdd.forEach((item) => dispatch(addToCart(item)));
 
-    router.push("/(routes)/cart");
+    router.push('/(routes)/cart');
   };
 
-  const toggleSection = (category: MealType, section: "Veg" | "NonVeg") => {
+  const toggleSection = (category: MealType, section: 'Veg' | 'NonVeg') => {
     setExpansionState((prev) => ({
       ...prev,
       [category]: { ...prev[category], [section]: !prev[category][section] },
@@ -173,7 +138,7 @@ const HomeScreen = () => {
     items: FoodItem[],
     expanded: boolean,
     onToggle: () => void,
-    disabled: boolean,
+    disabled: boolean
   ) => (
     <>
       <TouchableOpacity
@@ -186,40 +151,20 @@ const HomeScreen = () => {
         <Image
           source={banner}
           resizeMode="cover"
-          style={{
-            width: "100%",
-            height: 150,
-            alignSelf: "center",
-            borderRadius: radius.lg,
-          }}
+          style={{ width: '100%', height: 150, alignSelf: 'center', borderRadius: radius.lg }}
         />
       </TouchableOpacity>
-      <Animated.View
-        style={{
-          height: expanded ? undefined : 0,
-          overflow: "hidden",
-          marginHorizontal: space.md,
-        }}
-      >
+      <Animated.View style={{ height: expanded ? undefined : 0, overflow: 'hidden', marginHorizontal: space.md }}>
         {expanded && (
           <View>
-            <AppText
-              variant="body"
-              weight="bold"
-              tone="ink"
-              style={{ marginTop: space.sm, marginBottom: space.md }}
-            >
+            <AppText variant="body" weight="bold" tone="ink" style={{ marginTop: space.sm, marginBottom: space.md }}>
               {title} ({items.length})
             </AppText>
             {/* ponytail: bounded list (a handful of dishes per session), a nested FlatList would warn. Switch the screen to one SectionList if menus grow past ~30 items. */}
             {items.map((item) => (
               <RenderItem
                 key={item.id}
-                item={{
-                  name: item.name,
-                  description: item.description,
-                  price: parseFloat(item.price),
-                }}
+                item={{ name: item.name, description: item.description, price: parseFloat(item.price) }}
                 onPressCheckbox={handleMealSelection}
                 isChecked={selectedItems[item.name] || false}
                 disabled={disabled}
@@ -236,12 +181,7 @@ const HomeScreen = () => {
       return (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={color.brandStrong} />
-          <AppText
-            variant="body"
-            tone="brand"
-            weight="semibold"
-            style={styles.loadingText}
-          >
+          <AppText variant="body" tone="brand" weight="semibold" style={styles.loadingText}>
             Loading menu items...
           </AppText>
         </View>
@@ -251,12 +191,7 @@ const HomeScreen = () => {
     if (!isAuthenticated) {
       return (
         <View style={styles.loadingContainer}>
-          <AppText
-            variant="body"
-            tone="brand"
-            weight="semibold"
-            style={styles.loadingText}
-          >
+          <AppText variant="body" tone="brand" weight="semibold" style={styles.loadingText}>
             Please log in to view menu items
           </AppText>
         </View>
@@ -266,12 +201,7 @@ const HomeScreen = () => {
     if (!tabs) {
       return (
         <View style={styles.loadingContainer}>
-          <AppText
-            variant="body"
-            tone="brand"
-            weight="semibold"
-            style={styles.loadingText}
-          >
+          <AppText variant="body" tone="brand" weight="semibold" style={styles.loadingText}>
             Could not load the menu. Pull back to this screen to retry.
           </AppText>
         </View>
@@ -283,20 +213,14 @@ const HomeScreen = () => {
 
     return (
       <View>
-        <View
-          style={{
-            alignItems: "flex-start",
-            marginTop: padding.paddingTop,
-            marginHorizontal: space.md,
-          }}
-        >
+        <View style={{ alignItems: 'flex-start', marginTop: padding.paddingTop, marginHorizontal: space.md }}>
           <AppText variant="h1" weight="bold">
             RC Caterings
           </AppText>
         </View>
         <View
           style={{
-            flexDirection: "row",
+            flexDirection: 'row',
             marginTop: space.lg,
             marginHorizontal: space.md,
             backgroundColor: color.surface,
@@ -317,10 +241,10 @@ const HomeScreen = () => {
                   minHeight: 64,
                   paddingVertical: space.md,
                   paddingHorizontal: space.sm,
-                  backgroundColor: selected ? color.brand : "transparent",
+                  backgroundColor: selected ? color.brand : 'transparent',
                   borderRadius: radius.md,
-                  alignItems: "center",
-                  justifyContent: "center",
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
                 onPress={() => setActiveButton(category)}
               >
@@ -330,7 +254,7 @@ const HomeScreen = () => {
                   numberOfLines={1}
                   adjustsFontSizeToFit
                   minimumFontScale={0.85}
-                  tone={selected ? "onBrand" : "brand"}
+                  tone={selected ? 'onBrand' : 'brand'}
                 >
                   {category.charAt(0).toUpperCase() + category.slice(1)}
                 </AppText>
@@ -339,7 +263,7 @@ const HomeScreen = () => {
                   numberOfLines={1}
                   adjustsFontSizeToFit
                   minimumFontScale={0.85}
-                  tone={selected ? "onBrand" : "muted"}
+                  tone={selected ? 'onBrand' : 'muted'}
                   style={{ marginTop: 2 }}
                 >
                   {tabs[category].hint}
@@ -351,44 +275,34 @@ const HomeScreen = () => {
 
         {tab.banner ? (
           <View style={styles.banner}>
-            <AppText
-              variant="body"
-              weight="bold"
-              style={{ color: status.pending.fg }}
-            >
+            <AppText variant="body" weight="bold" style={{ color: status.pending.fg }}>
               {tab.banner}
             </AppText>
           </View>
         ) : null}
 
-        {tab.state === "empty" ? null : (
+        {tab.state === 'empty' ? null : (
           <>
-            <View
-              style={{
-                alignItems: "flex-start",
-                marginTop: 20,
-                marginHorizontal: space.md,
-              }}
-            >
+            <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: space.md }}>
               <AppText variant="h2" weight="bold">
                 Choose Your Preference
               </AppText>
             </View>
             {renderSection(
-              "Vegetarian Items",
-              require("../../../assets/vegBack.jpg"),
+              'Vegetarian Items',
+              require('../../../assets/vegBack.jpg'),
               tab.veg,
               expansion.Veg,
-              () => toggleSection(activeButton, "Veg"),
-              !tab.orderable,
+              () => toggleSection(activeButton, 'Veg'),
+              !tab.orderable
             )}
             {renderSection(
-              "Non-Vegetarian Items",
-              require("../../../assets/nonVegBackground.jpeg"),
+              'Non-Vegetarian Items',
+              require('../../../assets/nonVegBackground.jpeg'),
               tab.nonVeg,
               expansion.NonVeg,
-              () => toggleSection(activeButton, "NonVeg"),
-              !tab.orderable,
+              () => toggleSection(activeButton, 'NonVeg'),
+              !tab.orderable
             )}
           </>
         )}
@@ -400,9 +314,7 @@ const HomeScreen = () => {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: color.bg }}>
       {/* Extra bottom room (FAB height + gap) so the last row can scroll clear of the cart button */}
       <ScrollView
-        contentContainerStyle={{
-          paddingBottom: padding.paddingBottom + CART_FAB_SIZE + space.lg,
-        }}
+        contentContainerStyle={{ paddingBottom: padding.paddingBottom + CART_FAB_SIZE + space.lg }}
         showsVerticalScrollIndicator={false}
       >
         {renderContent()}
@@ -410,15 +322,15 @@ const HomeScreen = () => {
       <StatusBarScrim background={color.bg} />
       <TouchableOpacity
         style={{
-          position: "absolute",
+          position: 'absolute',
           bottom: padding.paddingBottom + space.sm,
           right: space.md,
           backgroundColor: color.brand,
           borderRadius: radius.pill,
           width: CART_FAB_SIZE,
           height: CART_FAB_SIZE,
-          justifyContent: "center",
-          alignItems: "center",
+          justifyContent: 'center',
+          alignItems: 'center',
           ...shadow.card,
         }}
         onPress={handleViewCart}
@@ -434,8 +346,8 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: 100,
   },
   loadingText: {
