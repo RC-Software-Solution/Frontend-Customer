@@ -262,4 +262,16 @@ describe('loading, offline and a failed refresh (Task 23)', () => {
     await refresh();
     expect(screen.queryByText("Couldn't refresh. Pull down to try again.")).toBeNull();
   });
+  it('a server failure on the first load says something went wrong, not that the connection is down, and retry works', async () => {
+    history.mockRejectedValueOnce({ status: 500, message: 'Server error' });
+    await mount();
+    expect(await screen.findByText("Couldn't load your order history")).toBeTruthy();
+    expect(screen.getByText('Something went wrong. Please try again.')).toBeTruthy();
+    expect(screen.queryByText('Check your connection and try again.')).toBeNull();
+
+    history.mockResolvedValueOnce([order('ORD-9')]);
+    await fireEvent.press(screen.getByText('Tap to retry'));
+    expect(await screen.findByText('ORD-9')).toBeTruthy();
+    expect(screen.queryByText("Couldn't load your order history")).toBeNull();
+  });
 });

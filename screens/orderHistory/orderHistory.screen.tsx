@@ -31,6 +31,7 @@ const OrderHistoryScreen: React.FC = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [moreFailed, setMoreFailed] = useState(false);
   const [refreshFailed, setRefreshFailed] = useState(false);
+  const [loadError, setLoadError] = useState<any>(null);
   const generation = useRef(0); // a refresh makes any page request still in flight stale
   const fetchingMore = useRef(false);
 
@@ -45,11 +46,15 @@ const OrderHistoryScreen: React.FC = () => {
       setLoadingMore(false);
       fetchingMore.current = false;
       setRefreshFailed(false);
+      setLoadError(null);
       setPhase('ready');
     } catch (error) {
       console.error('Failed to load order history:', error);
       if (keepOnError) setRefreshFailed(true);
-      else setPhase('error');
+      else {
+        setLoadError(error);
+        setPhase('error');
+      }
     }
   }, []);
 
@@ -58,6 +63,7 @@ const OrderHistoryScreen: React.FC = () => {
   }, [loadFirst]);
 
   const retryFirst = () => {
+    setLoadError(null);
     setPhase('loading');
     loadFirst(false);
   };
@@ -154,8 +160,13 @@ const OrderHistoryScreen: React.FC = () => {
         </View>
       ) : phase === 'error' ? (
         <View style={styles.centered}>
-          {/* the offline sentence for every failure: an existing test pins it for a plain Error */}
-          <ErrorState title="Couldn't load your order history" message="Check your connection and try again." onRetry={retryFirst} />
+          {/* a server answer (numeric non-zero status) gets the generic wording; no response, or an error without a status, keeps the offline sentence */}
+          <ErrorState
+            title="Couldn't load your order history"
+            error={loadError}
+            message={typeof loadError?.status === 'number' && loadError.status !== 0 ? undefined : 'Check your connection and try again.'}
+            onRetry={retryFirst}
+          />
         </View>
       ) : (
         <FlatList
