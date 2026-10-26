@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { orderService, useAuth } from '@/services';
 import { Order } from '@/services/types/api.types';
 import { mealTitle } from '@/services/utils/order-title';
+import { logApiError } from '@/services/utils/log';
 import { useFocusEffect } from 'expo-router';
 import { useScreenPadding } from '@/components/ui/Screen';
 import { Card } from '@/components/ui/Card';
@@ -37,7 +38,7 @@ const PendingPaymentsScreen = () => {
             setError(null);
             hasLoaded.current = true;
         } catch (e) {
-            console.error('Failed to load pending payments:', e);
+            logApiError('Failed to load pending payments:', e);
             setError(e);
         } finally {
             setLoading(false);

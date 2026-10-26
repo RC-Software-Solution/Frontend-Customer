@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { orderService } from '@/services';
 import { Order } from '@/services/types/api.types';
 import { mealTitle } from '@/services/utils/order-title';
+import { logApiError } from '@/services/utils/log';
 import { useScreenPadding } from '@/components/ui/Screen';
 import { Card } from '@/components/ui/Card';
 import { AppText } from '@/components/ui/AppText';
@@ -49,7 +50,7 @@ const OrderHistoryScreen: React.FC = () => {
       setLoadError(null);
       setPhase('ready');
     } catch (error) {
-      console.error('Failed to load order history:', error);
+      logApiError('Failed to load order history:', error);
       if (keepOnError) setRefreshFailed(true);
       else {
         setLoadError(error);
@@ -90,7 +91,7 @@ const OrderHistoryScreen: React.FC = () => {
       setPage(page + 1);
       setHasMore(rows.length === PAGE_SIZE);
     } catch (error) {
-      console.error('Failed to load more order history:', error);
+      logApiError('Failed to load more order history:', error);
       if (mine === generation.current) setMoreFailed(true);
     } finally {
       if (mine === generation.current) {

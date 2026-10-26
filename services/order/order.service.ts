@@ -5,6 +5,7 @@
 
 import { OrderApiClient } from '../clients/order-api.client';
 import { ErrorUtils } from '../utils/error.utils';
+import { logApiError } from '../utils/log';
 import { 
   Order, 
   CreateOrderRequest, 
@@ -32,7 +33,7 @@ export class OrderService {
       console.log('✅ Order created successfully:', result.order_id);
       return result;
     } catch (error) {
-      console.error('❌ Order creation failed:', error);
+      logApiError('❌ Order creation failed:', error);
       throw ErrorUtils.createApiError(error);
     }
   }
@@ -49,7 +50,7 @@ export class OrderService {
       const order = await this.orderApiClient.getOrder(orderId);
       return order;
     } catch (error) {
-      console.error('❌ Failed to get order:', error);
+      logApiError('❌ Failed to get order:', error);
       throw ErrorUtils.createApiError(error);
     }
   }
@@ -62,7 +63,7 @@ export class OrderService {
       const orders = await this.orderApiClient.getOrders(params);
       return orders;
     } catch (error) {
-      console.error('❌ Failed to get orders:', error);
+      logApiError('❌ Failed to get orders:', error);
       throw ErrorUtils.createApiError(error);
     }
   }
@@ -75,7 +76,7 @@ export class OrderService {
       const orders = await this.orderApiClient.getCurrentOrders(mealTime);
       return orders;
     } catch (error) {
-      console.error('❌ Failed to get current orders:', error);
+      logApiError('❌ Failed to get current orders:', error);
       throw ErrorUtils.createApiError(error);
     }
   }
@@ -94,7 +95,7 @@ export class OrderService {
       const orders = await this.orderApiClient.getOrders(params);
       return orders;
     } catch (error) {
-      console.error('❌ Failed to get undelivered orders:', error);
+      logApiError('❌ Failed to get undelivered orders:', error);
       throw ErrorUtils.createApiError(error);
     }
   }
@@ -109,7 +110,7 @@ export class OrderService {
       const params: GetOrdersRequest = { type: 'all', payment_status: 'unpaid', limit: 50 };
       return await this.orderApiClient.getOrders(params);
     } catch (error) {
-      console.error('❌ Failed to get pending payment orders:', error);
+      logApiError('❌ Failed to get pending payment orders:', error);
       throw ErrorUtils.createApiError(error);
     }
   }
@@ -121,7 +122,7 @@ export class OrderService {
     try {
       return await this.orderApiClient.getOrders({ type: 'all', page, limit });
     } catch (error) {
-      console.error('❌ Failed to get order history:', error);
+      logApiError('❌ Failed to get order history:', error);
       throw ErrorUtils.createApiError(error);
     }
   }
@@ -143,7 +144,7 @@ export class OrderService {
       console.log('✅ Order updated successfully:', orderId);
       return result;
     } catch (error) {
-      console.error('❌ Order update failed:', error);
+      logApiError('❌ Order update failed:', error);
       throw ErrorUtils.createApiError(error);
     }
   }
@@ -161,7 +162,7 @@ export class OrderService {
       console.log('✅ Order deleted successfully:', orderId);
       return result;
     } catch (error) {
-      console.error('❌ Order deletion failed:', error);
+      logApiError('❌ Order deletion failed:', error);
       throw ErrorUtils.createApiError(error);
     }
   }

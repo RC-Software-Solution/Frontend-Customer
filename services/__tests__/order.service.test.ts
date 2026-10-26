@@ -53,3 +53,32 @@ describe('getOrderHistory', () => {
     expect(mockGetOrders).toHaveBeenCalledWith({ type: 'all', page: 1, limit: 20 });
   });
 });
+
+describe('createOrder logging', () => {
+  const validOrder: any = {
+    customer_id: 'u1',
+    total_price: 300,
+    meal_time: 'breakfast',
+    items: [{ food_item_id: 1, quantity: 1, food_name: 'Hoppers', food_description: 'd', meal_time: 'breakfast', meal_type: 'veg', price: 300 }],
+  };
+  const withCreateRejecting = (error: any) => {
+    const { OrderApiClient } = require('../clients/order-api.client');
+    (OrderApiClient as jest.Mock).mockImplementationOnce(() => ({ createOrder: jest.fn().mockRejectedValue(error) }));
+  };
+
+  it('an expected 4xx refusal keeps its message and status and logs at warn level, not error', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    withCreateRejecting({ status: 400, message: 'Customer area not found' });
+    await expect(new OrderService().createOrder(validOrder)).rejects.toMatchObject({ status: 400, message: 'Customer area not found' });
+    expect(warn).toHaveBeenCalled();
+    expect(console.error).not.toHaveBeenCalled();
+  });
+
+  it('a 500 still logs at error level', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    withCreateRejecting({ status: 500, message: 'Server error' });
+    await expect(new OrderService().createOrder(validOrder)).rejects.toMatchObject({ status: 500 });
+    expect(console.error).toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+  });
+});

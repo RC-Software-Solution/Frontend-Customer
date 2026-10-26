@@ -11,7 +11,9 @@ import { AppButton } from '@/components/ui/AppButton';
 import { Card } from '@/components/ui/Card';
 import { AppText } from '@/components/ui/AppText';
 import { colomboToday } from '@/services/menu/todayMenu';
-import { color, radius, shadow, space } from '@/theme';
+import { classifyCheckoutError, checkoutNotice } from '@/services/utils/checkout-errors';
+import { logApiError } from '@/services/utils/log';
+import { color, radius, shadow, space, status } from '@/theme';
 
 // Helper function to normalize meal_type
 const normalizeMealType = (mealType: string): 'veg' | 'non-veg' | 'other' => {
@@ -32,6 +34,7 @@ const CartScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [user, setUser] = useState<{ id: string; address: string } | null>(null);
+  const [notice, setNotice] = useState<{ message: string; action?: { label: string; onPress: () => void } } | null>(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -65,6 +68,7 @@ const CartScreen = () => {
   const when = !sessionDate ? '' : sessionDate === colomboToday() ? ', delivered today' : `, ${shortDate(sessionDate)}`;
 
 const handleConfirmOrder = async () => {
+  setNotice(null); // a refusal's banner lasts until the next try
   if (!user?.id) {
     Alert.alert('Error', 'Please log in to place an order.');
     return;
@@ -130,20 +134,16 @@ const handleConfirmOrder = async () => {
   const attemptOrder = async (retry = false) => {
     try {
       const response = await orderService.createOrder(orderData);
+      setNotice(null);
       Alert.alert('Success', `Order placed successfully! Order ID: ${response.order_id}`);
       dispatch(clearCart());
       router.push('/(tabs)');
     } catch (error: any) {
-      const errorMessage = error.message || 'Failed to place order. Please try again.';
-      console.error('Error creating order:', error);
+      const issue = classifyCheckoutError(error);
+      logApiError('Error creating order:', error);
+      const shown = checkoutNotice(issue, error?.message);
 
-      if (errorMessage.includes('unpaid order')) {
-        Alert.alert('Error', 'You have more than two unpaid orders. Please settle them first.');
-      } else if (errorMessage.includes('Meal session not found')) {
-        Alert.alert('Error', 'The selected meal session is not available for today. Please choose another time or try again later.');
-      } else if (errorMessage.includes('Order limit reached')) {
-        Alert.alert('Error', 'The meal session has reached its order limit. Try another session.');
-      } else if (errorMessage.includes('Server error') && !retry) {
+      if (issue === 'server' && !retry) {
         Alert.alert(
           'Error',
           'Something went wrong on the server. Would you like to retry the order?',
@@ -153,7 +153,11 @@ const handleConfirmOrder = async () => {
           ]
         );
       } else {
-        Alert.alert('Error', errorMessage);
+        Alert.alert('Error', shown.alert);
+      }
+      if (shown.banner) {
+        const next = shown.action;
+        setNotice({ message: shown.banner, action: next && { label: next.label, onPress: () => router.push(next.route) } });
       }
     }
   };
@@ -249,6 +253,25 @@ const handleConfirmOrder = async () => {
         }
       />
 
+      {notice ? (
+        <View style={styles.banner}>
+          <View accessible accessibilityRole="alert" style={styles.bannerRow}>
+            <Ionicons name="alert-circle-outline" size={20} color={status.delivery_failed.fg} />
+            <AppText variant="caption" weight="bold" style={styles.bannerText}>{notice.message}</AppText>
+          </View>
+          {notice.action ? (
+            <TouchableOpacity
+              onPress={notice.action.onPress}
+              style={styles.bannerAction}
+              accessibilityRole="button"
+              accessibilityLabel={notice.action.label}
+            >
+              <AppText variant="caption" weight="bold" style={styles.bannerActionText}>{notice.action.label}</AppText>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      ) : null}
+
       <View style={[styles.sheet, { paddingBottom: padding.paddingBottom }]}>
         <View style={styles.summary}>
           <AppText variant="body" tone="muted">Total</AppText>
@@ -287,6 +310,12 @@ const styles = StyleSheet.create({
     ...shadow.bar,
   },
   summary: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: space.sm },
+  banner: { marginHorizontal: space.md, marginBottom: space.sm, padding: space.md, borderRadius: radius.md, backgroundColor: status.delivery_failed.bg },
+  bannerRow: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm },
+  bannerText: { flex: 1, color: status.delivery_failed.fg },
+  // underlined: the brand green fails 4.5:1 on this tint
+  bannerAction: { minHeight: 48, alignSelf: 'flex-start', justifyContent: 'center' },
+  bannerActionText: { color: status.delivery_failed.fg, textDecorationLine: 'underline' },
 });
 
 export default CartScreen;

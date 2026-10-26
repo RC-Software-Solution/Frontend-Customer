@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import CancelModal from '@/components/popupmodel/popupModel';
 import { orderService, useAuth, menuService } from '@/services';
 import { colomboToday } from '@/services/menu/todayMenu';
+import { logApiError } from '@/services/utils/log';
 import { Order } from '@/services/types/api.types';
 import { useFocusEffect, router } from 'expo-router';
 import { useScreenPadding } from '@/components/ui/Screen';
@@ -50,7 +51,7 @@ const OrderStatus: React.FC = () => {
       setError(null);
       hasLoaded.current = true;
     } catch (e) {
-      console.error('Failed to load orders:', e);
+      logApiError('Failed to load orders:', e);
       setError(e);
     } finally {
       setLoading(false);
@@ -88,7 +89,7 @@ const OrderStatus: React.FC = () => {
     try {
       await orderService.deleteOrder(selectedOrderId);
     } catch (error: any) {
-      console.error('Failed to cancel order:', error);
+      logApiError('Failed to cancel order:', error);
       failure = error?.message || 'Please try again.';
     }
     // Close and reload first: a refused cancel may mean the order is already gone.
