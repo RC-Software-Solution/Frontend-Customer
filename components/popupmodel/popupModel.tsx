@@ -51,7 +51,7 @@ const CancelModal: React.FC<ModalProps> = ({
           ) : null}
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose}>
+            <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose} accessibilityRole="button">
               <AppText variant="body" weight="bold" tone="ink">{cancelText}</AppText>
             </TouchableOpacity>
 

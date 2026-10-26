@@ -35,7 +35,8 @@ const onboarding = () => {
                 </View>
                 <TouchableOpacity
                     style={[styles.buttonWrapper, { bottom: insets.bottom + space.lg }]}
-                    onPress={() => router.push("/(routes)/welcome-intro")}>
+                    onPress={() => router.push("/(routes)/welcome-intro")}
+                    accessibilityRole="button">
                     <AppText variant="body" weight="bold" tone="inverse" style={styles.buttonText}>
                         Get Started</AppText>
                 </TouchableOpacity>
