@@ -16,7 +16,7 @@ import { CardSkeleton } from '@/components/ui/Skeleton';
 import { color, space } from '@/theme';
 
 const PAGE_SIZE = 20;
-const MORE_FAILED = "Couldn't load more. Tap to retry";
+const MORE_FAILED = "Couldn't load more. Try again";
 
 type Phase = 'loading' | 'ready' | 'error';
 

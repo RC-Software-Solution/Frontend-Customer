@@ -52,7 +52,7 @@ it('offline with nothing loaded: an error panel instead of "No pending payments"
   expect(Alert.alert).not.toHaveBeenCalled();
 
   orders.getPendingPaymentOrders.mockResolvedValue([order()] as any);
-  fireEvent.press(screen.getByText('Tap to retry'));
+  fireEvent.press(screen.getByText('Try again'));
   expect(await screen.findByText('Total unpaid')).toBeTruthy();
   expect(screen.queryByText("Couldn't load your payments")).toBeNull();
 });

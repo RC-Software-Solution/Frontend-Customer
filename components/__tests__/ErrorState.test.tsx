@@ -9,7 +9,7 @@ test('an offline failure shows the title, the offline sentence and a retry butto
   await render(<ErrorState title="Couldn't load your orders" error={OFFLINE} onRetry={onRetry} />);
   expect(screen.getByText("Couldn't load your orders")).toBeTruthy();
   expect(screen.getByText('Check your connection and try again.')).toBeTruthy();
-  fireEvent.press(screen.getByText('Tap to retry'));
+  fireEvent.press(screen.getByText('Try again'));
   expect(onRetry).toHaveBeenCalledTimes(1);
 });
 

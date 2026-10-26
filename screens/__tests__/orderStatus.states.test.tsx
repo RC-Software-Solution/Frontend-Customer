@@ -58,7 +58,7 @@ describe('an error with nothing loaded', () => {
     expect(Alert.alert).not.toHaveBeenCalled();
 
     orders.getUndeliveredOrdersToday.mockResolvedValue([order()] as any);
-    fireEvent.press(screen.getByText('Tap to retry'));
+    fireEvent.press(screen.getByText('Try again'));
     expect(await screen.findByText('String Hoppers x 1')).toBeTruthy();
     expect(screen.queryByText("Couldn't load your orders")).toBeNull();
   });

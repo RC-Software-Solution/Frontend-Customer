@@ -39,7 +39,7 @@ it('an offline first load keeps the title and button and adds the offline senten
   await mount();
   expect(await screen.findByText('Could not load notifications.')).toBeTruthy();
   expect(screen.getByText('Check your connection and try again.')).toBeTruthy();
-  fireEvent.press(screen.getByRole('button', { name: 'Tap to retry' }));
+  fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
   expect(await screen.findByText('Back online')).toBeTruthy();
   expect(screen.queryByText('Could not load notifications.')).toBeNull();
 });

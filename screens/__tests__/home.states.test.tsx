@@ -96,7 +96,7 @@ it('an offline first load shows the error panel, still raises the pinned alert o
   expect(alert).toHaveBeenCalledWith('Error', expect.stringMatching(/failed to load menu/i));
 
   menuSvc.getTodaysMenu.mockResolvedValue(menu());
-  fireEvent.press(screen.getByText('Tap to retry'));
+  fireEvent.press(screen.getByText('Try again'));
   expect(await screen.findByText('RC Caterings')).toBeTruthy();
   expect(screen.getByText('Open now')).toBeTruthy();
   expect(screen.queryByText("Couldn't load the menu")).toBeNull();

@@ -44,7 +44,7 @@ describe('notifications screen', () => {
   it('shows an error with a retry that loads the list', async () => {
     svc.getNotices.mockRejectedValueOnce(new Error('network')).mockResolvedValueOnce([notice(1, 'Back online', 'x')]);
     await render(<Provider store={store}><NotificationsScreen /></Provider>);
-    fireEvent.press(await screen.findByText('Tap to retry'));
+    fireEvent.press(await screen.findByText('Try again'));
     expect(await screen.findByText('Back online')).toBeTruthy();
     expect(svc.getNotices).toHaveBeenCalledTimes(2);
   });
@@ -94,7 +94,7 @@ describe('notifications screen', () => {
     svc.getNotices.mockRejectedValue(new Error('network'));
     await render(<Provider store={store}><NotificationsScreen /></Provider>);
     expect(await screen.findByText('Could not load notifications.')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Tap to retry' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeTruthy();
   });
 
   it('shows the empty state title and message', async () => {

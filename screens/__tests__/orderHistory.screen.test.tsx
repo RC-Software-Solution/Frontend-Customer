@@ -94,7 +94,7 @@ describe('empty and failed first loads', () => {
     expect(screen.getByText('Check your connection and try again.')).toBeTruthy();
 
     history.mockResolvedValueOnce([order('ORD-9')]);
-    await fireEvent.press(screen.getByLabelText('Tap to retry'));
+    await fireEvent.press(screen.getByLabelText('Try again'));
     expect(await screen.findByText('ORD-9')).toBeTruthy();
     expect(history).toHaveBeenCalledTimes(2);
     expect(screen.queryByText("Couldn't load your order history")).toBeNull();
@@ -143,7 +143,7 @@ describe('paging', () => {
 
     history.mockRejectedValueOnce(new Error('boom'));
     await endReached();
-    const retry = await screen.findByLabelText("Couldn't load more. Tap to retry");
+    const retry = await screen.findByLabelText("Couldn't load more. Try again");
     expect(screen.getByText('ORD-0')).toBeTruthy();
     await endReached(); // no paging while the failure is showing
     expect(history).toHaveBeenCalledTimes(2);
@@ -153,7 +153,7 @@ describe('paging', () => {
     await showEnd(22);
     expect(await screen.findByText('ORD-21')).toBeTruthy();
     expect(history).toHaveBeenLastCalledWith(2, 20);
-    expect(screen.queryByLabelText("Couldn't load more. Tap to retry")).toBeNull();
+    expect(screen.queryByLabelText("Couldn't load more. Try again")).toBeNull();
   });
 });
 
@@ -241,10 +241,10 @@ describe('loading, offline and a failed refresh (Task 23)', () => {
     await mount();
     expect(await screen.findByText("Couldn't load your order history")).toBeTruthy();
     expect(screen.getByText('Check your connection and try again.')).toBeTruthy();
-    expect(screen.getByText('Tap to retry')).toBeTruthy();
+    expect(screen.getByText('Try again')).toBeTruthy();
 
     history.mockResolvedValueOnce([order('ORD-9')]);
-    await fireEvent.press(screen.getByText('Tap to retry'));
+    await fireEvent.press(screen.getByText('Try again'));
     expect(await screen.findByText('ORD-9')).toBeTruthy();
   });
 
@@ -270,7 +270,7 @@ describe('loading, offline and a failed refresh (Task 23)', () => {
     expect(screen.queryByText('Check your connection and try again.')).toBeNull();
 
     history.mockResolvedValueOnce([order('ORD-9')]);
-    await fireEvent.press(screen.getByText('Tap to retry'));
+    await fireEvent.press(screen.getByText('Try again'));
     expect(await screen.findByText('ORD-9')).toBeTruthy();
     expect(screen.queryByText("Couldn't load your order history")).toBeNull();
   });

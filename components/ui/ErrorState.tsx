@@ -10,7 +10,7 @@ export function ErrorState({
   title,
   error,
   onRetry,
-  actionLabel = 'Tap to retry',
+  actionLabel = 'Try again',
   message,
 }: {
   title: string;
