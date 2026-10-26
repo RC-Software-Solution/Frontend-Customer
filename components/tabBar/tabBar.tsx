@@ -9,7 +9,7 @@ import { color, radius, shadow, space } from '@/theme';
 import { TAB_BAR_GAP, TAB_BAR_HEIGHT } from '@/theme/layout';
 import TabBarButton from '../tabBarButton/tabBarButton';
 
-export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+export function TabBar({ state, descriptors, emitter, navigateToTab }: BottomTabBarProps) {
   const [dimensions, setDimensions] = useState<{ height: number; width: number } | null>(null);
   const buttonWidth = dimensions ? dimensions.width / state.routes.length : 0;
   const tabPositionX = useSharedValue(0);
@@ -61,9 +61,9 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
         const onPress = () => {
           tabPositionX.value = withSpring(buttonWidth * index, { damping: 95, stiffness: 180 });
-          const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+          const event = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
           if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
+            navigateToTab(route.key);
           }
         };
 
@@ -71,7 +71,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           <TabBarButton
             key={route.key}
             onPress={onPress}
-            onLongPress={() => navigation.emit({ type: 'tabLongPress', target: route.key })}
+            onLongPress={() => emitter.emit({ type: 'tabLongPress', target: route.key })}
             isFocused={isFocused}
             routeName={route.name}
             label={label}
