@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, FlatList, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useNavigation } from 'expo-router';
@@ -35,6 +35,8 @@ const CartScreen = () => {
   const navigation = useNavigation();
   const [user, setUser] = useState<{ id: string; address: string } | null>(null);
   const [notice, setNotice] = useState<{ message: string; action?: { label: string; onPress: () => void } } | null>(null);
+  const placing = useRef(false); // set before the await: state would lag a fast second tap
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -68,6 +70,7 @@ const CartScreen = () => {
   const when = !sessionDate ? '' : sessionDate === colomboToday() ? ', delivered today' : `, ${shortDate(sessionDate)}`;
 
 const handleConfirmOrder = async () => {
+  if (placing.current) return;
   setNotice(null); // a refusal's banner lasts until the next try
   if (!user?.id) {
     Alert.alert('Error', 'Please log in to place an order.');
@@ -162,7 +165,14 @@ const handleConfirmOrder = async () => {
     }
   };
 
-  await attemptOrder();
+  placing.current = true;
+  setBusy(true);
+  try {
+    await attemptOrder();
+  } finally {
+    placing.current = false;
+    setBusy(false);
+  }
 };
   return (
     <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
@@ -277,7 +287,7 @@ const handleConfirmOrder = async () => {
           <AppText variant="body" tone="muted">Total</AppText>
           <AppText variant="h2" weight="bold" numberOfLines={1} testID="total-amount">{`Rs. ${totalAmount.toFixed(2)}`}</AppText>
         </View>
-        <AppButton title="CONFIRM ORDER" onPress={handleConfirmOrder} />
+        <AppButton title="CONFIRM ORDER" onPress={handleConfirmOrder} loading={busy} />
       </View>
     </View>
   );
