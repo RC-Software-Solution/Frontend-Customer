@@ -254,3 +254,47 @@ Check that file exists first. If it doesn't, leaving `OPENSSL_CONF` unset is the
 ## Diagnostic principle worth keeping
 
 Test reachability **from the device**, never from the laptop. Traffic a machine sends to its own LAN IP is short-circuited through the loopback path and never traverses the inbound firewall — so `curl http://<own-lan-ip>:8081/status` returns `200` on a machine that is comprehensively firewalled off from the entire network. That one false-positive is what makes this class of bug feel unfalsifiable.
+
+---
+
+## Running the app: USB vs wireless
+
+The app derives its API host from Metro's host (`services/config/api.config.ts`). Over USB that host is `localhost`, which on the phone means the phone itself, so the backend ports must be forwarded.
+
+### USB (phone plugged in, USB debugging on)
+
+```bash
+adb reverse tcp:8081 tcp:8081   # Metro
+adb reverse tcp:4001 tcp:4001   # user
+adb reverse tcp:4002 tcp:4002   # order
+adb reverse tcp:4004 tcp:4004   # location
+adb reverse tcp:4005 tcp:4005   # menu
+adb reverse tcp:4006 tcp:4006   # delivery
+adb reverse tcp:4007 tcp:4007   # payment
+npx expo start --localhost
+```
+
+Re-run the `adb reverse` lines after unplugging or restarting adb. Symptom if forgotten: login fails with `Failed to connect to /127.0.0.1:4001`.
+
+### Wireless (same Wi-Fi/hotspot, no cable)
+
+```bash
+npx expo start
+```
+
+Scan the QR code. The app reuses the LAN IP it reached Metro on, so the backend must be reachable at that IP: Docker ports published, and Windows Firewall allowing inbound 8081 and 4001-4007 (see §1).
+
+**The backend's `docker-compose.yml` publishes every port on `127.0.0.1` only** (security hardening), so out of the box a phone on the LAN gets a login timeout (`NETWORK_ERROR`, `_response: "timeout"`, URL `http://<LAN_IP>:4001/...`) even though Metro loads fine. Fix: a local, gitignored `Backend/docker/docker-compose.override.yml` that republishes only the app's ports on all interfaces:
+
+```yaml
+services:
+  user-service:      { ports: !override ["4001:4001"] }
+  order-service:     { ports: !override ["4002:4002"] }
+  locations-service: { ports: !override ["4004:4004"] }
+  menu-service:      { ports: !override ["4005:4005"] }
+  analytics-service: { ports: !override ["4006:4006"] }
+```
+
+Apply with `docker compose up -d user-service order-service locations-service menu-service analytics-service` (in `Backend/docker`). Check with `docker ps`: want `0.0.0.0:4001->4001/tcp`, not `127.0.0.1:...`. DB, Redis, websocket and phpMyAdmin stay loopback-only. Delete the override file to go back to loopback-only, and don't use it on untrusted networks.
+
+phpMyAdmin is opt-in (`profiles: ["tools"]`): `docker compose --profile tools up -d phpmyadmin`, then http://127.0.0.1:8080.
