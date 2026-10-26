@@ -26,3 +26,7 @@ jest.mock('@expo-google-fonts/nunito', () => ({
   Nunito_600SemiBold: 'Nunito_600SemiBold',
   Nunito_700Bold: 'Nunito_700Bold',
 }));
+
+// Reanimated's worklets runtime is native-only under Jest (see the note at the top of components/ui/Skeleton.tsx): use the libraries' own jest mocks.
+jest.mock('react-native-worklets', () => require('react-native-worklets/src/mock'));
+jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock'));

@@ -7,6 +7,13 @@ import { ApiError } from '../types/api.types';
 
 export class ErrorUtils {
   /**
+   * True when the request never got a response (no connection, or a timeout)
+   */
+  static isOffline(error: any): boolean {
+    return error?.status === 0 && error?.code === 'NETWORK_ERROR';
+  }
+
+  /**
    * Create a standardized API error object
    */
   static createApiError(error: any): ApiError {

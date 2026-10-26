@@ -1,4 +1,4 @@
-import { View, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView } from 'react-native';
+import { View, FlatList, StyleSheet, TouchableOpacity, Alert, Modal, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
@@ -13,6 +13,8 @@ import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState, StaleNotice } from '@/components/ui/ErrorState';
+import { CardSkeleton } from '@/components/ui/Skeleton';
 import { color, radius, space } from '@/theme';
 
 const STATUS_NOTE: Record<string, string> = { preparing: "Being prepared, so it can't be changed now", delivering: 'Arriving soon' };
@@ -22,6 +24,9 @@ const OrderStatus: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const hasLoaded = useRef(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const cancelling = useRef(false);
@@ -37,16 +42,31 @@ const OrderStatus: React.FC = () => {
     }
 
     try {
-      setLoading(true);
+      // skeleton for the first load only: a reload on focus keeps the cards on screen
+      if (!hasLoaded.current) setLoading(true);
       // Fetch undelivered orders for today (pending, preparing, delivering) for all meal times
       const currentOrders = await orderService.getUndeliveredOrdersToday();
       setOrders(currentOrders);
-    } catch (error) {
-      console.error('Failed to load orders:', error);
-      Alert.alert('Error', 'Failed to load orders. Please try again.');
+      setError(null);
+      hasLoaded.current = true;
+    } catch (e) {
+      console.error('Failed to load orders:', e);
+      setError(e);
     } finally {
       setLoading(false);
     }
+  };
+
+  const retry = () => {
+    setError(null);
+    setLoading(true);
+    loadOrders();
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadOrders();
+    setRefreshing(false);
   };
 
   useEffect(() => {
@@ -221,20 +241,33 @@ const OrderStatus: React.FC = () => {
       </View>
 
       {loading ? (
+        <View style={{ marginTop: space.md }}>
+          <CardSkeleton count={2} />
+        </View>
+      ) : error && orders.length === 0 ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={color.brandStrong} />
-          <AppText tone="brand" style={{ marginTop: space.sm }}>Loading orders...</AppText>
+          <ErrorState title="Couldn't load your orders" error={error} onRetry={retry} />
         </View>
       ) : orders.length === 0 ? (
         <View style={styles.centered}>
-          <EmptyState icon="receipt-outline" title="No orders found" message="Your current orders will appear here" />
+          <EmptyState
+            icon="receipt-outline"
+            title="No orders found"
+            message="Your current orders will appear here"
+            actionLabel="Browse the menu"
+            onAction={() => router.push('/(tabs)')}
+          />
         </View>
       ) : (
         <FlatList
+          testID="orders-list"
           style={{ flex: 1, marginTop: space.md }}
           data={orders}
           keyExtractor={(item) => item.order_id}
           renderItem={renderItem}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          ListHeaderComponent={error ? <StaleNotice /> : null}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: padding.paddingBottom }}
         />

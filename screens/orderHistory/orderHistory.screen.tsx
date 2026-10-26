@@ -10,6 +10,8 @@ import { Card } from '@/components/ui/Card';
 import { AppText } from '@/components/ui/AppText';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState, StaleNotice } from '@/components/ui/ErrorState';
+import { CardSkeleton } from '@/components/ui/Skeleton';
 import { color, space } from '@/theme';
 
 const PAGE_SIZE = 20;
@@ -28,6 +30,7 @@ const OrderHistoryScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [moreFailed, setMoreFailed] = useState(false);
+  const [refreshFailed, setRefreshFailed] = useState(false);
   const generation = useRef(0); // a refresh makes any page request still in flight stale
   const fetchingMore = useRef(false);
 
@@ -41,10 +44,12 @@ const OrderHistoryScreen: React.FC = () => {
       setMoreFailed(false);
       setLoadingMore(false);
       fetchingMore.current = false;
+      setRefreshFailed(false);
       setPhase('ready');
     } catch (error) {
       console.error('Failed to load order history:', error);
-      if (!keepOnError) setPhase('error');
+      if (keepOnError) setRefreshFailed(true);
+      else setPhase('error');
     }
   }, []);
 
@@ -144,19 +149,13 @@ const OrderHistoryScreen: React.FC = () => {
       </View>
 
       {phase === 'loading' ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={color.brandStrong} />
-          <AppText tone="brand" style={{ marginTop: space.sm }}>Loading order history...</AppText>
+        <View style={{ marginTop: space.sm }}>
+          <CardSkeleton count={3} />
         </View>
       ) : phase === 'error' ? (
         <View style={styles.centered}>
-          <EmptyState
-            icon="cloud-offline-outline"
-            title="Couldn't load your order history"
-            message="Check your connection and try again."
-            actionLabel="Tap to retry"
-            onAction={retryFirst}
-          />
+          {/* the offline sentence for every failure: an existing test pins it for a plain Error */}
+          <ErrorState title="Couldn't load your order history" message="Check your connection and try again." onRetry={retryFirst} />
         </View>
       ) : (
         <FlatList
@@ -168,6 +167,7 @@ const OrderHistoryScreen: React.FC = () => {
           onEndReached={onEndReached}
           onEndReachedThreshold={0.5}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[color.brandStrong]} />}
+          ListHeaderComponent={refreshFailed ? <StaleNotice /> : null}
           ListEmptyComponent={
             <EmptyState icon="receipt-outline" title="No order history yet" message="Orders you have placed will appear here." />
           }

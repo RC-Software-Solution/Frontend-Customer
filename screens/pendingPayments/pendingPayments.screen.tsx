@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, FlatList, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, FlatList, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { orderService, useAuth } from '@/services';
 import { Order } from '@/services/types/api.types';
@@ -10,6 +10,8 @@ import { Card } from '@/components/ui/Card';
 import { AppText } from '@/components/ui/AppText';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState, StaleNotice } from '@/components/ui/ErrorState';
+import { CardSkeleton } from '@/components/ui/Skeleton';
 import { color, radius, space, status } from '@/theme';
 
 const PendingPaymentsScreen = () => {
@@ -17,6 +19,9 @@ const PendingPaymentsScreen = () => {
     const { isAuthenticated, user } = useAuth();
     const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<unknown>(null);
+    const [refreshing, setRefreshing] = useState(false);
+    const hasLoaded = useRef(false);
 
     const loadPendingPayments = async () => {
         if (!isAuthenticated || !user) {
@@ -25,15 +30,30 @@ const PendingPaymentsScreen = () => {
         }
 
         try {
-            setLoading(true);
+            // skeleton for the first load only: a reload on focus keeps the rows on screen
+            if (!hasLoaded.current) setLoading(true);
             const orders = await orderService.getPendingPaymentOrders();
             setPendingOrders(orders);
-        } catch (error) {
-            console.error('Failed to load pending payments:', error);
-            Alert.alert('Error', 'Failed to load pending payments. Please try again.');
+            setError(null);
+            hasLoaded.current = true;
+        } catch (e) {
+            console.error('Failed to load pending payments:', e);
+            setError(e);
         } finally {
             setLoading(false);
         }
+    };
+
+    const retry = () => {
+        setError(null);
+        setLoading(true);
+        loadPendingPayments();
+    };
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await loadPendingPayments();
+        setRefreshing(false);
     };
 
     useEffect(() => {
@@ -66,6 +86,7 @@ const PendingPaymentsScreen = () => {
 
     const header = (
         <View>
+            {error ? <StaleNotice /> : null}
             {pendingOrders.length >= 2 ? (
                 <View style={styles.banner}>
                     <Ionicons name="alert-circle-outline" size={20} color={status.delivery_failed.fg} style={{ marginTop: 1 }} />
@@ -95,9 +116,10 @@ const PendingPaymentsScreen = () => {
                 <AppText variant="h2" weight="bold">Payments</AppText>
             </View>
             {loading ? (
+                <CardSkeleton count={2} />
+            ) : error && pendingOrders.length === 0 ? (
                 <View style={styles.centered}>
-                    <ActivityIndicator size="large" color={color.brandStrong} />
-                    <AppText tone="brand" style={{ marginTop: space.sm }}>Loading pending payments...</AppText>
+                    <ErrorState title="Couldn't load your payments" error={error} onRetry={retry} />
                 </View>
             ) : pendingOrders.length === 0 ? (
                 <View style={styles.centered}>
@@ -105,9 +127,12 @@ const PendingPaymentsScreen = () => {
                 </View>
             ) : (
                 <FlatList
+                    testID="payments-list"
                     data={pendingOrders}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.order_id}
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
                     ListHeaderComponent={header}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: padding.paddingBottom }}

@@ -116,6 +116,18 @@ const MenuListScreen = (params: { meal: Param; kind: Param }) => {
         </View>
       ) : null}
 
+      {menu === null ? (
+        <View style={styles.empty}>
+          <EmptyState
+            tone="error"
+            icon="restaurant-outline"
+            title="Menu not loaded"
+            message="Open Home to load today's menu."
+            actionLabel="Go to Home"
+            onAction={() => router.replace('/(tabs)')}
+          />
+        </View>
+      ) : (
       <FlatList
         data={items}
         keyExtractor={(item) => String(item.id)}
@@ -129,6 +141,7 @@ const MenuListScreen = (params: { meal: Param; kind: Param }) => {
           </View>
         }
       />
+      )}
 
       {totalQuantity > 0 ? (
         <View style={{ paddingHorizontal: space.md, paddingTop: space.sm, paddingBottom: padding.paddingBottom }}>

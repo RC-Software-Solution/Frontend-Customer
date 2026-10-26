@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, ScrollView, Image, StyleSheet, ActivityIndicator, Alert, AppState } from 'react-native';
+import { View, TouchableOpacity, ScrollView, Image, StyleSheet, Alert, AppState } from 'react-native';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { router, useFocusEffect } from 'expo-router';
@@ -9,6 +9,8 @@ import { menuService, useAuth } from '@/services';
 import { MealType, MEAL_TYPES, buildTabs, nextTransitionMs } from '@/services/menu/todayMenu';
 import { useScreenPadding, StatusBarScrim } from '@/components/ui/Screen';
 import { AppText } from '@/components/ui/AppText';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { Skeleton, SkeletonGroup } from '@/components/ui/Skeleton';
 import { Ionicons } from '@expo/vector-icons';
 import { color, space, radius, shadow, status } from '@/theme';
 
@@ -19,6 +21,8 @@ const HomeScreen = () => {
   const [activeButton, setActiveButton] = useState<MealType>('breakfast');
   const [loading, setLoading] = useState(true);
   const hasLoaded = useRef(false);
+  const alerted = useRef(false); // the failure alert shows once per outage, so a retry that fails again is not met by a second popup
+  const [loadError, setLoadError] = useState<unknown>(null);
 
   const padding = useScreenPadding({ tabBar: true, gutters: false });
   const dispatch = useDispatch();
@@ -40,9 +44,15 @@ const HomeScreen = () => {
       if (!hasLoaded.current) setLoading(true);
       dispatch(setMenu(await menuService.getTodaysMenu()));
       hasLoaded.current = true;
+      alerted.current = false;
+      setLoadError(null);
     } catch (error) {
       console.error('Failed to load menu data:', error);
-      if (!hasLoaded.current) Alert.alert('Error', 'Failed to load menu items. Please try again.');
+      if (!hasLoaded.current) {
+        setLoadError(error);
+        if (!alerted.current) Alert.alert('Error', 'Failed to load menu items. Please try again.');
+        alerted.current = true;
+      }
     } finally {
       setLoading(false);
     }
@@ -93,13 +103,20 @@ const HomeScreen = () => {
 
   const renderContent = () => {
     if (loading) {
+      // the Home layout drawn in grey bars: heading, tab row, two banners
       return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={color.brandStrong} />
-          <AppText variant="body" tone="brand" weight="semibold" style={styles.loadingText}>
-            Loading menu items...
-          </AppText>
-        </View>
+        <SkeletonGroup>
+          <View style={{ marginTop: padding.paddingTop, marginHorizontal: space.md }}>
+            <Skeleton width={160} height={28} />
+          </View>
+          <View style={{ marginTop: space.lg, marginHorizontal: space.md, marginBottom: space.md }}>
+            <Skeleton width="100%" height={64} radius={radius.lg} />
+          </View>
+          <View style={{ gap: space.md, marginHorizontal: space.md }}>
+            <Skeleton width="100%" height={150} radius={radius.lg} />
+            <Skeleton width="100%" height={150} radius={radius.lg} />
+          </View>
+        </SkeletonGroup>
       );
     }
 
@@ -116,9 +133,7 @@ const HomeScreen = () => {
     if (!tabs) {
       return (
         <View style={styles.loadingContainer}>
-          <AppText variant="body" tone="brand" weight="semibold" style={styles.loadingText}>
-            Could not load the menu. Pull back to this screen to retry.
-          </AppText>
+          <ErrorState title="Couldn't load the menu" error={loadError} onRetry={loadMenuData} />
         </View>
       );
     }

@@ -27,3 +27,17 @@ describe('ErrorUtils.createApiError', () => {
     expect(ErrorUtils.createApiError(network)).toMatchObject({ code: 'NETWORK_ERROR', status: 0 });
   });
 });
+
+describe('ErrorUtils.isOffline', () => {
+  it('is true only for a request that never got a response', () => {
+    expect(ErrorUtils.isOffline({ status: 0, code: 'NETWORK_ERROR' })).toBe(true);
+  });
+
+  it('is false for everything else and never throws', () => {
+    expect(ErrorUtils.isOffline({ status: 0, code: 'UNKNOWN_ERROR' })).toBe(false);
+    expect(ErrorUtils.isOffline({ status: 500 })).toBe(false);
+    expect(ErrorUtils.isOffline(new Error('x'))).toBe(false);
+    expect(ErrorUtils.isOffline(undefined)).toBe(false);
+    expect(ErrorUtils.isOffline(null)).toBe(false);
+  });
+});

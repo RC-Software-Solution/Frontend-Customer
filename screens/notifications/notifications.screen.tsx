@@ -1,4 +1,4 @@
-import { View, FlatList, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, FlatList, StyleSheet } from 'react-native'
 import React, { useCallback, useRef, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
@@ -7,6 +7,8 @@ import { useScreenPadding } from '@/components/ui/Screen';
 import { Card } from '@/components/ui/Card';
 import { AppText } from '@/components/ui/AppText';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState, StaleNotice } from '@/components/ui/ErrorState';
+import { CardSkeleton } from '@/components/ui/Skeleton';
 import { color, space } from '@/theme';
 import { authService } from '@/services/instances';
 import { Notice } from '@/services/types/api.types';
@@ -25,6 +27,8 @@ const Notification = () => {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [failed, setFailed] = useState(false);
+    const [loadError, setLoadError] = useState<unknown>(null);
+    const [refreshFailed, setRefreshFailed] = useState(false);
     const hasLoaded = useRef(false);
     // The watermark as it was when the tab was opened: cards above it stay highlighted until the tab is left and reopened.
     const seenAtOpen = useRef(0);
@@ -39,11 +43,13 @@ const Notification = () => {
             if (userId) await markSeen(userId, list);
             dispatch(setUnread(0));
             setFailed(false);
+            setRefreshFailed(false);
             hasLoaded.current = true;
         } catch (error) {
             console.error('Failed to load notices:', error);
-            // Keep showing the last good list on a refresh failure
-            if (!hasLoaded.current) setFailed(true);
+            // Keep showing the last good list on a refresh failure, with one muted line above it
+            if (!hasLoaded.current) { setLoadError(error); setFailed(true); }
+            else setRefreshFailed(true);
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -82,16 +88,9 @@ const Notification = () => {
     };
 
     const renderEmpty = () => {
-        if (loading) return <ActivityIndicator size="large" color={color.brandStrong} />;
+        if (loading) return <CardSkeleton count={3} />;
         if (failed) {
-            return (
-                <EmptyState
-                    icon="cloud-offline-outline"
-                    title="Could not load notifications."
-                    actionLabel="Tap to retry"
-                    onAction={retry}
-                />
-            );
+            return <ErrorState title="Could not load notifications." error={loadError} onRetry={retry} />;
         }
         return (
             <EmptyState
@@ -115,12 +114,13 @@ const Notification = () => {
                 data={notices}
                 renderItem={renderItem}
                 keyExtractor={(item) => String(item.id)}
+                ListHeaderComponent={refreshFailed ? <StaleNotice /> : null}
                 ListEmptyComponent={renderEmpty}
                 refreshing={refreshing}
                 onRefresh={() => { setRefreshing(true); load(false); }}
                 contentContainerStyle={[
                     { paddingBottom: padding.paddingBottom },
-                    notices.length === 0 && styles.emptyContent,
+                    notices.length === 0 && !loading && styles.emptyContent,
                 ]}
             />
         </View>

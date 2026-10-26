@@ -225,3 +225,41 @@ describe('a request still in flight', () => {
     expect(history).toHaveBeenLastCalledWith(3, 20);
   });
 });
+
+describe('loading, offline and a failed refresh (Task 23)', () => {
+  const OFFLINE = { status: 0, code: 'NETWORK_ERROR', message: 'Network error - please check your connection' };
+
+  it('shows a skeleton while the first page is pending, not the old spinner text', async () => {
+    history.mockReturnValue(new Promise(() => {}));
+    await mount();
+    expect(screen.getByLabelText('Loading')).toBeTruthy();
+    expect(screen.queryByText('Loading order history...')).toBeNull();
+  });
+
+  it('an offline first load shows the shared error panel with the offline sentence and a retry', async () => {
+    history.mockRejectedValueOnce(OFFLINE);
+    await mount();
+    expect(await screen.findByText("Couldn't load your order history")).toBeTruthy();
+    expect(screen.getByText('Check your connection and try again.')).toBeTruthy();
+    expect(screen.getByText('Tap to retry')).toBeTruthy();
+
+    history.mockResolvedValueOnce([order('ORD-9')]);
+    await fireEvent.press(screen.getByText('Tap to retry'));
+    expect(await screen.findByText('ORD-9')).toBeTruthy();
+  });
+
+  it('a failed refresh keeps the rows and shows one muted line, which a good refresh removes', async () => {
+    history.mockResolvedValueOnce([order('ORD-OLD')]);
+    await mount();
+    await screen.findByText('ORD-OLD');
+
+    history.mockRejectedValueOnce(OFFLINE);
+    await refresh();
+    expect(screen.getByText('ORD-OLD')).toBeTruthy();
+    expect(screen.getByText("Couldn't refresh. Pull down to try again.").props.accessibilityLiveRegion).toBe('polite');
+
+    history.mockResolvedValueOnce([order('ORD-NEW')]);
+    await refresh();
+    expect(screen.queryByText("Couldn't refresh. Pull down to try again.")).toBeNull();
+  });
+});
