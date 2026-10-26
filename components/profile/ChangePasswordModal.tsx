@@ -48,7 +48,7 @@ export function ChangePasswordModal({ visible, onClose }: { visible: boolean; on
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={close}>
+    <Modal visible={visible} animationType="slide" statusBarTranslucent onRequestClose={close}>
       <View style={{ flex: 1, backgroundColor: color.surface, paddingTop: insets.top + space.md }}>
         <KeyboardForm contentContainerStyle={{ paddingHorizontal: space.md, paddingBottom: insets.bottom + space.xl }}>
           <AppText variant="h2" weight="bold" tone="brand" style={{ marginBottom: space.lg }}>

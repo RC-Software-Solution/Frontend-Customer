@@ -37,7 +37,7 @@ const mount = async () => {
     </AuthProvider>,
   );
   await screen.findByText('nimal@test.local', { exact: false }).catch(() => {});
-  await screen.findByDisplayValue('nimal@test.local');
+  await screen.findByText('nimal@test.local');
 };
 const openEdit = async () => fireEvent.press(screen.getByText('Edit Profile'));
 
@@ -55,8 +55,8 @@ afterEach(() => jest.restoreAllMocks());
 describe('profile view', () => {
   it('shows the details read-only, with Edit Profile and Change Password available', async () => {
     await mount();
-    expect(screen.getByDisplayValue('12 Galle Road')).toBeTruthy();
-    expect(screen.getByDisplayValue('0771234567')).toBeTruthy();
+    expect(screen.getByText('12 Galle Road')).toBeTruthy();
+    expect(screen.getByText('0771234567')).toBeTruthy();
     expect(screen.getByText('Edit Profile')).toBeTruthy();
     expect(screen.getByText('Change Password')).toBeTruthy();
   });
@@ -85,7 +85,7 @@ describe('editing the profile', () => {
     expect(alert).toHaveBeenCalledWith('Profile updated', expect.any(String));
     // back on the profile view with the saved values
     expect(await screen.findByText('Nimal P')).toBeTruthy();
-    expect(screen.getByDisplayValue('0779998888')).toBeTruthy();
+    expect(screen.getByText('0779998888')).toBeTruthy();
     expect(screen.queryByText('Save changes')).toBeNull();
   });
 

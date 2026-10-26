@@ -1,4 +1,5 @@
-import { View, Text, TextInput, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react'
 import CancelModal from '@/components/popupmodel/popupModel';
 import { useEffect, useState } from 'react';
@@ -9,7 +10,10 @@ import { Screen } from '@/components/ui/Screen';
 import { AppButton } from '@/components/ui/AppButton';
 import { EditProfileForm } from '@/components/profile/EditProfileForm';
 import { ChangePasswordModal } from '@/components/profile/ChangePasswordModal';
-import { color, space, shadow } from '@/theme';
+import { Card } from '@/components/ui/Card';
+import { AppText } from '@/components/ui/AppText';
+import { initials } from './initials';
+import { color, space } from '@/theme';
 
 const Profile = () => {
     const { logout, deleteAccount, refreshUser } = useAuth();
@@ -79,67 +83,78 @@ const Profile = () => {
     }
 
     return (
-        <Screen scroll tabBar>
-            <View style={{ alignItems: 'flex-start' }}>
-                <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#0A0A0F' }}>RC Caterings</Text>
-            </View>
-            <View style={{ alignItems: 'flex-start', marginTop: 20 }}>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#69bf70' }}>Profile</Text>
-            </View>
+        <Screen scroll tabBar background={color.bg}>
+            <AppText variant="h1" weight="bold">Profile</AppText>
             {loading ? (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#69bf70" />
-                    <Text style={styles.loadingText}>Loading profile...</Text>
+                    <ActivityIndicator size="large" color={color.brandStrong} />
+                    <AppText tone="brand" style={{ marginTop: space.sm }}>Loading profile...</AppText>
                 </View>
             ) : (
                 <>
                     <View style={styles.header}>
-                        <View style={styles.profileImageShadow}>
-                            <View style={styles.profileImageContainer}>
-                                <Image source={require('../../assets/propic.png')} style={styles.profileImage} />
+                        <View style={styles.avatar}>
+                            <AppText variant="h1" weight="bold" tone="brand">{initials(user?.full_name)}</AppText>
+                        </View>
+                        <AppText variant="h2" weight="bold" style={{ marginTop: space.sm + 2 }}>{user?.full_name || "Unknown User"}</AppText>
+                        <AppText variant="caption" tone="muted">{user?.email || ""}</AppText>
+                    </View>
+
+                    <Card style={styles.group}>
+                        <View style={styles.row}>
+                            <Ionicons name="location-outline" size={20} color={color.muted} />
+                            <View style={{ flex: 1 }}>
+                                <AppText variant="micro" tone="muted">Location</AppText>
+                                <AppText variant="body" weight="semibold">{user?.address || "Not set"}</AppText>
                             </View>
                         </View>
-                        <Text style={styles.name}>{user?.full_name || "Unknown User"}</Text>
-                    </View>
+                        <View style={[styles.row, styles.rowDivider]}>
+                            <Ionicons name="call-outline" size={20} color={color.muted} />
+                            <View style={{ flex: 1 }}>
+                                <AppText variant="micro" tone="muted">Phone Number</AppText>
+                                <AppText variant="body" weight="semibold">{user?.phone || "Not set"}</AppText>
+                            </View>
+                        </View>
+                    </Card>
 
-                    <View style={styles.fieldContainer}>
-                        <Text style={styles.label}>User ID</Text>
-                        <TextInput style={styles.input} value={user?.id || ""} editable={false} />
-                    </View>
+                    <Card style={styles.group}>
+                        <TouchableOpacity
+                            style={styles.row}
+                            onPress={() => setEditing(true)}
+                            disabled={!user}
+                            accessibilityRole="button"
+                            accessibilityLabel="Edit Profile"
+                            accessibilityState={{ disabled: !user }}
+                        >
+                            <Ionicons name="create-outline" size={20} color={color.ink} />
+                            <AppText variant="body" weight="semibold" style={{ flex: 1 }}>Edit Profile</AppText>
+                            <Ionicons name="chevron-forward" size={18} color={color.subtle} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.row, styles.rowDivider]}
+                            onPress={() => setChangingPassword(true)}
+                            accessibilityRole="button"
+                            accessibilityLabel="Change Password"
+                        >
+                            <Ionicons name="lock-closed-outline" size={20} color={color.ink} />
+                            <AppText variant="body" weight="semibold" style={{ flex: 1 }}>Change Password</AppText>
+                            <Ionicons name="chevron-forward" size={18} color={color.subtle} />
+                        </TouchableOpacity>
+                    </Card>
 
-                    <View style={styles.fieldContainer}>
-                        <Text style={styles.label}>Email</Text>
-                        <TextInput style={styles.input} value={user?.email || ""} editable={false} />
-                    </View>
+                    <AppButton title="Logout" variant="outline" onPress={handleLogout} />
 
-                    <View style={styles.fieldContainer}>
-                        <Text style={styles.label}>Location</Text>
-                        <TextInput style={styles.input} value={user?.address || ""} editable={false} />
+                    <View style={styles.dangerZone}>
+                        <AppText variant="micro" tone="muted">Danger zone</AppText>
+                        <TouchableOpacity
+                            style={styles.deleteButton}
+                            onPress={() => setModalVisible(true)}
+                            accessibilityRole="button"
+                            accessibilityLabel="Delete Account"
+                        >
+                            <AppText variant="caption" weight="bold" tone="danger">Delete Account</AppText>
+                        </TouchableOpacity>
                     </View>
-
-                    <View style={styles.fieldContainer}>
-                        <Text style={styles.label}>Phone Number</Text>
-                        <TextInput style={styles.input} value={user?.phone || ""} editable={false} />
-                    </View>
-                </>
-            )}
-
-            {!loading && (
-                <>
-                    <AppButton title="Edit Profile" onPress={() => setEditing(true)} disabled={!user} />
-                    <AppButton
-                        title="Change Password"
-                        variant="secondary"
-                        onPress={() => setChangingPassword(true)}
-                        style={{ marginTop: space.md }}
-                    />
-                    <AppButton title="Logout" variant="secondary" onPress={handleLogout} style={{ marginTop: space.md }} />
-                    <AppButton
-                        title="Delete Account"
-                        variant="danger"
-                        onPress={() => setModalVisible(true)}
-                        style={{ marginTop: space.md }}
-                    />
                 </>
             )}
             <ChangePasswordModal visible={changingPassword} onClose={() => setChangingPassword(false)} />
@@ -157,48 +172,40 @@ const Profile = () => {
 };
 
 const styles = StyleSheet.create({
-    header: { alignItems: 'center', marginVertical: 30 },
-    profileImage: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
-    },
-    name: { fontSize: 24, fontWeight: 'bold', color: '#4A4A4A', marginTop: 12 },
-    fieldContainer: { marginBottom: 16 },
-    label: { fontSize: 14, color: color.muted, marginBottom: 7 },
-    input: {
-        backgroundColor: '#f0f0f0',
-        padding: 17,
-        borderRadius: 20,
-        fontSize: 16,
-        color: '#333',
-    },
-    profileImageShadow: {
-        width: 112,
-        height: 112,
-        borderRadius: 56,
-        backgroundColor: color.brand,
-        ...shadow.card,
-    },
-    profileImageContainer: {
-        width: 112,
-        height: 112,
-        borderRadius: 56,
-        overflow: 'hidden',
+    header: { alignItems: 'center', marginTop: space.md, marginBottom: space.lg - 4 },
+    avatar: {
+        width: 88,
+        height: 88,
+        borderRadius: 44,
+        backgroundColor: color.brandSoft,
         alignItems: 'center',
         justifyContent: 'center',
     },
+    group: { padding: 0, marginBottom: space.md },
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: space.sm + space.xs,
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        minHeight: 56,
+    },
+    rowDivider: { borderTopWidth: 1, borderTopColor: color.border },
+    dangerZone: {
+        marginTop: space.lg + 4,
+        borderTopWidth: 1,
+        borderTopColor: color.border,
+        paddingTop: space.sm + space.xs,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    deleteButton: { minHeight: 48, paddingHorizontal: space.xs, justifyContent: 'center' },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 100,
-    },
-    loadingText: {
-        marginTop: 10,
-        fontSize: 16,
-        color: '#69bf70',
-        fontWeight: '500',
     },
 });
 
