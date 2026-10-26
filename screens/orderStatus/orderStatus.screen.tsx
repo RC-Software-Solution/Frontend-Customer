@@ -31,6 +31,8 @@ const OrderStatus: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const cancelling = useRef(false);
+  const saving = useRef(false); // set before the await: state would lag a fast second tap
+  const [savingUi, setSavingUi] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [editItems, setEditItems] = useState<Array<{ food_item_id: number; name: string; meal_type: 'veg' | 'non-veg' | 'other'; quantity: number }>>([]);
@@ -156,7 +158,9 @@ const OrderStatus: React.FC = () => {
   };
 
   const handleSaveEdits = async () => {
-    if (!editingOrder) return;
+    if (!editingOrder || saving.current) return;
+    saving.current = true;
+    setSavingUi(true);
     try {
       // If all quantities are zero or list empty => cancel order
       const filtered = editItems.filter((it) => it.quantity > 0 && it.food_item_id);
@@ -179,6 +183,9 @@ const OrderStatus: React.FC = () => {
       loadOrders();
     } catch (e: any) {
       Alert.alert('Error', e?.message || 'Failed to save changes');
+    } finally {
+      saving.current = false;
+      setSavingUi(false);
     }
   };
 
@@ -354,7 +361,7 @@ const OrderStatus: React.FC = () => {
 
             <View style={styles.modalActions}>
               <AppButton title="Close" variant="secondary" onPress={() => { setEditVisible(false); setEditingOrder(null); }} style={styles.modalBtn} />
-              <AppButton title="Save Changes" onPress={handleSaveEdits} style={styles.modalBtn} />
+              <AppButton title="Save Changes" onPress={handleSaveEdits} loading={savingUi} style={styles.modalBtn} />
             </View>
           </View>
         </View>
