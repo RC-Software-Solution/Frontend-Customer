@@ -1,14 +1,15 @@
 import React, { ReactNode } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeyboardForm } from '@/components/ui/KeyboardForm';
 import { AppText } from '@/components/ui/AppText';
-import { color, shadow, space } from '@/theme';
+import { color, radius, space, status } from '@/theme';
 
 /**
- * The look shared by the sign-in family of screens: food photo on top, white rounded card
- * below that fills the rest of the screen, and the keyboard never hides the form.
+ * The look shared by the sign-in family of screens: a 16:9 food photo with a scrim and the
+ * brand lines, a white sheet that overlaps it and fills the rest of the screen, and the
+ * keyboard never hides the form.
  */
 export function AuthLayout({
   title,
@@ -25,24 +26,39 @@ export function AuthLayout({
   const insets = useSafeAreaInsets();
   return (
     <KeyboardForm>
-      <View>
-        <Image source={require('../../assets/signinback.jpg')} style={styles.image} />
+      <View testID="auth-hero" style={styles.hero}>
+        <Image
+          source={require('../../assets/signinback.jpg')}
+          style={StyleSheet.absoluteFill}
+          resizeMode="cover"
+          accessible={false}
+        />
+        <View testID="auth-hero-scrim" pointerEvents="none" style={styles.scrim} />
+        <View style={styles.heroText}>
+          <AppText variant="h1" weight="bold" tone="inverse">
+            RC Caterings
+          </AppText>
+          <AppText variant="caption" weight="semibold" tone="inverse">
+            Fresh home-style meals, delivered
+          </AppText>
+        </View>
         {onBack ? (
           <TouchableOpacity
             onPress={onBack}
             accessibilityRole="button"
             accessibilityLabel="Go back"
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             style={[styles.back, { top: insets.top + space.sm }]}
           >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
+            <Ionicons name="arrow-back" size={24} color={color.brandInk} />
           </TouchableOpacity>
         ) : null}
       </View>
-      <View style={[styles.card, { paddingBottom: insets.bottom + space.xl }]}>
-        <Text style={styles.title}>{title}</Text>
+      <View style={[styles.sheet, { paddingBottom: insets.bottom + space.xl }]}>
+        <AppText variant="h1" weight="bold" style={styles.title}>
+          {title}
+        </AppText>
         {subtitle ? (
-          <AppText tone="muted" style={styles.subtitle}>
+          <AppText variant="body" tone="muted" style={styles.subtitle}>
             {subtitle}
           </AppText>
         ) : null}
@@ -52,27 +68,84 @@ export function AuthLayout({
   );
 }
 
+/** Account-status and connection problems that do not belong to one field. */
+export function AuthBanner({ message }: { message: string }) {
+  return (
+    <View accessible accessibilityRole="alert" style={styles.banner}>
+      <Ionicons name="alert-circle-outline" size={22} color={status.delivery_failed.fg} />
+      <AppText
+        variant="caption"
+        weight="bold"
+        style={{ color: status.delivery_failed.fg, flex: 1, marginLeft: space.sm }}
+      >
+        {message}
+      </AppText>
+    </View>
+  );
+}
+
+/** "Don't have an account? Sign Up": a muted prompt and a 48dp text button. */
+export function AuthFooterLink({
+  prompt,
+  action,
+  onPress,
+}: {
+  prompt: string;
+  action: string;
+  onPress: () => void;
+}) {
+  return (
+    <View style={styles.footer}>
+      <AppText variant="caption" tone="muted">
+        {prompt}
+      </AppText>
+      <TouchableOpacity
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={action}
+        style={styles.footerAction}
+      >
+        <AppText variant="caption" weight="bold" tone="brand">
+          {action}
+        </AppText>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  image: { width: '100%', height: 250, resizeMode: 'cover' },
+  hero: { width: '100%', aspectRatio: 16 / 9 },
+  scrim: { ...StyleSheet.absoluteFill, backgroundColor: color.scrim },
+  heroText: { position: 'absolute', left: space.md, bottom: space.xl },
   back: {
     position: 'absolute',
     left: space.md,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: color.scrim,
   },
-  card: {
+  sheet: {
     flexGrow: 1,
     backgroundColor: color.surface,
-    padding: space.lg,
-    marginTop: -40,
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
-    ...shadow.card,
+    paddingHorizontal: space.md,
+    paddingTop: space.lg,
+    marginTop: -space.lg,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
   },
-  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: space.sm },
-  subtitle: { textAlign: 'center', marginBottom: space.lg },
+  title: { textAlign: 'left', marginBottom: space.xs },
+  subtitle: { textAlign: 'left', marginBottom: space.lg },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: status.delivery_failed.bg,
+    borderRadius: radius.md,
+    padding: space.md,
+    marginBottom: space.md,
+  },
+  footer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: space.md },
+  footerAction: { minHeight: 48, paddingHorizontal: space.sm, alignItems: 'center', justifyContent: 'center' },
 });
