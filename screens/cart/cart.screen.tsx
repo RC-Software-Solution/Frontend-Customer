@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, FlatList, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useNavigation } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
@@ -8,7 +8,9 @@ import { updateQuantity, removeItem, clearCart } from '@/store/cartSlice';
 import { orderService, authService } from '@/services';
 import { useScreenPadding } from '@/components/ui/Screen';
 import { AppButton } from '@/components/ui/AppButton';
-import { space } from '@/theme';
+import { Card } from '@/components/ui/Card';
+import { AppText } from '@/components/ui/AppText';
+import { color, radius, shadow, space } from '@/theme';
 
 // Helper function to normalize meal_type
 const normalizeMealType = (mealType: string): 'veg' | 'non-veg' | 'other' => {
@@ -150,53 +152,68 @@ const handleConfirmOrder = async () => {
 };
   return (
     <View style={[styles.container, { paddingTop: padding.paddingTop }]}>
-      <TouchableOpacity
-        style={[styles.backButton, { top: padding.paddingTop }]}
-        onPress={() => navigation.goBack()}
-        accessibilityRole="button"
-        accessibilityLabel="Go back"
-        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-      >
-        <Ionicons name='arrow-back' size={28} color='#000' />
-      </TouchableOpacity>
+      <View style={styles.headerRow}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => navigation.goBack()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={28} color={color.ink} />
+        </TouchableOpacity>
+        <AppText variant="h2" weight="bold">Food Basket</AppText>
+      </View>
 
-      <Text style={styles.header}>🛒 Food Basket</Text>
       <FlatList
         data={cartItems}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: space.md }}
+        contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <View style={styles.itemContainer}>
+          <Card style={styles.itemCard}>
             <Image source={item.image} style={styles.image} />
             <View style={styles.details}>
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.price}>Rs. {item.price.toFixed(2)}</Text>
+              <AppText variant="body" weight="bold" numberOfLines={2}>{item.name}</AppText>
+              <View style={styles.priceRow}>
+                <AppText variant="caption" tone="muted" numberOfLines={1}>Rs. {item.price.toFixed(2)}</AppText>
+                <AppText variant="caption" weight="bold" numberOfLines={1} style={styles.lineTotal}>
+                  Rs. {(item.price * item.quantity).toFixed(2)}
+                </AppText>
+              </View>
               <View style={styles.quantityControl}>
                 <TouchableOpacity
                   onPress={() => handleLocalQuantityUpdate(item.id, 'decrease')}
-                  style={styles.button}
+                  style={[styles.stepper, { backgroundColor: color.field }]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Decrease quantity of ${item.name}`}
                 >
-                  <Text style={styles.buttonText}>-</Text>
+                  <Ionicons name="remove" size={24} color={color.ink} />
                 </TouchableOpacity>
-                <Text style={styles.quantity}>{item.quantity}</Text>
+                <AppText variant="body" weight="bold" style={styles.quantity}>{item.quantity}</AppText>
                 <TouchableOpacity
                   onPress={() => handleLocalQuantityUpdate(item.id, 'increase')}
-                  style={styles.button}
+                  style={[styles.stepper, { backgroundColor: color.brand }]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Increase quantity of ${item.name}`}
                 >
-                  <Text style={styles.buttonText}>+</Text>
+                  <Ionicons name="add" size={24} color={color.onBrand} />
                 </TouchableOpacity>
               </View>
             </View>
-            <TouchableOpacity onPress={() => handleLocalRemoveItem(item.id)} style={styles.removeButton}>
-              <Text style={styles.removeText}>✖</Text>
+            <TouchableOpacity
+              onPress={() => handleLocalRemoveItem(item.id)}
+              style={styles.iconButton}
+              accessibilityRole="button"
+              accessibilityLabel={`Remove ${item.name}`}
+            >
+              <Ionicons name="trash-outline" size={22} color={color.danger} />
             </TouchableOpacity>
-          </View>
+          </Card>
         )}
       />
-      
+
       <View style={styles.summary}>
-        <Text style={styles.summaryText} numberOfLines={1}>Parcel Quantity: {totalQuantity}</Text>
-        <Text style={styles.summaryText} numberOfLines={1}>Total: Rs. {totalAmount.toFixed(2)}</Text>
+        <AppText variant="body" weight="bold" numberOfLines={1}>Parcel Quantity: {totalQuantity}</AppText>
+        <AppText variant="body" weight="bold" numberOfLines={1}>Total: Rs. {totalAmount.toFixed(2)}</AppText>
       </View>
       <AppButton
         title="CONFIRM ORDER"
@@ -208,45 +225,28 @@ const handleConfirmOrder = async () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: { fontSize: 22, fontWeight: 'bold', color: '#69bf70', textAlign: 'center', marginBottom: 30, marginTop: 0 },
-  itemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    padding: 14,
-    borderRadius: 20,
-    marginBottom: 10,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    position: 'relative',
-    marginTop: 10,
-    marginHorizontal: 16,
-  },
-  image: { width: 70, height: 70, borderRadius: 10 },
-  details: { flex: 1, marginLeft: 10 },
-  name: { fontSize: 16, fontWeight: 'bold' },
-  price: { fontSize: 14, color: '#666' },
-  quantityControl: { flexDirection: 'row', alignItems: 'center', marginTop: 5 },
-  button: { backgroundColor: '#ddd', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 5 },
-  buttonText: { fontSize: 18, fontWeight: 'bold' },
-  quantity: { marginHorizontal: 10, fontSize: 16, fontWeight: 'bold' },
-  removeButton: { padding: 10 },
-  removeText: { fontSize: 18, color: 'red' },
+  container: { flex: 1, backgroundColor: color.bg },
+  headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.sm, gap: space.xs },
+  list: { padding: space.md },
+  itemCard: { flexDirection: 'row', alignItems: 'center' },
+  image: { width: 72, height: 72, borderRadius: radius.md, backgroundColor: color.field },
+  details: { flex: 1, marginLeft: space.sm },
+  quantityControl: { flexDirection: 'row', alignItems: 'center', marginTop: space.xs },
+  stepper: { width: 48, height: 48, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  quantity: { minWidth: 32, textAlign: 'center' },
+  priceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.xs },
+  lineTotal: { flexShrink: 1, textAlign: 'right' },
+  iconButton: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   summary: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: space.sm,
     padding: space.md,
-    borderTopWidth: 1,
-    borderColor: '#ddd',
-    marginTop: 10,
-    marginHorizontal: 16,
+    backgroundColor: color.surface,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    ...shadow.bar,
   },
-  summaryText: { fontSize: 16, fontWeight: 'bold', flexShrink: 1 },
-  backButton: { position: 'absolute', left: 20, zIndex: 10 },
 });
 
 export default CartScreen;

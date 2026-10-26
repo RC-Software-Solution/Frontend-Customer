@@ -74,17 +74,17 @@ describe('basket contents', () => {
   it('+ and - change the quantity and the total, and quantity never drops below 1', async () => {
     add(item());
     await mount();
-    await fireEvent.press(screen.getByText('+'));
+    await fireEvent.press(screen.getByLabelText('Increase quantity of String Hoppers'));
     expect(screen.getByText('Total: Rs. 600.00')).toBeTruthy();
-    await fireEvent.press(screen.getByText('-'));
-    await fireEvent.press(screen.getByText('-'));
+    await fireEvent.press(screen.getByLabelText('Decrease quantity of String Hoppers'));
+    await fireEvent.press(screen.getByLabelText('Decrease quantity of String Hoppers'));
     expect(screen.getByText('Parcel Quantity: 1')).toBeTruthy();
   });
 
   it('the cross removes an item', async () => {
     add(item(), item({ id: '2', name: 'Milk Rice' }));
     await mount();
-    await fireEvent.press(screen.getAllByText('✖')[0]);
+    await fireEvent.press(screen.getByLabelText('Remove String Hoppers'));
     expect(screen.queryByText('String Hoppers')).toBeNull();
     expect(screen.getByText('Milk Rice')).toBeTruthy();
   });
