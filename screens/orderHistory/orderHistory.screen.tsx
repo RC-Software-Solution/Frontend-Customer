@@ -32,10 +32,9 @@ const OrderHistoryScreen: React.FC = () => {
   const fetchingMore = useRef(false);
 
   const loadFirst = useCallback(async (keepOnError: boolean) => {
-    const mine = ++generation.current;
     try {
       const rows = await orderService.getOrderHistory(1, PAGE_SIZE);
-      if (mine !== generation.current) return;
+      generation.current++; // only a refresh that worked makes an in-flight page stale: a failed one must not strand it
       setItems(rows);
       setPage(1);
       setHasMore(rows.length === PAGE_SIZE);
@@ -45,7 +44,7 @@ const OrderHistoryScreen: React.FC = () => {
       setPhase('ready');
     } catch (error) {
       console.error('Failed to load order history:', error);
-      if (mine === generation.current && !keepOnError) setPhase('error');
+      if (!keepOnError) setPhase('error');
     }
   }, []);
 
@@ -118,7 +117,7 @@ const OrderHistoryScreen: React.FC = () => {
   );
 
   const footer = loadingMore ? (
-    <ActivityIndicator style={styles.footer} color={color.brandStrong} />
+    <ActivityIndicator style={styles.footer} accessibilityLabel="Loading more" color={color.brandStrong} />
   ) : moreFailed ? (
     <TouchableOpacity
       style={[styles.footer, styles.moreRetry]}

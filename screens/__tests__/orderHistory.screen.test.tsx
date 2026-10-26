@@ -181,3 +181,47 @@ describe('pull to refresh', () => {
     expect(screen.queryByText("Couldn't load your order history")).toBeNull();
   });
 });
+
+describe('a request still in flight', () => {
+  const held = () => {
+    let settle!: (v: any) => void, fail!: (e: any) => void;
+    const promise = new Promise<any>((res, rej) => { settle = res; fail = rej; });
+    return { promise, settle, fail };
+  };
+
+  it('a second endReached while a page is loading issues no second request', async () => {
+    history.mockResolvedValueOnce(page(0, 20));
+    await mount();
+    await screen.findByText('ORD-0');
+
+    const next = held();
+    history.mockReturnValueOnce(next.promise);
+    await endReached();
+    await endReached();
+    expect(history).toHaveBeenCalledTimes(2);
+    await act(async () => next.settle(page(20, 2)));
+  });
+
+  it('a failed refresh during a page load does not strand the paging', async () => {
+    history.mockResolvedValueOnce(page(0, 20));
+    await mount();
+    await screen.findByText('ORD-0');
+
+    const next = held();
+    history.mockReturnValueOnce(next.promise);
+    await endReached();
+    expect(screen.getByLabelText('Loading more')).toBeTruthy();
+
+    history.mockRejectedValueOnce(new Error('offline'));
+    await refresh();
+    expect(screen.getByText('ORD-0')).toBeTruthy();
+    expect(screen.queryByText("Couldn't load your order history")).toBeNull();
+
+    await act(async () => next.settle(page(20, 20))); // the page that was in flight still lands
+    expect(screen.queryByLabelText('Loading more')).toBeNull();
+
+    history.mockResolvedValueOnce(page(40, 1));
+    await endReached();
+    expect(history).toHaveBeenLastCalledWith(3, 20);
+  });
+});
