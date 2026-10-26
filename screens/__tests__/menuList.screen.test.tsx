@@ -105,6 +105,24 @@ describe('the list', () => {
     expect(cart()).toEqual([]);
   });
 
+  it('a bad link (missing or repeated meal) falls back to Breakfast / Vegetarian instead of crashing', async () => {
+    store.dispatch(setMenu(menu({ breakfast: session('breakfast', 'open') })));
+    const view = await render(
+      <Provider store={store}>
+        <MenuListScreen meal={undefined} kind={undefined} />
+      </Provider>,
+    );
+    expect(screen.getByText('Vegetarian Items (2)')).toBeTruthy();
+    expect(screen.getByText('Breakfast, today')).toBeTruthy();
+    await view.rerender(
+      <Provider store={store}>
+        <MenuListScreen meal={['lunch', 'dinner']} kind={['nonveg', 'veg']} />
+      </Provider>,
+    );
+    expect(screen.getByText('Lunch, today')).toBeTruthy(); // first element of an array
+    expect(screen.getByText('Non-Vegetarian Items (0)')).toBeTruthy();
+  });
+
   it('the back button goes back', async () => {
     await mount(menu({ breakfast: session('breakfast', 'open') }));
     await press('Go back');

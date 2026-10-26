@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { addToCart, clearCart } from '@/store/cartSlice';
 import { FoodItem } from '@/services/types/api.types';
-import { MealType, buildTabs } from '@/services/menu/todayMenu';
+import { MealType, MEAL_TYPES, buildTabs } from '@/services/menu/todayMenu';
 import MenuRow from '@/components/menu/MenuRow';
 import { useScreenPadding } from '@/components/ui/Screen';
 import { AppText } from '@/components/ui/AppText';
@@ -15,7 +15,15 @@ import { color, radius, shadow, space, status } from '@/theme';
 
 const label = (meal: string) => meal.charAt(0).toUpperCase() + meal.slice(1);
 
-const MenuListScreen = ({ meal, kind }: { meal: MealType; kind: 'veg' | 'nonveg' }) => {
+type Param = string | string[] | undefined;
+
+const MenuListScreen = (params: { meal: Param; kind: Param }) => {
+  // route params come from links too: a missing, repeated or unknown value falls back instead of crashing
+  const first = (p: Param) => (Array.isArray(p) ? p[0] : p);
+  const rawMeal = first(params.meal);
+  const meal: MealType = MEAL_TYPES.includes(rawMeal as MealType) ? (rawMeal as MealType) : 'breakfast';
+  const kind = first(params.kind) === 'nonveg' ? 'nonveg' : 'veg';
+
   const padding = useScreenPadding({ gutters: false });
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);

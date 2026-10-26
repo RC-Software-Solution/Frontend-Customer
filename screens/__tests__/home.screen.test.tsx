@@ -110,7 +110,7 @@ describe("today's tabs", () => {
     expect(screen.queryByLabelText('Open Vegetarian Items')).toBeNull();
   });
 
-  it('an open session has no banner and shows its items', async () => {
+  it('an open session has no banner and shows the banner count pills', async () => {
     await mount(menu({ breakfast: session('breakfast', 'open') }));
     expect(screen.queryByText(/Ordering (opens|closed)/)).toBeNull();
     expect(screen.getByLabelText('Open Vegetarian Items')).toBeTruthy();
