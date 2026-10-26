@@ -10,6 +10,7 @@ import { useScreenPadding } from '@/components/ui/Screen';
 import { AppButton } from '@/components/ui/AppButton';
 import { Card } from '@/components/ui/Card';
 import { AppText } from '@/components/ui/AppText';
+import { colomboToday } from '@/services/menu/todayMenu';
 import { color, radius, shadow, space } from '@/theme';
 
 // Helper function to normalize meal_type
@@ -20,19 +21,24 @@ const normalizeMealType = (mealType: string): 'veg' | 'non-veg' | 'other' => {
   return 'other'; // Fallback for safety
 };
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// '2026-10-11' -> '11 Oct'
+const shortDate = (iso: string) => `${Number(iso.slice(8, 10))} ${MONTHS[Number(iso.slice(5, 7)) - 1]}`;
+
 const CartScreen = () => {
   const padding = useScreenPadding({ gutters: false });
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const [user, setUser] = useState<{ id: string } | null>(null);
+  const [user, setUser] = useState<{ id: string; address: string } | null>(null);
 
   useEffect(() => {
     const loadUser = async () => {
       try {
         const currentUser = await authService.getCurrentUser();
         if (currentUser?.id) {
-          setUser({ id: currentUser.id });
+          setUser({ id: currentUser.id, address: currentUser.address?.trim() || '' });
         } else {
           setUser(null);
         }
@@ -53,6 +59,10 @@ const CartScreen = () => {
 
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const meal = cartItems[0]?.meal_time;
+  const sessionDate = (cartItems[0] as any)?.session_date as string | undefined;
+  const count = `${cartItems.length} ${cartItems.length === 1 ? 'item' : 'items'}`;
+  const when = !sessionDate ? '' : sessionDate === colomboToday() ? ', delivered today' : `, ${shortDate(sessionDate)}`;
 
 const handleConfirmOrder = async () => {
   if (!user?.id) {
@@ -161,24 +171,40 @@ const handleConfirmOrder = async () => {
         >
           <Ionicons name="arrow-back" size={28} color={color.ink} />
         </TouchableOpacity>
-        <AppText variant="h2" weight="bold">Food Basket</AppText>
+        <AppText variant="h2" weight="bold">My cart</AppText>
       </View>
+
+      {meal ? (
+        <View style={styles.metaRow}>
+          <View style={styles.chip}>
+            <AppText variant="micro" weight="bold" tone="brand">{meal.charAt(0).toUpperCase() + meal.slice(1)}</AppText>
+          </View>
+          <AppText variant="caption" tone="muted">{count}{when}</AppText>
+        </View>
+      ) : null}
 
       <FlatList
         data={cartItems}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <Card style={styles.itemCard}>
-            <Image source={item.image} style={styles.image} />
-            <View style={styles.details}>
-              <AppText variant="body" weight="bold" numberOfLines={2}>{item.name}</AppText>
-              <View style={styles.priceRow}>
-                <AppText variant="caption" tone="muted" numberOfLines={1}>Rs. {item.price.toFixed(2)}</AppText>
-                <AppText variant="caption" weight="bold" numberOfLines={1} style={styles.lineTotal}>
-                  Rs. {(item.price * item.quantity).toFixed(2)}
-                </AppText>
+          <Card>
+            <View style={styles.top}>
+              <Image source={item.image} style={styles.image} />
+              <View style={styles.details}>
+                <AppText variant="body" weight="bold" numberOfLines={2}>{item.name}</AppText>
+                <AppText variant="caption" tone="muted" numberOfLines={1} style={styles.price}>Rs. {item.price.toFixed(2)} each</AppText>
               </View>
+              <TouchableOpacity
+                onPress={() => handleLocalRemoveItem(item.id)}
+                style={styles.iconButton}
+                accessibilityRole="button"
+                accessibilityLabel={`Remove ${item.name}`}
+              >
+                <Ionicons name="trash-outline" size={22} color={color.danger} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.bottom}>
               <View style={styles.quantityControl}>
                 <TouchableOpacity
                   onPress={() => handleLocalQuantityUpdate(item.id, 'decrease')}
@@ -198,17 +224,29 @@ const handleConfirmOrder = async () => {
                   <Ionicons name="add" size={24} color={color.onBrand} />
                 </TouchableOpacity>
               </View>
+              <AppText variant="body" weight="bold" numberOfLines={1}>Rs. {(item.price * item.quantity).toFixed(2)}</AppText>
             </View>
-            <TouchableOpacity
-              onPress={() => handleLocalRemoveItem(item.id)}
-              style={styles.iconButton}
-              accessibilityRole="button"
-              accessibilityLabel={`Remove ${item.name}`}
-            >
-              <Ionicons name="trash-outline" size={22} color={color.danger} />
-            </TouchableOpacity>
           </Card>
         )}
+        ListFooterComponent={
+          <Card style={styles.deliveryRow}>
+            <View style={styles.disc}>
+              <Ionicons name="location-outline" size={20} color={color.brandStrong} />
+            </View>
+            <View style={styles.details}>
+              <AppText variant="micro" tone="muted">Delivering to</AppText>
+              <AppText variant="body" weight="bold" numberOfLines={2}>{user?.address || 'Set your delivery area in Profile'}</AppText>
+            </View>
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/profile')}
+              style={styles.profileButton}
+              accessibilityRole="button"
+              accessibilityLabel="Change delivery area in Profile"
+            >
+              <AppText variant="caption" weight="bold" tone="brand">Profile</AppText>
+            </TouchableOpacity>
+          </Card>
+        }
       />
 
       <View style={[styles.sheet, { paddingBottom: padding.paddingBottom }]}>
@@ -226,14 +264,19 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: color.bg },
   headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.sm, gap: space.xs },
   list: { padding: space.md },
-  itemCard: { flexDirection: 'row', alignItems: 'center' },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.md, paddingTop: space.sm },
+  chip: { backgroundColor: color.brandSoft, borderRadius: radius.pill, paddingHorizontal: space.sm + space.xs, paddingVertical: space.xs },
+  top: { flexDirection: 'row', alignItems: 'flex-start' },
+  bottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: space.xs },
+  price: { marginTop: space.xs },
+  deliveryRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  disc: { width: 40, height: 40, borderRadius: radius.pill, backgroundColor: color.brandSoft, alignItems: 'center', justifyContent: 'center' },
+  profileButton: { minHeight: 48, paddingHorizontal: space.xs, alignItems: 'center', justifyContent: 'center' },
   image: { width: 72, height: 72, borderRadius: radius.md, backgroundColor: color.field },
   details: { flex: 1, marginLeft: space.sm },
-  quantityControl: { flexDirection: 'row', alignItems: 'center', marginTop: space.xs },
+  quantityControl: { flexDirection: 'row', alignItems: 'center' },
   stepper: { width: 48, height: 48, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   quantity: { minWidth: 32, textAlign: 'center' },
-  priceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.xs },
-  lineTotal: { flexShrink: 1, textAlign: 'right' },
   iconButton: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   sheet: {
     gap: space.md,

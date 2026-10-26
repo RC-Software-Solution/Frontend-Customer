@@ -7,6 +7,7 @@ import CartScreen from '../cart/cart.screen';
 import { store } from '@/store';
 import { addToCart, clearCart } from '@/store/cartSlice';
 import { authService, orderService } from '@/services/instances';
+import { colomboToday } from '@/services/menu/todayMenu';
 
 jest.mock('@/services/instances', () => ({
   authService: { getCurrentUser: jest.fn() },
@@ -87,6 +88,38 @@ describe('basket contents', () => {
     await fireEvent.press(screen.getByLabelText('Remove String Hoppers'));
     expect(screen.queryByText('String Hoppers')).toBeNull();
     expect(screen.getByText('Milk Rice')).toBeTruthy();
+  });
+});
+
+describe('header, meal chip and delivery row', () => {
+  it('titles the screen "My cart" and shows the meal chip with a dated item count', async () => {
+    add(item(), item({ id: '2', food_item_id: 2, name: 'Milk Rice' }));
+    await mount();
+    expect(screen.getByText('My cart')).toBeTruthy();
+    expect(screen.getByText('Breakfast')).toBeTruthy();
+    expect(screen.getByText('2 items, 11 Oct')).toBeTruthy();
+  });
+
+  it('says "delivered today" for a session dated today and singularises one item', async () => {
+    add(item({ session_date: colomboToday() }));
+    await mount();
+    expect(screen.getByText('1 item, delivered today')).toBeTruthy();
+  });
+
+  it('shows the customer address and a Profile button that opens the profile', async () => {
+    auth.getCurrentUser.mockResolvedValue({ id: 'user-1', address: 'Colombo 05' } as any);
+    add(item());
+    await mount();
+    expect(await screen.findByText('Delivering to')).toBeTruthy();
+    expect(await screen.findByText('Colombo 05')).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText('Change delivery area in Profile'));
+    expect(router.push).toHaveBeenCalledWith('/(tabs)/profile');
+  });
+
+  it('asks for a delivery area when the customer has no address', async () => {
+    add(item());
+    await mount();
+    expect(await screen.findByText('Set your delivery area in Profile')).toBeTruthy();
   });
 });
 
