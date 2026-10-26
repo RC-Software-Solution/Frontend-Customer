@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { authService } from '@/services';
-import { AuthLayout } from '@/components/ui/AuthLayout';
+import { AuthBanner, AuthLayout } from '@/components/ui/AuthLayout';
 import { Field } from '@/components/ui/Field';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppText } from '@/components/ui/AppText';
@@ -10,6 +10,9 @@ import { validateNewPassword, validateResetCode } from '@/services/utils/validat
 import { space } from '@/theme';
 
 const RESEND_SECONDS = 30;
+
+// each link under the button is its own 48dp row, centred, with a small gap between rows
+const linkRow = { minHeight: 48, marginTop: space.xs, alignItems: 'center', justifyContent: 'center' } as const;
 
 export default function ResetPasswordScreen() {
   const { email } = useLocalSearchParams<{ email: string }>();
@@ -71,37 +74,35 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <AuthLayout title="Reset Password" onBack={() => router.back()} subtitle={`If there is an account for ${email}, we have sent it a 6-digit code (valid for 15 minutes). Check your spam folder too. No email? The address may not be the one you registered with.`}>
+    <AuthLayout title="Reset Password" onBack={() => router.back()} subtitle={`If there is an account for ${email}, a 6-digit code is on its way. Check your spam folder.`}>
+      {errors.form ? <AuthBanner message={errors.form} /> : null}
       <Field
         label="Code"
         placeholder="123456"
-        keyboardType="number-pad"
+        inputMode="numeric"
         maxLength={6}
         value={code}
         onChangeText={(t) => setCode(t.replace(/\D/g, ''))}
+        style={{ textAlign: 'center', letterSpacing: space.sm }}
         error={errors.code}
       />
       <Field label="New password" placeholder="At least 6 characters" secure value={password} onChangeText={setPassword} error={errors.password} />
       <Field label="Confirm new password" placeholder="Repeat the password" secure value={confirm} onChangeText={setConfirm} error={errors.confirm} />
 
-      {errors.form ? (
-        <AppText tone="danger" style={{ marginBottom: space.md }}>
-          {errors.form}
-        </AppText>
-      ) : null}
-
       <AppButton title="Reset password" onPress={submit} loading={loading} />
 
-      <TouchableOpacity onPress={resend} disabled={cooldown > 0} style={{ marginTop: space.lg, alignItems: 'center', opacity: cooldown > 0 ? 0.5 : 1 }}>
-        <AppText weight="bold" tone="brand">
+      <TouchableOpacity onPress={resend} disabled={cooldown > 0} accessibilityRole="button" style={linkRow}>
+        <AppText weight="bold" tone={cooldown > 0 ? 'muted' : 'brand'}>
           {cooldown > 0 ? `Send a new code in ${cooldown}s` : 'Send a new code'}
         </AppText>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.back()} style={{ marginTop: space.md, alignItems: 'center' }}>
-        <AppText tone="muted">Wrong email? Use a different one</AppText>
+      <TouchableOpacity onPress={() => router.back()} accessibilityRole="button" style={linkRow}>
+        <AppText weight="semibold" tone="brand" style={{ textDecorationLine: 'underline' }}>
+          Wrong email? Use a different one
+        </AppText>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.dismissTo('/(routes)/login')} style={{ marginTop: space.md, alignItems: 'center' }}>
+      <TouchableOpacity onPress={() => router.dismissTo('/(routes)/login')} accessibilityRole="button" style={linkRow}>
         <AppText weight="bold" tone="brand">
           Back to sign in
         </AppText>
