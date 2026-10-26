@@ -1,8 +1,10 @@
-// D:\RiceCooker\RC-Customer(ccc)\Frontend-Customer\components\flatList\flatList.tsx
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import BouncyCheckbox from 'react-native-bouncy-checkbox';
-import React from 'react';
-import { MenuItem } from '@/screens/homeTab/home/home.screen'; // Import MenuItem type
+import { View, Image } from "react-native";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
+import React from "react";
+import { MenuItem } from "@/screens/homeTab/home/home.screen"; // Import MenuItem type
+import { Card } from "@/components/ui/Card";
+import { AppText } from "@/components/ui/AppText";
+import { color, radius, space } from "@/theme";
 
 interface Props {
   item: MenuItem;
@@ -12,64 +14,76 @@ interface Props {
   disabled?: boolean;
 }
 
-const RenderItem: React.FC<Props> = ({ item, onPressCheckbox, isChecked, disabled = false }) => {
+const RenderItem: React.FC<Props> = ({
+  item,
+  onPressCheckbox,
+  isChecked,
+  disabled = false,
+}) => {
   return (
-    <View
+    <Card
       style={{
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         opacity: disabled ? 0.55 : 1,
-        backgroundColor: 'white',
-        padding: 10,
-        marginVertical: 8,
-        borderRadius: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
+        padding: space.sm + 2,
+        marginBottom: space.sm,
       }}
     >
       {/* Food Image */}
       <Image
-        source={require('../../assets/plate.jpeg')}
+        source={require("../../assets/plate.jpeg")}
+        resizeMode="cover"
         style={{
-          width: 80,
-          height: 80,
-          borderRadius: 10,
+          width: 72,
+          height: 72,
+          borderRadius: radius.md,
+          backgroundColor: color.field,
         }}
       />
 
       {/* Meal Info */}
       {/* flexGrow/flexShrink (not flex: 1): a zero flex-basis makes Android measure the text at ~0 width, one character per line, blowing up the row height */}
-      <View style={{ flexGrow: 1, flexShrink: 1, marginLeft: 12, justifyContent: 'center' }}>
-        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
+      <View
+        style={{
+          flexGrow: 1,
+          flexShrink: 1,
+          marginLeft: 12,
+          justifyContent: "center",
+        }}
+      >
+        <AppText variant="body" weight="bold">
           {item.name}
-        </Text>
-        <Text style={{ fontSize: 12, color: '#777', marginTop: 2 }}>
+        </AppText>
+        <AppText
+          variant="caption"
+          tone="muted"
+          numberOfLines={2}
+          style={{ marginTop: 2 }}
+        >
           {item.description}
-        </Text>
-        <Text style={{ fontSize: 14, fontWeight: 'bold', marginTop: 5 }}>
+        </AppText>
+        <AppText variant="caption" weight="bold" style={{ marginTop: 5 }}>
           Rs. {item.price.toFixed(2)}
-        </Text>
+        </AppText>
       </View>
 
-      {/* Checkbox */}
+      {/* Checkbox: padding 12 around the 25 dp box makes a 49 dp touch target */}
       <BouncyCheckbox
         disableText
         disabled={disabled}
         testID={`select-${item.name}`}
-        style={{ alignSelf: 'center', marginLeft: 8 }}
+        style={{ alignSelf: "center", marginLeft: 8, padding: 12 }}
         size={25}
-        fillColor='#69bf70'
-        unFillColor='#FFFFFF'
-        iconStyle={{ borderColor: '#69bf70' }}
+        fillColor={color.brandStrong}
+        unFillColor={color.surface}
+        iconStyle={{ borderColor: color.brandStrong }}
         innerIconStyle={{ borderWidth: 2 }}
         isChecked={isChecked}
         onPress={(isChecked: boolean) => onPressCheckbox(item.name, isChecked)}
       />
-    </View>
+    </Card>
   );
 };
 
-export default RenderItem;
+export default React.memo(RenderItem);
