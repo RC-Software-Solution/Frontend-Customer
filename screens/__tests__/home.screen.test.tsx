@@ -6,7 +6,8 @@ import { router } from 'expo-router';
 import HomeScreen from '../homeTab/home/home.screen';
 import { AuthProvider } from '@/services';
 import { store } from '@/store';
-import { clearCart } from '@/store/cartSlice';
+import { addToCart, clearCart } from '@/store/cartSlice';
+import { setMenu } from '@/store/menuSlice';
 import { authService, menuService } from '@/services/instances';
 import { TodayMenu, TodaySession } from '@/services/types/api.types';
 
@@ -72,11 +73,11 @@ const mount = async (m: TodayMenu) => {
 };
 
 const openTab = async (name: string) => fireEvent.press(screen.getByText(name));
-const expandVeg = async () => fireEvent.press(screen.getByLabelText('Toggle Vegetarian Items'));
 
 beforeEach(() => {
   jest.clearAllMocks();
   store.dispatch(clearCart());
+  store.dispatch(setMenu(null));
   auth.isAuthenticated.mockResolvedValue(true);
   auth.getRefreshToken.mockResolvedValue(null);
   auth.getCurrentUser.mockResolvedValue({ id: 'u1', role: 'customer' } as any);
@@ -105,24 +106,23 @@ describe("today's tabs", () => {
     await mount(menu({ lunch: session('lunch', 'open') }));
     expect(screen.getAllByText('No menu')).toHaveLength(2); // breakfast and dinner
     expect(screen.getByText('No breakfast menu has been published for today.')).toBeTruthy();
-    expect(screen.queryByText('Choose Your Preference')).toBeNull();
-    expect(screen.queryByLabelText('Toggle Vegetarian Items')).toBeNull();
+    expect(screen.queryByText('Choose your preference')).toBeNull();
+    expect(screen.queryByLabelText('Open Vegetarian Items')).toBeNull();
   });
 
   it('an open session has no banner and shows its items', async () => {
     await mount(menu({ breakfast: session('breakfast', 'open') }));
     expect(screen.queryByText(/Ordering (opens|closed)/)).toBeNull();
-    await expandVeg();
-    expect(screen.getByText('String Hoppers')).toBeTruthy();
-    expect(screen.getByText('Vegetarian Items (1)')).toBeTruthy();
+    expect(screen.getByLabelText('Open Vegetarian Items')).toBeTruthy();
+    expect(screen.getAllByText('1 item')).toHaveLength(2); // the count pills: 1 veg, 1 non-veg
   });
 
   it('an upcoming session explains when it opens and still lists its items', async () => {
     await mount(menu({ dinner: session('dinner', 'upcoming', { start_time: '18:00:00' }) }));
     await openTab('Dinner');
     expect(screen.getByText('Ordering opens today at 6:00 PM.')).toBeTruthy();
-    await expandVeg();
-    expect(screen.getByText('String Hoppers')).toBeTruthy();
+    expect(screen.getByLabelText('Open Vegetarian Items')).toBeTruthy();
+    expect(screen.getAllByText('1 item')).toHaveLength(2);
   });
 
   it('a closed session explains when it closed', async () => {
@@ -143,35 +143,36 @@ describe("today's tabs", () => {
 });
 
 describe('ordering from a tab', () => {
-  it('an open session can be ticked and goes to the cart with the session date', async () => {
-    await mount(menu({ breakfast: session('breakfast', 'open') }));
-    await expandVeg();
-    await fireEvent.press(screen.getByTestId('select-String Hoppers'));
-    await fireEvent.press(screen.getByLabelText('View cart'));
+  it('a banner opens the Menu list for the active meal and that kind', async () => {
+    await mount(menu({ breakfast: session('breakfast', 'closed'), dinner: session('dinner', 'open') }));
+    await openTab('Dinner');
+    await fireEvent.press(screen.getByLabelText('Open Non-Vegetarian Items'));
+    expect(router.push).toHaveBeenCalledWith({ pathname: '/(routes)/menu', params: { meal: 'dinner', kind: 'nonveg' } });
+    await fireEvent.press(screen.getByLabelText('Open Vegetarian Items'));
+    expect(router.push).toHaveBeenCalledWith({ pathname: '/(routes)/menu', params: { meal: 'dinner', kind: 'veg' } });
+  });
 
-    const [added] = store.getState().cart.items;
-    expect(added).toMatchObject({ food_item_id: 1, name: 'String Hoppers', meal_time: 'breakfast', session_date: '2026-10-11', price: 300, quantity: 1 });
+  it('each banner carries a count pill of its dishes', async () => {
+    const two = session('breakfast', 'open');
+    two.items.push({ id: 3, food_item_id: 3, available_quantity: 5, foodItem: food(3, 'Milk Rice', 'veg') });
+    await mount(menu({ breakfast: two }));
+    expect(screen.getByText('2 items')).toBeTruthy();
+    expect(screen.getByText('1 item')).toBeTruthy();
+  });
+
+  it('the cart button shows the cart quantity as a badge and opens the cart', async () => {
+    await mount(menu({ breakfast: session('breakfast', 'open') }));
+    expect(screen.getByLabelText('View cart')).toBeTruthy(); // no badge while empty
+    await act(async () => {
+      store.dispatch(addToCart({ id: '1', name: 'String Hoppers', price: 300, quantity: 3, meal_type: 'veg', meal_time: 'breakfast', description: '' }));
+    });
+    expect(screen.getByLabelText('View cart, 3 items')).toBeTruthy();
+    expect(screen.getByText('3')).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText('View cart, 3 items'));
     expect(router.push).toHaveBeenCalledWith('/(routes)/cart');
   });
 
-  it('items in an upcoming session cannot be ticked, so nothing reaches the cart', async () => {
-    await mount(menu({ dinner: session('dinner', 'upcoming') }));
-    await openTab('Dinner');
-    await expandVeg();
-    await fireEvent.press(screen.getByTestId('select-String Hoppers'));
-    await fireEvent.press(screen.getByLabelText('View cart'));
-    expect(store.getState().cart.items).toEqual([]);
-  });
-
-  it('items in a closed session cannot be ticked either', async () => {
-    await mount(menu({ breakfast: session('breakfast', 'closed') }));
-    await expandVeg();
-    await fireEvent.press(screen.getByTestId('select-String Hoppers'));
-    await fireEvent.press(screen.getByLabelText('View cart'));
-    expect(store.getState().cart.items).toEqual([]);
-  });
-
-  it('a selection made while a session was open is ignored once it has closed (refresh on returning to the app)', async () => {
+  it('returning to the app refreshes the menu, which the Menu list reads from the store', async () => {
     const { AppState } = require('react-native');
     const listeners: Array<(state: string) => void> = [];
     jest.spyOn(AppState, 'addEventListener').mockImplementation(((_: string, cb: (s: string) => void) => {
@@ -180,16 +181,13 @@ describe('ordering from a tab', () => {
     }) as any);
 
     await mount(menu({ breakfast: session('breakfast', 'open') }));
-    await expandVeg();
-    await fireEvent.press(screen.getByTestId('select-String Hoppers')); // ticked while open
+    expect(store.getState().menu.menu?.sessions.breakfast?.state).toBe('open');
 
     // the window closes while the app is in the background; coming back refreshes the menu
     menuSvc.getTodaysMenu.mockResolvedValue(menu({ breakfast: session('breakfast', 'closed') }));
     await act(async () => listeners.forEach((l) => l('active')));
     expect(await screen.findByText('Closed')).toBeTruthy();
-
-    await fireEvent.press(screen.getByLabelText('View cart'));
-    expect(store.getState().cart.items).toEqual([]);
+    expect(store.getState().menu.menu?.sessions.breakfast?.state).toBe('closed');
   });
 });
 

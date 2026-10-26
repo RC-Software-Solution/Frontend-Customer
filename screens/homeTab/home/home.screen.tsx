@@ -1,13 +1,11 @@
-import { View, TouchableOpacity, ScrollView, Image, Animated, StyleSheet, ActivityIndicator, Alert, AppState } from 'react-native';
+import { View, TouchableOpacity, ScrollView, Image, StyleSheet, ActivityIndicator, Alert, AppState } from 'react-native';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import RenderItem from '@/components/flatList/flatList';
 import { router, useFocusEffect } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart } from '@/store/cartSlice';
+import { setMenu } from '@/store/menuSlice';
 import { RootState } from '@/store';
 import { menuService, useAuth } from '@/services';
-import { FoodItem, TodayMenu } from '@/services/types/api.types';
 import { MealType, MEAL_TYPES, buildTabs, nextTransitionMs } from '@/services/menu/todayMenu';
 import { useScreenPadding, StatusBarScrim } from '@/components/ui/Screen';
 import { AppText } from '@/components/ui/AppText';
@@ -16,30 +14,17 @@ import { color, space, radius, shadow, status } from '@/theme';
 
 const CART_FAB_SIZE = 56;
 
-export type MenuItem = {
-  name: string;
-  description: string;
-  price: number;
-};
-
-type Expansion = { [key in MealType]: { Veg: boolean; NonVeg: boolean } };
-
 const HomeScreen = () => {
   const { isAuthenticated } = useAuth();
-  const [selectedItems, setSelectedItems] = useState<{ [key: string]: boolean }>({});
   const [activeButton, setActiveButton] = useState<MealType>('breakfast');
   const [loading, setLoading] = useState(true);
-  const [menu, setMenu] = useState<TodayMenu | null>(null);
-  const [expansionState, setExpansionState] = useState<Expansion>({
-    breakfast: { Veg: false, NonVeg: false },
-    lunch: { Veg: false, NonVeg: false },
-    dinner: { Veg: false, NonVeg: false },
-  });
   const hasLoaded = useRef(false);
 
   const padding = useScreenPadding({ tabBar: true, gutters: false });
   const dispatch = useDispatch();
-  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const cartCount = useSelector((state: RootState) => state.cart.items.reduce((acc, item) => acc + item.quantity, 0));
+  // kept in the store so the Menu list screen follows the same refreshes
+  const menu = useSelector((state: RootState) => state.menu.menu);
 
   // What each meal tab shows is decided by the server (today's date in Sri Lanka, each
   // session upcoming/open/closed). Other days are never shown.
@@ -53,7 +38,7 @@ const HomeScreen = () => {
     try {
       // spinner only for the first load; later refreshes update quietly
       if (!hasLoaded.current) setLoading(true);
-      setMenu(await menuService.getTodaysMenu());
+      dispatch(setMenu(await menuService.getTodaysMenu()));
       hasLoaded.current = true;
     } catch (error) {
       console.error('Failed to load menu data:', error);
@@ -61,7 +46,7 @@ const HomeScreen = () => {
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, dispatch]);
 
   // Refresh when this screen is focused (also runs on first mount)
   useFocusEffect(
@@ -85,95 +70,25 @@ const HomeScreen = () => {
     return () => clearTimeout(timer);
   }, [menu, loadMenuData]);
 
-  const handleViewCart = () => {
-    const tab = tabs?.[activeButton];
-    // only an open session can be ordered from; selections in other tabs are ignored
-    const selectedList = tab?.orderable ? Object.keys(selectedItems).filter((name) => selectedItems[name]) : [];
-
-    const cartFormattedItems = selectedList.flatMap((name) => {
-      const vegItem = tab!.veg.find((item) => item.name === name);
-      const nonVegItem = tab!.nonVeg.find((item) => item.name === name);
-      const foodItem: FoodItem | undefined = vegItem || nonVegItem;
-      if (!foodItem) return [];
-
-      return [
-        {
-          id: foodItem.id.toString(),
-          food_item_id: foodItem.id,
-          name,
-          price: parseFloat(foodItem.price),
-          quantity: 1,
-          image: foodItem.image_url ? { uri: foodItem.image_url } : require('../../../assets/plate.jpeg'),
-          meal_type: (vegItem ? 'veg' : 'non-veg') as 'veg' | 'non-veg',
-          meal_time: activeButton,
-          description: foodItem.description,
-          // the session's own date (today), sent as the order's target_date
-          session_date: tab!.sessionDate,
-        },
-      ];
-    });
-
-    const itemsToAdd = cartFormattedItems.filter(
-      (newItem) => !cartItems.some((existingItem: { name: string }) => existingItem.name === newItem.name)
-    );
-    itemsToAdd.forEach((item) => dispatch(addToCart(item)));
-
-    router.push('/(routes)/cart');
-  };
-
-  const toggleSection = (category: MealType, section: 'Veg' | 'NonVeg') => {
-    setExpansionState((prev) => ({
-      ...prev,
-      [category]: { ...prev[category], [section]: !prev[category][section] },
-    }));
-  };
-
-  const handleMealSelection = (meal: string, isChecked: boolean) => {
-    setSelectedItems((prev) => ({ ...prev, [meal]: isChecked }));
-  };
-
-  const renderSection = (
-    title: string,
-    banner: any,
-    items: FoodItem[],
-    expanded: boolean,
-    onToggle: () => void,
-    disabled: boolean
-  ) => (
-    <>
-      <TouchableOpacity
-        onPress={onToggle}
-        accessibilityRole="button"
-        accessibilityLabel={`Toggle ${title}`}
-        accessibilityState={{ expanded }}
-        style={{ marginTop: 20, marginHorizontal: space.md }}
-      >
-        <Image
-          source={banner}
-          resizeMode="cover"
-          style={{ width: '100%', height: 150, alignSelf: 'center', borderRadius: radius.lg }}
-        />
-      </TouchableOpacity>
-      <Animated.View style={{ height: expanded ? undefined : 0, overflow: 'hidden', marginHorizontal: space.md }}>
-        {expanded && (
-          <View>
-            <AppText variant="body" weight="bold" tone="ink" style={{ marginTop: space.sm, marginBottom: space.md }}>
-              {title} ({items.length})
-            </AppText>
-            {/* ponytail: bounded list (a handful of dishes per session), a nested FlatList would warn. Switch the screen to one SectionList if menus grow past ~30 items. */}
-            {items.map((item) => (
-              <RenderItem
-                key={item.id}
-                item={{ name: item.name, description: item.description, price: parseFloat(item.price) }}
-                onPressCheckbox={handleMealSelection}
-                isChecked={selectedItems[item.name] || false}
-                disabled={disabled}
-              />
-            ))}
-          </View>
-        )}
-      </Animated.View>
-    </>
+  // A banner opens that kind's Menu list; the pill over the photo counts its dishes
+  const renderSection = (title: string, banner: any, count: number, kind: 'veg' | 'nonveg') => (
+    <TouchableOpacity
+      onPress={() => router.push({ pathname: '/(routes)/menu', params: { meal: activeButton, kind } })}
+      accessibilityRole="button"
+      accessibilityLabel={`Open ${title}`}
+      style={{ marginHorizontal: space.md }}
+    >
+      <Image
+        source={banner}
+        resizeMode="cover"
+        style={{ width: '100%', height: 150, alignSelf: 'center', borderRadius: radius.lg }}
+      />
+      <View style={styles.countPill}>
+        <AppText variant="micro" weight="bold" tone="inverse">
+          {count} {count === 1 ? 'item' : 'items'}
+        </AppText>
+      </View>
+    </TouchableOpacity>
   );
 
   const renderContent = () => {
@@ -209,7 +124,6 @@ const HomeScreen = () => {
     }
 
     const tab = tabs[activeButton];
-    const expansion = expansionState[activeButton];
 
     return (
       <View>
@@ -283,27 +197,15 @@ const HomeScreen = () => {
 
         {tab.state === 'empty' ? null : (
           <>
-            <View style={{ alignItems: 'flex-start', marginTop: 20, marginHorizontal: space.md }}>
+            <View style={{ alignItems: 'flex-start', marginTop: space.sm + space.xs, marginBottom: space.sm + space.xs, marginHorizontal: space.md }}>
               <AppText variant="h2" weight="bold">
-                Choose Your Preference
+                Choose your preference
               </AppText>
             </View>
-            {renderSection(
-              'Vegetarian Items',
-              require('../../../assets/vegBack.jpg'),
-              tab.veg,
-              expansion.Veg,
-              () => toggleSection(activeButton, 'Veg'),
-              !tab.orderable
-            )}
-            {renderSection(
-              'Non-Vegetarian Items',
-              require('../../../assets/nonVegBackground.jpeg'),
-              tab.nonVeg,
-              expansion.NonVeg,
-              () => toggleSection(activeButton, 'NonVeg'),
-              !tab.orderable
-            )}
+            <View style={{ gap: space.md }}>
+              {renderSection('Vegetarian Items', require('../../../assets/vegBack.jpg'), tab.veg.length, 'veg')}
+              {renderSection('Non-Vegetarian Items', require('../../../assets/nonVegBackground.jpeg'), tab.nonVeg.length, 'nonveg')}
+            </View>
           </>
         )}
       </View>
@@ -333,11 +235,18 @@ const HomeScreen = () => {
           alignItems: 'center',
           ...shadow.card,
         }}
-        onPress={handleViewCart}
+        onPress={() => router.push('/(routes)/cart')}
         accessibilityRole="button"
-        accessibilityLabel="View cart"
+        accessibilityLabel={cartCount > 0 ? `View cart, ${cartCount} ${cartCount === 1 ? 'item' : 'items'}` : 'View cart'}
       >
         <Ionicons name="cart-outline" size={28} color={color.onBrand} />
+        {cartCount > 0 ? (
+          <View style={styles.cartBadge}>
+            <AppText variant="micro" weight="bold" tone="inverse">
+              {cartCount}
+            </AppText>
+          </View>
+        ) : null}
       </TouchableOpacity>
     </GestureHandlerRootView>
   );
@@ -359,6 +268,27 @@ const styles = StyleSheet.create({
     padding: space.md,
     borderRadius: radius.md,
     backgroundColor: status.pending.bg,
+  },
+  countPill: {
+    position: 'absolute',
+    right: space.md,
+    bottom: space.md,
+    backgroundColor: color.scrim,
+    borderRadius: radius.pill,
+    paddingHorizontal: space.sm,
+    paddingVertical: 2,
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -space.xs,
+    right: -space.xs,
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: space.xs,
+    borderRadius: radius.pill,
+    backgroundColor: color.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
