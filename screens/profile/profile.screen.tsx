@@ -163,9 +163,10 @@ const Profile = () => {
                 onClose={() => setModalVisible(false)}
                 onConfirm={handleDeleteAccount}
                 title="Delete Account"
-                message="Are you sure you want to delete your account? This action cannot be undone."
+                message="This permanently deletes your account and cannot be undone."
                 confirmText="Yes, Delete"
                 cancelText="Cancel"
+                requireText="DELETE"
             />
         </Screen>
     );

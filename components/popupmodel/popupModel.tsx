@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Modal, StyleSheet, TouchableOpacity } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
+import { Field } from '@/components/ui/Field';
 import { color, radius, space } from '@/theme';
 
 interface ModalProps {
@@ -11,6 +12,7 @@ interface ModalProps {
   message?: string;
   confirmText?: string;
   cancelText?: string;
+  requireText?: string;
 }
 
 const CancelModal: React.FC<ModalProps> = ({
@@ -21,7 +23,13 @@ const CancelModal: React.FC<ModalProps> = ({
   message = "Are you sure you want to cancel this order?",
   confirmText = "Yes",
   cancelText = "No",
+  requireText,
 }) => {
+  const [typed, setTyped] = useState('');
+  // Start empty every time the dialog opens or closes, so a stale answer never carries over.
+  useEffect(() => { setTyped(''); }, [visible]);
+  const canConfirm = !requireText || typed.trim() === requireText;
+
   return (
     <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
       <View style={styles.modalContainer}>
@@ -29,12 +37,31 @@ const CancelModal: React.FC<ModalProps> = ({
           <AppText variant="h2" weight="bold" style={styles.modalTitle}>{title}</AppText>
           <AppText variant="body" tone="muted" style={styles.modalText}>{message}</AppText>
 
+          {requireText ? (
+            <View style={styles.requireBox}>
+              <AppText variant="caption" tone="muted" weight="semibold" style={styles.requireCaption}>Type {requireText} to confirm</AppText>
+              <Field
+                value={typed}
+                onChangeText={setTyped}
+                autoCapitalize="characters"
+                autoCorrect={false}
+                accessibilityLabel={`Type ${requireText} to confirm`}
+              />
+            </View>
+          ) : null}
+
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose}>
               <AppText variant="body" weight="bold" tone="ink">{cancelText}</AppText>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={onConfirm}>
+            <TouchableOpacity
+              style={[styles.button, styles.confirmButton, !canConfirm && styles.confirmDisabled]}
+              onPress={onConfirm}
+              disabled={!canConfirm}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: !canConfirm }}
+            >
               <AppText variant="body" weight="bold" tone="inverse">{confirmText}</AppText>
             </TouchableOpacity>
           </View>
@@ -65,6 +92,12 @@ const styles = StyleSheet.create({
     marginBottom: space.lg,
     textAlign: 'center',
   },
+  requireBox: {
+    width: '100%',
+  },
+  requireCaption: {
+    marginBottom: space.xs,
+  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -83,6 +116,9 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     backgroundColor: color.danger,
+  },
+  confirmDisabled: {
+    opacity: 0.4,
   },
 });
 

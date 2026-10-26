@@ -178,3 +178,31 @@ describe('changing the password', () => {
     expect(alert).not.toHaveBeenCalledWith('Password changed', expect.anything());
   });
 });
+
+describe('deleting the account', () => {
+  const openDelete = async () => fireEvent.press(screen.getByText('Delete Account'));
+
+  it('asks the user to type DELETE before the account can be deleted', async () => {
+    await mount();
+    await openDelete();
+    expect(screen.getByText('Type DELETE to confirm')).toBeTruthy();
+    expect(screen.getByLabelText('Type DELETE to confirm')).toBeTruthy();
+    expect(screen.getByText('This permanently deletes your account and cannot be undone.')).toBeTruthy();
+  });
+
+  it('does not delete when "Yes, Delete" is pressed without typing', async () => {
+    await mount();
+    await openDelete();
+    await fireEvent.press(screen.getByText('Yes, Delete'));
+    expect(auth.deleteAccount).not.toHaveBeenCalled();
+  });
+
+  it('deletes once after DELETE is typed', async () => {
+    auth.deleteAccount.mockResolvedValue(undefined);
+    await mount();
+    await openDelete();
+    await fireEvent.changeText(screen.getByLabelText('Type DELETE to confirm'), 'DELETE');
+    await fireEvent.press(screen.getByText('Yes, Delete'));
+    await waitFor(() => expect(auth.deleteAccount).toHaveBeenCalledTimes(1));
+  });
+});
