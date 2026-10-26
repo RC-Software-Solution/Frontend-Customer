@@ -81,13 +81,13 @@ export class OrderService {
   }
 
   /**
-   * Get undelivered orders for today (pending, preparing)
+   * Get undelivered orders for today (pending, preparing, delivering)
    */
   async getUndeliveredOrdersToday(mealTime?: 'breakfast' | 'lunch' | 'dinner'): Promise<Order[]> {
     try {
       const params: GetOrdersRequest = {
         type: 'current',
-        status: 'pending,preparing',
+        status: 'pending,preparing,delivering',
         date_range: 'today',
       };
       if (mealTime) params.meal_time = mealTime;

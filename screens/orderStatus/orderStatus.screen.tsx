@@ -1,7 +1,7 @@
 import { View, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import CancelModal from '@/components/popupmodel/popupModel';
 import { orderService, useAuth, menuService } from '@/services';
 import { colomboToday } from '@/services/menu/todayMenu';
@@ -15,6 +15,8 @@ import { StatusChip } from '@/components/ui/StatusChip';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { color, radius, space } from '@/theme';
 
+const STATUS_NOTE: Record<string, string> = { preparing: "Being prepared, so it can't be changed now", delivering: 'Arriving soon' };
+
 const OrderStatus: React.FC = () => {
   const padding = useScreenPadding({ tabBar: true, gutters: false });
   const { user, isAuthenticated } = useAuth();
@@ -22,6 +24,7 @@ const OrderStatus: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const cancelling = useRef(false);
   const [editVisible, setEditVisible] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [editItems, setEditItems] = useState<Array<{ food_item_id: number; name: string; meal_type: 'veg' | 'non-veg' | 'other'; quantity: number }>>([]);
@@ -35,7 +38,7 @@ const OrderStatus: React.FC = () => {
 
     try {
       setLoading(true);
-      // Fetch undelivered orders for today (pending, preparing) for all meal times
+      // Fetch undelivered orders for today (pending, preparing, delivering) for all meal times
       const currentOrders = await orderService.getUndeliveredOrdersToday();
       setOrders(currentOrders);
     } catch (error) {
@@ -58,18 +61,23 @@ const OrderStatus: React.FC = () => {
   );
 
   const handleCancelOrder = async () => {
-    if (!selectedOrderId) return;
+    if (cancelling.current || !selectedOrderId) return;
+    cancelling.current = true;
 
+    let failure: string | null = null;
     try {
       await orderService.deleteOrder(selectedOrderId);
-      Alert.alert('Success', 'Order cancelled successfully');
-      setModalVisible(false);
-      setSelectedOrderId(null);
-      loadOrders(); // Refresh the list
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to cancel order:', error);
-      Alert.alert('Error', 'Failed to cancel order. Please try again.');
+      failure = error?.message || 'Please try again.';
     }
+    // Close and reload first: a refused cancel may mean the order is already gone.
+    setModalVisible(false);
+    setSelectedOrderId(null);
+    cancelling.current = false;
+    loadOrders();
+    if (failure) Alert.alert('Could not cancel order', failure);
+    else Alert.alert('Success', 'Order cancelled successfully');
   };
 
   // Open edit modal: map existing order items to food_item_id using the order's target_date session
@@ -174,18 +182,22 @@ const OrderStatus: React.FC = () => {
           <AppText variant="caption" tone="muted">Total</AppText>
           <AppText variant="h2" weight="bold">Rs. {item.total_price.toFixed(2)}</AppText>
         </View>
-        <View style={styles.actionsRow}>
-          <AppButton title="Edit" variant="outline" onPress={() => handleOpenEdit(item)} style={styles.actionButton} />
-          <AppButton
-            title="Cancel"
-            variant="dangerOutline"
-            onPress={() => {
-              setSelectedOrderId(item.order_id);
-              setModalVisible(true);
-            }}
-            style={styles.actionButton}
-          />
-        </View>
+        {item.status === 'pending' ? (
+          <View style={styles.actionsRow}>
+            <AppButton title="Edit" variant="outline" onPress={() => handleOpenEdit(item)} style={styles.actionButton} />
+            <AppButton
+              title="Cancel"
+              variant="dangerOutline"
+              onPress={() => {
+                setSelectedOrderId(item.order_id);
+                setModalVisible(true);
+              }}
+              style={styles.actionButton}
+            />
+          </View>
+        ) : STATUS_NOTE[item.status] ? (
+          <AppText variant="micro" tone="muted" style={{ maxWidth: 150, textAlign: 'right' }}>{STATUS_NOTE[item.status]}</AppText>
+        ) : null}
       </View>
     </Card>
   );

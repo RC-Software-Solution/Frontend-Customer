@@ -109,7 +109,7 @@ export interface Order extends BaseEntity {
   items: OrderItem[];
   total_price: number;
   meal_time: 'breakfast' | 'lunch' | 'dinner';
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+  status: 'pending' | 'preparing' | 'delivering' | 'delivered' | 'completed' | 'cancelled' | 'delivery_failed';
   created_at: string;
   updated_at: string;
 }
