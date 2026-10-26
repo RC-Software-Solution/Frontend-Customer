@@ -39,7 +39,7 @@ const TabBarButton = ({
       onPress={onPress}
       onLongPress={onLongPress}
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={badge > 0 ? `${label}, ${badge} unread` : label}
       accessibilityState={{ selected: isFocused }}
       style={styles.item}
     >
@@ -50,7 +50,11 @@ const TabBarButton = ({
           color={isFocused ? color.onBrand : color.muted}
         />
         {badge > 0 ? (
-          <View style={styles.badge} accessibilityLabel={`${badge} unread`}>
+          <View
+            style={styles.badge}
+            importantForAccessibility="no-hide-descendants"
+            accessibilityElementsHidden
+          >
             <AppText variant="micro" weight="bold" tone="inverse">
               {badge > 9 ? '9+' : String(badge)}
             </AppText>
