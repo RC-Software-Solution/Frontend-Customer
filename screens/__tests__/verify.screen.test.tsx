@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextInput } from 'react-native';
+import { StyleSheet, TextInput } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { router } from 'expo-router';
 import VerifyScreen from '../auth/verify/verify.screen';
@@ -37,6 +37,15 @@ describe('Verify screen', () => {
     expect(focus).toHaveBeenCalledTimes(1);
     await fireEvent.changeText(digit(2), '');
     expect(focus).toHaveBeenCalledTimes(2);
+  });
+
+  it('centres each digit: equal left and right padding, centred text', async () => {
+    await render(<VerifyScreen />);
+    for (const n of [1, 2, 3, 4]) {
+      const s = StyleSheet.flatten(digit(n).props.style);
+      expect(s.textAlign).toBe('center');
+      expect(s.paddingLeft ?? s.paddingHorizontal).toBe(s.paddingRight ?? s.paddingHorizontal);
+    }
   });
 
   it('Submit does nothing and Sign In opens the login screen', async () => {

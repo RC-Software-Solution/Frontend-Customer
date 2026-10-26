@@ -164,7 +164,7 @@ describe('LoginScreen error routing and layout', () => {
     expect(svc.login).not.toHaveBeenCalled();
   });
 
-  it('a new submit clears the previous banner and field errors', async () => {
+  it('a new submit clears the previous banner', async () => {
     reject({ status: 403, message: 'Your account is pending approval.' });
     await mount();
     await submit();
@@ -174,8 +174,26 @@ describe('LoginScreen error routing and layout', () => {
     // not awaited: the press only settles once the (still pending) login does
     await act(async () => { void pressSignIn(); });
     expect(screen.queryByRole('alert')).toBeNull();
+    await act(async () => release());
+  });
+
+  it('a new submit clears a previous field error', async () => {
+    reject({ status: 401, message: 'Invalid credentials' });
+    await mount();
+    await submit();
+    expect(await screen.findByText('Invalid credentials')).toBeTruthy();
+    let release!: () => void;
+    svc.login.mockReturnValue(new Promise<any>((r) => { release = () => r({ user: customer }); }));
+    await act(async () => { void pressSignIn(); });
     expect(screen.queryByText('Invalid credentials')).toBeNull();
     await act(async () => release());
+  });
+
+  it.each([['undefined', undefined], ['null', null]])('shows "Login failed" in the banner when login throws %s', async (_n, thrown) => {
+    svc.login.mockRejectedValue(thrown);
+    await mount();
+    await submit();
+    expect(within(await screen.findByRole('alert')).getByText('Login failed')).toBeTruthy();
   });
 
   it('Forgot Password? is a 48dp button that opens the reset flow', async () => {

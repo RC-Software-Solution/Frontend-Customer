@@ -51,6 +51,7 @@ export default function ForgotPasswordScreen() {
         onChangeText={(text) => {
           setEmail(text);
           setFieldError('');
+          setBanner('');
         }}
         error={fieldError || undefined}
       />

@@ -69,6 +69,16 @@ describe('Forgot password screen: banner vs field error', () => {
     expect(screen.queryByRole('alert')).toBeNull();
   });
 
+  it('typing in the email field removes a failed-request banner', async () => {
+    auth.forgotPassword.mockRejectedValue(new Error('Boom'));
+    await render(<ForgotPasswordScreen />);
+    await type('ann@example.com');
+    await fireEvent.press(screen.getByText('Send code'));
+    expect(await screen.findByRole('alert')).toBeTruthy();
+    await type('ann@example.co');
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
   it('Back to sign in is a 48dp row', async () => {
     await render(<ForgotPasswordScreen />);
     const link = screen.getByText('Back to sign in').parent!;

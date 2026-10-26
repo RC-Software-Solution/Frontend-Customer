@@ -36,7 +36,7 @@ export default function VerifyScreen() {
               ref={inputs.current[index]}
               autoFocus={index === 0}
               accessibilityLabel={`Digit ${index + 1} of 4`}
-              style={{ textAlign: 'center', paddingHorizontal: 0 }}
+              style={{ textAlign: 'center', paddingHorizontal: 0, paddingRight: 0 }}
             />
           </View>
         ))}

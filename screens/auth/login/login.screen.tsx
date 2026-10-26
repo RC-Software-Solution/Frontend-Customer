@@ -53,12 +53,12 @@ const handleSignIn = async () => {
 
   } catch (error: any) {
     console.log("❌ Login error:", error);
-    const message: string = error.message || "Login failed";
-    if (error.status === 401 || error.message === 'Invalid credentials') {
+    const message: string = error?.message || "Login failed";
+    if (error?.status === 401 || error?.message === 'Invalid credentials') {
       setErrors({ password: message });
-    } else if (error.status === 400 && /email/i.test(message)) {
+    } else if (error?.status === 400 && /email/i.test(message)) {
       setErrors({ email: message });
-    } else if (error.status === 400 && /password/i.test(message)) {
+    } else if (error?.status === 400 && /password/i.test(message)) {
       setErrors({ password: message });
     } else {
       setBanner(message);
