@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Keyboard, KeyboardAvoidingView, ScrollView, ScrollViewProps } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, ScrollView, ScrollViewInstance, ScrollViewProps } from 'react-native';
 
 /**
  * A scrollable form that stays usable while the on-screen keyboard is open.
@@ -10,7 +10,7 @@ import { Keyboard, KeyboardAvoidingView, ScrollView, ScrollViewProps } from 'rea
  * bottom so the action button above it is visible.
  */
 export function KeyboardForm({ children, contentContainerStyle, ...rest }: ScrollViewProps) {
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
 
   useEffect(() => {
     const sub = Keyboard.addListener('keyboardDidShow', () => scroll.current?.scrollToEnd({ animated: true }));

@@ -114,7 +114,7 @@ const Notification = () => {
                 data={notices}
                 renderItem={renderItem}
                 keyExtractor={(item) => String(item.id)}
-                ListHeaderComponent={refreshFailed ? <StaleNotice /> : null}
+                ListHeaderComponent={refreshFailed ? <StaleNotice /> : undefined}
                 ListEmptyComponent={renderEmpty}
                 refreshing={refreshing}
                 onRefresh={() => { setRefreshing(true); load(false); }}

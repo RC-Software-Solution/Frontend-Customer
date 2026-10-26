@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
+import { TextInput, TextInputInstance, TextInputProps, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
 import { color, radius, space, type } from '@/theme';
@@ -10,7 +10,7 @@ type FieldProps = TextInputProps & {
   label?: string;
   error?: string;
   secure?: boolean;
-  ref?: React.Ref<TextInput>;
+  ref?: React.Ref<TextInputInstance>;
 };
 
 export function Field({ label, error, secure = false, style, onFocus, onBlur, ...rest }: FieldProps) {

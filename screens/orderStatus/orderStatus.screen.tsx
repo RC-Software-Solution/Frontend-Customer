@@ -275,7 +275,7 @@ const OrderStatus: React.FC = () => {
           renderItem={renderItem}
           refreshing={refreshing}
           onRefresh={onRefresh}
-          ListHeaderComponent={error ? <StaleNotice /> : null}
+          ListHeaderComponent={error ? <StaleNotice /> : undefined}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: padding.paddingBottom }}
         />
