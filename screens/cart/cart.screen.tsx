@@ -61,7 +61,7 @@ const CartScreen = () => {
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const meal = cartItems[0]?.meal_time;
   const sessionDate = (cartItems[0] as any)?.session_date as string | undefined;
-  const count = `${cartItems.length} ${cartItems.length === 1 ? 'item' : 'items'}`;
+  const count = `${totalQuantity} ${totalQuantity === 1 ? 'item' : 'items'}`;
   const when = !sessionDate ? '' : sessionDate === colomboToday() ? ', delivered today' : `, ${shortDate(sessionDate)}`;
 
 const handleConfirmOrder = async () => {
@@ -251,8 +251,8 @@ const handleConfirmOrder = async () => {
 
       <View style={[styles.sheet, { paddingBottom: padding.paddingBottom }]}>
         <View style={styles.summary}>
-          <AppText variant="body" weight="bold" numberOfLines={1}>Parcel Quantity: {totalQuantity}</AppText>
-          <AppText variant="body" weight="bold" numberOfLines={1}>Total: Rs. {totalAmount.toFixed(2)}</AppText>
+          <AppText variant="body" tone="muted">Total</AppText>
+          <AppText variant="h2" weight="bold" numberOfLines={1} testID="total-amount">{`Rs. ${totalAmount.toFixed(2)}`}</AppText>
         </View>
         <AppButton title="CONFIRM ORDER" onPress={handleConfirmOrder} />
       </View>
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: radius.lg,
     ...shadow.bar,
   },
-  summary: { flexDirection: 'row', justifyContent: 'space-between', gap: space.sm },
+  summary: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: space.sm },
 });
 
 export default CartScreen;

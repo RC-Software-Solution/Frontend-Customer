@@ -68,18 +68,19 @@ describe('basket contents', () => {
     await mount();
     expect(screen.getByText('String Hoppers')).toBeTruthy();
     expect(screen.getByText('Milk Rice')).toBeTruthy();
-    expect(screen.getByText('Parcel Quantity: 3')).toBeTruthy();
-    expect(screen.getByText('Total: Rs. 800.00')).toBeTruthy();
+    expect(screen.getByText('3 items, 11 Oct')).toBeTruthy();
+    expect(screen.getByText('Total')).toBeTruthy();
+    expect(screen.getByTestId('total-amount').props.children).toBe('Rs. 800.00');
   });
 
   it('+ and - change the quantity and the total, and quantity never drops below 1', async () => {
     add(item());
     await mount();
     await fireEvent.press(screen.getByLabelText('Increase quantity of String Hoppers'));
-    expect(screen.getByText('Total: Rs. 600.00')).toBeTruthy();
+    expect(screen.getByTestId('total-amount').props.children).toBe('Rs. 600.00');
     await fireEvent.press(screen.getByLabelText('Decrease quantity of String Hoppers'));
     await fireEvent.press(screen.getByLabelText('Decrease quantity of String Hoppers'));
-    expect(screen.getByText('Parcel Quantity: 1')).toBeTruthy();
+    expect(screen.getByText('1 item, 11 Oct')).toBeTruthy();
   });
 
   it('the cross removes an item', async () => {
