@@ -10,13 +10,14 @@ type FieldProps = TextInputProps & {
   secure?: boolean;
 };
 
-export function Field({ label, error, secure = false, style, ...rest }: FieldProps) {
+export function Field({ label, error, secure = false, style, onFocus, onBlur, ...rest }: FieldProps) {
   const [revealed, setRevealed] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   return (
     <View style={{ marginBottom: space.md }}>
       {label ? (
-        <AppText variant="caption" tone="muted" style={{ marginBottom: space.xs }}>
+        <AppText variant="caption" tone="muted" weight="semibold" style={{ marginBottom: space.xs }}>
           {label}
         </AppText>
       ) : null}
@@ -27,20 +28,28 @@ export function Field({ label, error, secure = false, style, ...rest }: FieldPro
         <TextInput
           style={[
             {
-              backgroundColor: color.field,
+              backgroundColor: focused ? color.surface : color.field,
               borderRadius: radius.md,
               paddingHorizontal: space.md,
-              paddingRight: secure ? space.xl + space.md : space.md,
+              paddingRight: secure ? 48 : space.md,
               minHeight: 52,
               fontSize: type.body,
               color: color.ink,
-              borderWidth: 1,
-              borderColor: error ? color.danger : 'transparent',
+              borderWidth: 2,
+              borderColor: error ? color.danger : focused ? color.brandStrong : 'transparent',
             },
             style,
           ]}
           placeholderTextColor={color.subtle}
           secureTextEntry={secure && !revealed}
+          onFocus={(e) => {
+            setFocused(true);
+            onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            onBlur?.(e);
+          }}
           {...rest}
         />
 
@@ -49,8 +58,7 @@ export function Field({ label, error, secure = false, style, ...rest }: FieldPro
             onPress={() => setRevealed((v) => !v)}
             accessibilityRole="button"
             accessibilityLabel={revealed ? 'Hide password' : 'Show password'}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            style={{ position: 'absolute', right: space.md }}
+            style={{ position: 'absolute', right: 0, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}
           >
             <Ionicons
               name={revealed ? 'eye-off-outline' : 'eye-outline'}

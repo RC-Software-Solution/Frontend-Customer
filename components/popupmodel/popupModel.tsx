@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Modal, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Modal, StyleSheet, TouchableOpacity } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { color, radius, space } from '@/theme';
 
@@ -26,8 +26,8 @@ const CancelModal: React.FC<ModalProps> = ({
     <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>{title}</Text>
-          <Text style={styles.modalText}>{message}</Text>
+          <AppText variant="h2" weight="bold" style={styles.modalTitle}>{title}</AppText>
+          <AppText variant="body" tone="muted" style={styles.modalText}>{message}</AppText>
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose}>
@@ -49,23 +49,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: color.scrim,
   },
   modalContent: {
     width: '80%',
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
+    backgroundColor: color.surface,
+    padding: space.lg,
+    borderRadius: radius.lg,
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: space.sm,
   },
   modalText: {
-    fontSize: 16,
-    marginBottom: 20,
+    marginBottom: space.lg,
     textAlign: 'center',
   },
   buttonContainer: {

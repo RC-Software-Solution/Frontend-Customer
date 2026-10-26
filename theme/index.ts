@@ -12,6 +12,7 @@ export const color = {
   field: '#f0f0f0',
   border: '#e6e6e6',
   danger: '#C0392B', // was #d9534f (3.96:1); now 5.44:1 on white
+  scrim: 'rgba(10,10,15,0.5)', // modal overlay, not a text colour
 } as const;
 
 // Order status chips: every pair clears 5.7:1.
@@ -33,11 +34,11 @@ export const type = { h1: 28, h2: 20, body: 16, caption: 14, micro: 12 } as cons
 
 export const shadow = {
   card: {
-    elevation: 5,
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
   },
   bar: {
     elevation: 6,
