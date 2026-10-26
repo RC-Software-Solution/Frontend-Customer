@@ -12,12 +12,14 @@
   },
   "jest": {
     "preset": "jest-expo",
+    "resolver": "react-native-reanimated/jest/resolver",
     "setupFiles": [
       "<rootDir>/jest.setup.ts"
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",
-      "^react-redux$": "<rootDir>/node_modules/react-redux/dist/cjs/index.js"
+      "^react-redux$": "<rootDir>/node_modules/react-redux/dist/cjs/index.js",
+      "^immer$": "<rootDir>/node_modules/immer/dist/cjs/index.js"
     },
     "testPathIgnorePatterns": [
       "/node_modules/",
