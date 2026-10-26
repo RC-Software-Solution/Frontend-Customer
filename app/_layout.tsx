@@ -11,7 +11,7 @@ import { useFonts, Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold } from 
 SplashScreen.preventAutoHideAsync();
 
 const RootNavigator = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, hasSeenIntro } = useAuth();
   const [fontsLoaded, fontError] = useFonts({ Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold });
   // A font failure must not trap the user on the splash screen: fall back to the system font.
   const ready = !loading && (fontsLoaded || !!fontError);
@@ -22,12 +22,14 @@ const RootNavigator = () => {
 
   if (!ready) return null;
 
-  // Stack.Protected: routes in a guarded group are unreachable (and redirect to "index") when guard is false
+  // Stack.Protected: routes in a guarded group are unreachable (and redirect) when guard is false.
+  // SDK 58 resolves the default redirect "/" to (tabs)/index, which is itself guarded and loops forever,
+  // so the logged-in group names where index would send a logged-out user.
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
 
-      <Stack.Protected guard={isAuthenticated}>
+      <Stack.Protected guard={isAuthenticated} redirectTo={hasSeenIntro ? '/(routes)/login' : '/(routes)/onboarding'}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(routes)/cart/index" />
         <Stack.Screen name="(routes)/menu/index" />
