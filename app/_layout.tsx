@@ -1,10 +1,16 @@
 import React, { useEffect } from 'react'
-import { Stack } from 'expo-router'
+import { View } from 'react-native'
+import { Stack, type ErrorBoundaryProps } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { Provider } from 'react-redux'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { store } from '@/store'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '@/services';
+import { TokenUtils } from '@/services/utils/token.utils';
+import { API_CONFIG } from '@/services/config/api.config';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { AppButton } from '@/components/ui/AppButton';
 import { useFonts, Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold } from '@expo-google-fonts/nunito';
 
 // Keep the splash screen up until the saved session has been checked
@@ -47,6 +53,36 @@ const RootNavigator = () => {
         <Stack.Screen name="(routes)/verifyAccount/index" />
       </Stack.Protected>
     </Stack>
+  );
+}
+
+// Replaces the whole tree after a render error, so it must not need the providers (they may be what failed).
+// "Sign out" is the way out of a crash that repeats for the saved session on every launch.
+export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
+  useEffect(() => {
+    SplashScreen.hideAsync(); // the error may have happened before the splash was hidden
+  }, []);
+
+  const signOut = async () => {
+    await Promise.all([
+      TokenUtils.clearTokens(),
+      AsyncStorage.removeItem(API_CONFIG.STORAGE_KEYS.USER_DATA).catch(() => {}),
+    ]);
+    await retry();
+  };
+
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', padding: 24 }}>
+      <EmptyState
+        tone="error"
+        icon="alert-circle-outline"
+        title="Something went wrong"
+        message="The app hit an unexpected problem."
+        actionLabel="Try again"
+        onAction={retry}
+      />
+      <AppButton title="Sign out" variant="secondary" onPress={signOut} />
+    </View>
   );
 }
 
