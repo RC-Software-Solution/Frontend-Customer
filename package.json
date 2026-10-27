@@ -2,6 +2,9 @@
   "name": "rc_customer",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=24.22.1"
+  },
   "scripts": {
     "start": "expo start -c",
     "android": "expo run:android",
@@ -59,14 +62,12 @@
     "react-native-app-intro-slider": "^4.0.4",
     "react-native-bouncy-checkbox": "^4.1.2",
     "react-native-gesture-handler": "~3.3.0",
-    "react-native-get-random-values": "^1.11.0",
     "react-native-reanimated": "4.7.1",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
     "react-native-web": "^0.21.4",
     "react-native-worklets": "0.13.0",
-    "react-redux": "^9.2.0",
-    "uuid": "^11.1.0"
+    "react-redux": "^9.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
