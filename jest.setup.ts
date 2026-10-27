@@ -16,6 +16,9 @@ jest.mock('expo-secure-store', () => {
 // Screens read safe-area insets; the library ships a ready-made jest mock.
 jest.mock('react-native-safe-area-context', () => require('react-native-safe-area-context/jest/mock').default);
 
+// RN 0.88 serves `AssetRegistry` from a private module that jest-expo's 'react-native/asset-registry' stub does not cover: reuse that stub so icon fonts "load".
+jest.mock('react-native/src/private/assets/AssetRegistry', () => ({ AssetRegistry: jest.requireMock('react-native/asset-registry') }));
+
 // Gesture-handler's native module doesn't exist under Jest.
 require('react-native-gesture-handler/jestSetup');
 

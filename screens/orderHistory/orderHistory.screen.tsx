@@ -179,11 +179,11 @@ const OrderHistoryScreen: React.FC = () => {
           onEndReached={onEndReached}
           onEndReachedThreshold={0.5}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[color.brandStrong]} />}
-          ListHeaderComponent={refreshFailed ? <StaleNotice /> : null}
+          ListHeaderComponent={refreshFailed ? <StaleNotice /> : undefined}
           ListEmptyComponent={
             <EmptyState icon="receipt-outline" title="No order history yet" message="Orders you have placed will appear here." />
           }
-          ListFooterComponent={footer}
+          ListFooterComponent={footer ?? undefined}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[{ paddingBottom: padding.paddingBottom }, items.length === 0 && styles.emptyContent]}
         />

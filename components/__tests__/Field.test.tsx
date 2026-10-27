@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TextInput } from 'react-native';
+import { StyleSheet, TextInputInstance } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Field } from '../ui/Field';
 import { color } from '@/theme';
@@ -55,7 +55,7 @@ test('background is color.field unfocused and color.surface focused', async () =
 });
 
 test('a ref passed to Field reaches the TextInput', async () => {
-  const ref = React.createRef<TextInput>();
+  const ref = React.createRef<TextInputInstance>();
   await render(<Field placeholder="Email" ref={ref} />);
   expect(typeof ref.current?.focus).toBe('function');
 });
