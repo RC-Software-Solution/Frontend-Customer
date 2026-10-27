@@ -342,7 +342,6 @@ The architecture supports easy addition of new features:
 3. **`services/order/order.service.ts`** - Updated business logic
 4. **`screens/cart/cart.screen.tsx`** - Updated to use new service
 5. **`screens/orderStatus/orderStatus.screen.tsx`** - Real-time order loading
-6. **`services/orderservice/orderservice.ts`** - Legacy compatibility
 
 ## Conclusion
 
