@@ -16,9 +16,9 @@ const walk = (d) =>
     return statSync(p).isDirectory() ? walk(p) : [p];
   });
 
-const bundles = walk(dir).filter((p) => /\.(js|hbc|bundle)$/.test(p));
+const bundles = walk(dir).filter((p) => /\.(js|hbc|bundle|jsbundle)$/.test(p));
 if (!bundles.length) {
-  console.error(`no .js, .hbc or .bundle file under ${dir}`);
+  console.error(`no .js, .hbc, .bundle or .jsbundle file under ${dir}`);
   process.exit(1);
 }
 

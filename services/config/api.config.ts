@@ -28,7 +28,7 @@ function devServiceUrl(port: number): string {
 
 // devServiceUrl is referenced only on the __DEV__ side, so the minifier drops it (and its
 // 127.0.0.1) from release bundles; scripts/check-bundle.mjs verifies that.
-const serviceUrl = (port: number) => (__DEV__ ? API_URL ?? devServiceUrl(port) : releaseApiUrl(API_URL));
+const serviceUrl = (port: number) => (__DEV__ ? API_URL || devServiceUrl(port) : releaseApiUrl(API_URL));
 
 export const API_CONFIG = {
   // Base URLs for different services

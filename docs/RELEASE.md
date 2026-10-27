@@ -10,7 +10,7 @@ Commands are bash (Git Bash on Windows). Builds run on EAS; `android/` and `ios/
 - `eas.json` profiles (both pin Node `24.22.1`, `appVersionSource` is `remote`):
   - `preview`: internal distribution, Android APK, `EXPO_PUBLIC_API_URL=https://api-staging.rcdelivery.com/api`.
   - `production`: store builds, build numbers auto-increment, `EXPO_PUBLIC_API_URL=https://api.rcdelivery.com/api`.
-- `scripts/check-bundle.mjs <dir> <expectedApiUrl>` scans every `.js`, `.hbc` and `.bundle` file under `<dir>` for LAN IPs,
+- `scripts/check-bundle.mjs <dir> <expectedApiUrl>` scans every `.js`, `.hbc`, `.bundle` and `.jsbundle` file under `<dir>` for LAN IPs,
   `127.0.0.1`, `[API_CLIENT]` debug logs and private keys, and checks that the expected API URL was inlined.
 
 ## One-time setup (before the first store upload, except where a step says otherwise)
@@ -43,6 +43,24 @@ None of these is done yet. Tick each item and write the date.
   password rule, account deletion that removes personal data, no password hashes or internal errors in responses,
   Expo push delivery) are on the Backend branch `chore/customer-readiness`. Merge and deploy it to staging and production
   before the first store build points at them.
+- [ ] Backend, right after that deploy: anonymise accounts deleted before it. Rows already at `status = 'deleted'` still
+  hold the person's name, email, phone and address, and signing up again with that email would reactivate them. Run once
+  on staging, then production, after a backup (the `id`, `role`, dates and orders stay):
+  ```sql
+  UPDATE users SET
+    full_name = 'Deleted user',
+    email = CONCAT('deleted-', id, '@deleted.invalid'),
+    phone = NULL, address = NULL, fcm_token = NULL, refresh_token = NULL,
+    password_reset_token = NULL, password_reset_expires = NULL,
+    password = '!deleted',
+    rejection_reason = IF(role = 'customer', NULL, rejection_reason),
+    blocked_reason = IF(role = 'customer', NULL, blocked_reason)
+  WHERE status = 'deleted' AND email NOT LIKE 'deleted-%@deleted.invalid';
+  ```
+  `'!deleted'` is not a bcrypt hash (bcrypt hashes are 60 characters starting `$2`), and `bcryptjs.compare` returns
+  false for every password against it, so nobody can sign in to these rows. That needs no per-row random hash from a
+  one-off script; new deletions keep using a random hash. Check afterwards that
+  `SELECT COUNT(*) FROM users WHERE status = 'deleted' AND email NOT LIKE 'deleted-%@deleted.invalid'` returns 0. Date: ____
 - [ ] Rotate the backend signing key (`private.pem`) before launch.
 - [ ] Web account-deletion page live (see Store listing answers). Google Play rejects the listing without it.
 
@@ -57,8 +75,8 @@ None of these is done yet. Tick each item and write the date.
 5. Scan the store artifacts. Each command must print `bundle clean`.
    - Android: download the `.aab`, then
      `unzip -o app.aab 'base/assets/index.android.bundle' -d aab && node scripts/check-bundle.mjs aab https://api.rcdelivery.com/api`.
-   - iOS: download the `.ipa`. The bundle is named `main.jsbundle`, which the script does not pick up, so rename it:
-     `unzip -o app.ipa 'Payload/*.app/main.jsbundle' -d ipa && mv ipa/Payload/*.app/main.jsbundle ipa/main.hbc && node scripts/check-bundle.mjs ipa https://api.rcdelivery.com/api`.
+   - iOS: download the `.ipa`, then
+     `unzip -o app.ipa 'Payload/*.app/main.jsbundle' -d ipa && node scripts/check-bundle.mjs ipa https://api.rcdelivery.com/api`.
 6. Submit: `npx eas-cli@latest submit --profile production --platform all --latest` (needs `submit.production`, see above).
 7. Android: promote internal -> production with a staged rollout (10%, then 50%, then 100% after 48 h without new
    crashes in Play vitals). iOS: phased release on.

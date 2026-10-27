@@ -9,3 +9,20 @@ describe('releaseApiUrl', () => {
     expect(() => releaseApiUrl(url)).toThrow('EXPO_PUBLIC_API_URL must be an https:// URL in a release build');
   });
 });
+
+describe('dev service URLs', () => {
+  const saved = process.env.EXPO_PUBLIC_API_URL;
+  afterEach(() => {
+    if (saved === undefined) delete process.env.EXPO_PUBLIC_API_URL;
+    else process.env.EXPO_PUBLIC_API_URL = saved;
+  });
+
+  it('fall back to the dev services when EXPO_PUBLIC_API_URL is set but empty', () => {
+    expect(__DEV__).toBe(true);
+    process.env.EXPO_PUBLIC_API_URL = '';
+    jest.isolateModules(() => {
+      const { API_CONFIG } = require('../config/api.config');
+      expect(API_CONFIG.BASE_URLS.USER_SERVICE).toMatch(/^http:\/\/.*:4001\/api$/);
+    });
+  });
+});
