@@ -193,7 +193,7 @@ export class MenuApiClient extends BaseApiClient {
       console.log(`🌐 [API_CLIENT] Response (${mealTime} ${date}) len=${Array.isArray(items) ? items.length : 0} | local ${tz} now=${localStamp2}`);
       return Array.isArray(items) ? items : [];
     } catch (e: any) {
-      console.warn(`🌐 [API_CLIENT] ERROR ${url} | local ${tz} now=${new Date().toISOString()} | err=`, e);
+      console.warn(`Menu items request failed: ${url}`, e?.message);
       throw e;
     }
   }
@@ -235,7 +235,7 @@ export class MenuApiClient extends BaseApiClient {
       console.log(`✅ [API_CLIENT] Found ${itemsResponse.data.data?.length || 0} items for session ${mealSession.id}`);
       return itemsResponse.data.data || [];
     } catch (error) {
-      console.error('❌ [API_CLIENT] Error getting meal session items:', error);
+      console.error('Error getting meal session items:', (error as any)?.message);
       return [];
     }
   }
