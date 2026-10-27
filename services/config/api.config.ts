@@ -22,9 +22,6 @@ export const API_CONFIG = {
     USER_SERVICE: serviceUrl(4001),
     ORDER_SERVICE: serviceUrl(4002),
     MENU_SERVICE: serviceUrl(4005),
-    LOCATION_SERVICE: serviceUrl(4004),
-    DELIVERY_SERVICE: serviceUrl(4006),
-    PAYMENT_SERVICE: serviceUrl(4007),
   },
   
   // Common settings

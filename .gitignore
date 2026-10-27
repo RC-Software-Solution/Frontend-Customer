@@ -34,3 +34,9 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+.env
+
+# IDE and generated analysis output
+.idea/
+graphify-out/

@@ -30,13 +30,3 @@ export { useAuth, AuthProvider } from './hooks/useAuth';
 
 // Singleton instances
 export { authService, orderService, menuService } from './instances';
-
-// Legacy API client for backward compatibility
-import axios from 'axios';
-import { API_CONFIG } from './config/api.config';
-
-export const legacyApi = axios.create({
-  baseURL: API_CONFIG.BASE_URLS.USER_SERVICE,
-  timeout: API_CONFIG.TIMEOUT,
-  headers: API_CONFIG.DEFAULT_HEADERS,
-});

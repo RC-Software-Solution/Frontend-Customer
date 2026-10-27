@@ -171,28 +171,6 @@ export const yourService = new YourService();
 - Store sensitive data in plain text
 - Mix business logic with UI logic
 
-## Migration from Legacy Code
-
-### Before (Legacy)
-```typescript
-import api from '@/services/api';
-
-const response = await api.post('/users/login', {
-  email: 'user@example.com',
-  password: 'password123'
-});
-```
-
-### After (New Architecture)
-```typescript
-import { authService } from '@/services';
-
-const response = await authService.login({
-  email: 'user@example.com',
-  password: 'password123'
-});
-```
-
 ## Error Handling
 
 The new architecture provides comprehensive error handling:

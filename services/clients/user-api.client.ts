@@ -118,21 +118,5 @@ export class UserApiClient extends BaseApiClient {
     const response = await this.put<{ message: string }>(`/users/delete/${userId}`);
     return response.data;
   }
-
-  /**
-   * Verify email
-   */
-  async verifyEmail(token: string): Promise<{ message: string }> {
-    const response = await this.post<{ message: string }>('/users/verify-email', { token });
-    return response.data;
-  }
-
-  /**
-   * Resend verification email
-   */
-  async resendVerificationEmail(): Promise<{ message: string }> {
-    const response = await this.post<{ message: string }>('/users/resend-verification');
-    return response.data;
-  }
 }
 
