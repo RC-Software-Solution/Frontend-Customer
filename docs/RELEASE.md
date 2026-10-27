@@ -13,7 +13,7 @@ Commands are bash (Git Bash on Windows). Builds run on EAS; `android/` and `ios/
 - `scripts/check-bundle.mjs <dir> <expectedApiUrl>` scans every `.js`, `.hbc` and `.bundle` file under `<dir>` for LAN IPs,
   `127.0.0.1`, `[API_CLIENT]` debug logs and private keys, and checks that the expected API URL was inlined.
 
-## One-time setup (do before the first store upload; keep this list current)
+## One-time setup (before the first store upload, except where a step says otherwise)
 None of these is done yet. Tick each item and write the date.
 
 - [ ] Firebase: register the Android app `com.rcdelivery.customer` in the Firebase project, download its
@@ -24,17 +24,21 @@ None of these is done yet. Tick each item and write the date.
   Owner: ____
 - [ ] Credentials: let EAS generate the Android upload key and the iOS distribution certificate and profile. Store the
   Android upload-key backup and the App Store Connect API key in the company password manager. Turn Play App Signing on.
+- [ ] Firebase Android API key: restrict it to `com.rcdelivery.customer` and the EAS upload-key SHA-1 (`eas credentials`,
+  available as soon as the upload key exists). Date: ____
 - [ ] Versions: `npx eas-cli@latest build:version:set` for each platform if the stores already hold builds of this app
   (remote build numbers must start above them).
 - [ ] Submit config: fill `submit.production` in `eas.json` (Play service-account key path and track `internal`;
   App Store Connect app id and API key). It is `{}` today, so `eas submit` will prompt or fail until this is done.
-- [ ] Firebase Android API key restricted to `com.rcdelivery.customer` plus the upload-key and app-signing SHA-1
-  (both from the Play Console after the first upload). Date: ____
 - [ ] Push: upload the FCM V1 service-account key and the APNs key to EAS.
 - [ ] Push in the app: switch the app from native device tokens (`getDevicePushTokenAsync` in
-  `services/push/push.service.ts`) to Expo push tokens, which needs the EAS `projectId` above. The backend already
-  accepts both. Until this ships, iOS devices register an APNs token that the backend cannot deliver through FCM, so
+  `services/push/push.service.ts`) to Expo push tokens, which needs the EAS `projectId` above. Accepting both token
+  types is only on the unmerged Backend branch `chore/customer-readiness`; merge and deploy that branch before the app
+  sends Expo tokens. Until this ships, iOS devices register an APNs token that the backend cannot deliver through FCM, so
   iOS push does not work.
+- [ ] After the first upload to Play Console: add the Play App Signing SHA-1 (Play Console > App integrity > App signing)
+  to the same Firebase API key restriction. That fingerprint exists only once the app is in Play, so this cannot be done
+  before the first upload. Date: ____
 - [ ] Backend: the customer-readiness changes (1 h customer access tokens via `CUSTOMER_ACCESS_TOKEN_TTL`, server-side
   password rule, account deletion that removes personal data, no password hashes or internal errors in responses,
   Expo push delivery) are on the Backend branch `chore/customer-readiness`. Merge and deploy it to staging and production
@@ -45,8 +49,10 @@ None of these is done yet. Tick each item and write the date.
 ## Every release
 1. `git switch main && git pull`, CI green on the commit.
 2. Bump `expo.version` in `app.json` for a user-visible release (build numbers increment automatically).
-3. Tester build: `npx eas-cli@latest build --profile preview --platform all`; run the smoke list below on one Android
-   phone and one iPhone.
+3. Register each iPhone that will install the internal build: `npx eas-cli@latest device:create`. An ad-hoc build only
+   installs on devices already in its provisioning profile, so register them before this build (a device added later
+   needs a new build). Then `npx eas-cli@latest build --profile preview --platform all` and run the smoke list below on
+   one Android phone and one iPhone.
 4. Store build: `npx eas-cli@latest build --profile production --platform all`.
 5. Scan the store artifacts. Each command must print `bundle clean`.
    - Android: download the `.aab`, then
@@ -69,16 +75,17 @@ iOS: pause the phased release; submit a fixed build (request expedited review if
 Never reuse a build number.
 
 ## Store listing answers
-Based on what the app sends today: sign-up sends full name, email, phone, a typed delivery address ("Location") and
-the device push token; orders and their payment status are stored by the backend. The app has no analytics, crash
-reporting, advertising, location permission or in-app payment. Re-check this list when any of that changes.
+Based on what the app sends today: sign-up sends full name, email, phone and a typed delivery address ("Location");
+sign-up and sign-in both send the device push token; orders and their payment status are stored by the backend. The app has no
+analytics, crash reporting, advertising, location permission or in-app payment. Re-check this list when any of that changes.
 Items marked "confirm before submitting" are not established from the code.
 
 - Privacy policy URL: ____ (must list name, email, phone, delivery address, order history, device push token;
   purpose: providing the service; not sold or shared; encrypted in transit; how to delete the account).
 - Account deletion: in the app (Profile > Delete Account, confirmed by typing `DELETE`) and on the web at ____
-  (Google Play requires a web link too). Deletion replaces the name and email with placeholders and removes phone,
-  address, push token, sessions and the password; the account row and order records are kept for accounting.
+  (Google Play requires a web link too). Deletion replaces the name and email with placeholders, clears phone,
+  address, push token and sessions, and overwrites the password with the hash of a random value; the account row and
+  order records are kept for accounting.
 - Google Play Data safety: personal info (name, email, phone, address), app activity (order history; confirm before
   submitting whether Play wants this under "App activity" or "Financial info > purchase history"), device or other IDs
   (push token); collected, not shared; required for the service; encrypted in transit; deletion available.
