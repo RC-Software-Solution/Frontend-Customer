@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { authService } from '@/services';
 import { getFcmToken } from "@/services/push/push.service";
+import { validateNewPassword } from "@/services/utils/validation";
 import { Field } from '@/components/ui/Field';
 import { AppButton } from '@/components/ui/AppButton';
 import { AuthLayout } from '@/components/ui/AuthLayout';
@@ -20,8 +21,9 @@ export default function signUpSecondScreen() {
         let valid = true;
         let newErrors = { passwordError: "", confirmPasswordError: "" };
 
-        if (!/(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/.test(passwordInfo.password)) {
-            newErrors.passwordError = "Password must be at least 8 characters, contain a number and a special character";
+        const passwordProblem = validateNewPassword(passwordInfo.password);
+        if (passwordProblem) {
+            newErrors.passwordError = passwordProblem;
             valid = false;
         }
 

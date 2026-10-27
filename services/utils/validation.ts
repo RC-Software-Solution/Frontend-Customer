@@ -23,8 +23,10 @@ export const validateLocation = (value: string): string | null => {
   return null;
 };
 
+export const PASSWORD_RULE = 'Password must be at least 8 characters, contain a number and a special character';
+
 export const validateNewPassword = (value: string): string | null =>
-  value.length >= 6 ? null : 'Password must be at least 6 characters';
+  value.length >= 8 && /\d/.test(value) && /[^A-Za-z0-9]/.test(value) ? null : PASSWORD_RULE;
 
 export const validateResetCode = (value: string): string | null =>
   /^\d{6}$/.test(value.trim()) ? null : 'Enter the 6-digit code from your email';

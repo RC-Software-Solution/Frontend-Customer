@@ -1,4 +1,4 @@
-import { validateEmail, validateName, validatePhone, validateLocation, validateNewPassword, validateResetCode } from '../utils/validation';
+import { validateEmail, validateName, validatePhone, validateLocation, validateNewPassword, validateResetCode, PASSWORD_RULE } from '../utils/validation';
 
 describe('validators (mirror the server limits)', () => {
   it.each([
@@ -32,11 +32,6 @@ describe('validators (mirror the server limits)', () => {
     expect(validateLocation('x'.repeat(256))).toMatch(/too long/);
   });
 
-  it('password: at least 6 characters', () => {
-    expect(validateNewPassword('123456')).toBeNull();
-    expect(validateNewPassword('12345')).toMatch(/at least 6/);
-  });
-
   it.each([
     ['123456', null],
     [' 123456 ', null],
@@ -44,4 +39,13 @@ describe('validators (mirror the server limits)', () => {
     ['1234567', 'Enter the 6-digit code from your email'],
     ['12a456', 'Enter the 6-digit code from your email'],
   ])('reset code %j', (value, expected) => expect(validateResetCode(value)).toBe(expected));
+});
+
+describe('validateNewPassword (same rule as signup and the server)', () => {
+  it.each(['Brand-new-1', 'Passw0rd!', 'abc 12345'])('accepts %p', (pw) => {
+    expect(validateNewPassword(pw)).toBeNull();
+  });
+  it.each(['short1!', 'no-digits-here', 'NoSymbol123', ''])('refuses %p', (pw) => {
+    expect(validateNewPassword(pw)).toBe(PASSWORD_RULE);
+  });
 });

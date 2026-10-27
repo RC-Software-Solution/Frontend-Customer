@@ -74,7 +74,7 @@ describe('Reset password screen', () => {
 
   const fill = async (code: string, password: string, confirm = password) => {
     await fireEvent.changeText(screen.getByPlaceholderText('123456'), code);
-    await fireEvent.changeText(screen.getByPlaceholderText('At least 6 characters'), password);
+    await fireEvent.changeText(screen.getByPlaceholderText('8+ characters, a number and a symbol'), password);
     await fireEvent.changeText(screen.getByPlaceholderText('Repeat the password'), confirm);
   };
   const submit = async () => fireEvent.press(screen.getByText('Reset password', { exact: true }));
@@ -97,7 +97,7 @@ describe('Reset password screen', () => {
     await render(<ResetPasswordScreen />);
     await submit();
     expect(await screen.findByText('Enter the 6-digit code from your email')).toBeTruthy();
-    expect(screen.getByText('Password must be at least 6 characters')).toBeTruthy();
+    expect(screen.getByText('Password must be at least 8 characters, contain a number and a special character')).toBeTruthy();
     expect(auth.resetPassword).not.toHaveBeenCalled();
   });
 

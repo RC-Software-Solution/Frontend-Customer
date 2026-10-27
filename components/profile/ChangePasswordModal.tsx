@@ -29,7 +29,7 @@ export function ChangePasswordModal({ visible, onClose }: { visible: boolean; on
   const save = async () => {
     const found = {
       current: current ? undefined : 'Enter your current password',
-      next: validateNewPassword(next) ?? (next === current ? 'Choose a different password from the current one' : undefined),
+      next: current && next === current ? 'Choose a different password from the current one' : validateNewPassword(next) ?? undefined,
       confirm: next !== confirm ? 'Passwords do not match' : undefined,
     };
     setErrors(found);
@@ -55,7 +55,7 @@ export function ChangePasswordModal({ visible, onClose }: { visible: boolean; on
             Change Password
           </AppText>
           <Field label="Current password" secure placeholder="Your current password" value={current} onChangeText={setCurrent} error={errors.current} />
-          <Field label="New password" secure placeholder="At least 6 characters" value={next} onChangeText={setNext} error={errors.next} />
+          <Field label="New password" secure placeholder="8+ characters, a number and a symbol" value={next} onChangeText={setNext} error={errors.next} />
           <Field label="Confirm new password" secure placeholder="Repeat the new password" value={confirm} onChangeText={setConfirm} error={errors.confirm} />
           {errors.form ? (
             <AppText tone="danger" style={{ marginBottom: space.md }}>

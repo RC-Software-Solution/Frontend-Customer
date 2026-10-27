@@ -86,7 +86,7 @@ export default function ResetPasswordScreen() {
         style={{ textAlign: 'center', letterSpacing: space.sm }}
         error={errors.code}
       />
-      <Field label="New password" placeholder="At least 6 characters" secure value={password} onChangeText={setPassword} error={errors.password} />
+      <Field label="New password" placeholder="8+ characters, a number and a symbol" secure value={password} onChangeText={setPassword} error={errors.password} />
       <Field label="Confirm new password" placeholder="Repeat the password" secure value={confirm} onChangeText={setConfirm} error={errors.confirm} />
 
       <AppButton title="Reset password" onPress={submit} loading={loading} />

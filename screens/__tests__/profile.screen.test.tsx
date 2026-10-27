@@ -127,7 +127,7 @@ describe('changing the password', () => {
   const open = async () => fireEvent.press(screen.getByText('Change Password'));
   const fill = async (current: string, next: string, confirm = next) => {
     await fireEvent.changeText(screen.getByPlaceholderText('Your current password'), current);
-    await fireEvent.changeText(screen.getByPlaceholderText('At least 6 characters'), next);
+    await fireEvent.changeText(screen.getByPlaceholderText('8+ characters, a number and a symbol'), next);
     await fireEvent.changeText(screen.getByPlaceholderText('Repeat the new password'), confirm);
   };
   const submit = async () => fireEvent.press(screen.getByText('Change password', { exact: true }));
@@ -160,7 +160,7 @@ describe('changing the password', () => {
 
     await fill('old-pass', '123');
     await submit();
-    expect(await screen.findByText('Password must be at least 6 characters')).toBeTruthy();
+    expect(await screen.findByText('Password must be at least 8 characters, contain a number and a special character')).toBeTruthy();
 
     await fill('old-pass', 'old-pass');
     await submit();
